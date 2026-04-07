@@ -1,0 +1,6 @@
+<Solution>
+  <Project Path="Speakat.Api/Speakat.Api.csproj" />
+  <Project Path="Speakat.Application/Speakat.Application.csproj" />
+  <Project Path="Speakat.Domain/Speakat.Domain.csproj" />
+  <Project Path="Speakat.Infrastructure/Speakat.Infrastructure.csproj" />
+</Solution>

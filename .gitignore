@@ -52,3 +52,17 @@ CodeCoverage/
 *.VisualState.xml
 TestResult.xml
 nunit-*.xml
+
+# IDE 설정 
+.idea/
+
+# macOS
+.DS_Store
+
+# env
+appsettings.Development.json
+appsettings.*.local.json
+.env
+
+# Docker
+docker-compose.override.yml
