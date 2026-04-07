@@ -1,8 +1,16 @@
+using Microsoft.EntityFrameworkCore;
 using Scalar.AspNetCore;
+using Speakat.Infrastructure.Persistence;
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddOpenApi();
+
+var connectionString = builder.Configuration.GetConnectionString("MySQL")
+    ?? throw new InvalidOperationException("Connection string 'MySQL' not found.");
+
+builder.Services.AddDbContext<AppDbContext>(options =>
+    options.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString)));
 
 var app = builder.Build();
 
