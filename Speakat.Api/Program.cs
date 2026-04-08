@@ -18,6 +18,11 @@ if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
     app.MapScalarApiReference();
+
+    // 프로젝트 실행하면 자동으로 db 마이그레이션 실행
+    using var scope = app.Services.CreateScope();
+    var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+    db.Database.Migrate();
 }
 
 // 개발용으로 https redirection 해제
