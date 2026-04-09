@@ -1,10 +1,25 @@
 using Microsoft.EntityFrameworkCore;
 using Scalar.AspNetCore;
+using Speakat.Application.Auth.Interfaces;
+using Speakat.Application.Auth.Services;
+using Speakat.Application.Users.Repositories;
+using Speakat.Infrastructure.Auth;
+using Speakat.Infrastructure.OAuth;
 using Speakat.Infrastructure.Persistence;
+using Speakat.Infrastructure.Persistence.Repositories;
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddOpenApi();
+builder.Services.AddControllers();
+
+builder.Services.AddHttpClient<GoogleOAuthProvider>();
+builder.Services.AddTransient<IOAuthProvider>(sp => sp.GetRequiredService<GoogleOAuthProvider>());
+
+builder.Services.AddSingleton<IJwtTokenService, JwtTokenService>();
+
+builder.Services.AddScoped<IUserRepository, UserRepository>();
+builder.Services.AddScoped<IAuthService, AuthService>();
 
 var connectionString = builder.Configuration.GetConnectionString("MySQL")
     ?? throw new InvalidOperationException("Connection string 'MySQL' not found.");
@@ -46,6 +61,8 @@ app.MapGet("/weatherforecast", () =>
     return forecast;
 })
 .WithName("GetWeatherForecast");
+
+app.MapControllers();
 
 app.Run();
 
