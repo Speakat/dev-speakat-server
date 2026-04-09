@@ -6,7 +6,7 @@ public class User
 {
     public long UserId { get; set; }
     public SocialType SocialType { get; set; }
-    public string SocialId { get; set; } = null!;
+    public string SocialId { get; set; } = null!; // OAuth 제공자가 발급하는 고유 ID
     public string Nickname { get; set; } = null!;
     public Gender? Gender { get; set; }
     public string? Email { get; set; }
