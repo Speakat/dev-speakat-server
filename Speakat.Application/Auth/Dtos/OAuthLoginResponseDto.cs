@@ -1,0 +1,15 @@
+using Speakat.Domain.Enums;
+
+namespace Speakat.Application.Auth.Commands;
+
+public class OAuthLoginResponseDto
+{
+    public long UserId { get; set; }
+    public string? Email { get; set; }
+    public required string Nickname { get; set; }
+    public string? ProfileImageUrl { get; set; }
+    public SocialType Provider { get; set; } 
+    public required string AccessToken { get; set; }
+    public required string RefreshToken { get; set; }
+    public bool IsNewUser { get; set; }
+}
