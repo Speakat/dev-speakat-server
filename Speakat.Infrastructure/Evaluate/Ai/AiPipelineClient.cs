@@ -5,7 +5,11 @@ public class AiPipelineClient : IAiPipelineClient
 
     public async Task<AiPipelineResult> EvaluateAsync(string audioBase64)
     {
-        var res = await _http.PostAsJsonAsync("/evaluate", new { audio_base64 = audioBase64 });
+        var res = await _http.PostAsJsonAsync("/evaluate", new { 
+            audio_base64 = audioBase64,
+            quest_id = questId,
+            turn = turn
+        });
         res.EnsureSuccessStatusCode();
 
         return await res.Content.ReadFromJsonAsync<AiPipelineResult>()

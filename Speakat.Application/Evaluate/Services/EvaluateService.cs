@@ -13,7 +13,7 @@ public class EvaluateService : IEvaluateService
 
     public async Task<EvaluateRequestDto> EvaluateAsync(EvaluateRequestDto request)
     {
-        var aiResult = await _ai.EvaluateAsync(request.QuestId); //ai 평가 요청
+        var aiResult = await _ai.EvaluateAsync(request.Audio, request.QuestId, request.Turn); //ai 평가 요청
 
         await _questRepo.GetByIdAsync(request.QuestId); //존재 검증용
         bool isTurnPassed = aiResult.SimilarityPassed && aiResult.Score >= PassScore;
