@@ -13,9 +13,14 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddOpenApi();
 builder.Services.AddControllers();
 
+// HttpClient
 builder.Services.AddHttpClient<GoogleOAuthProvider>();
 builder.Services.AddTransient<IOAuthProvider>(sp => sp.GetRequiredService<GoogleOAuthProvider>());
 
+builder.Services.AddHttpClient<KakaoOAuthProvider>();
+builder.Services.AddTransient<IOAuthProvider>(sp => sp.GetRequiredService<KakaoOAuthProvider>());
+
+// Services
 builder.Services.AddSingleton<IJwtTokenService, JwtTokenService>();
 
 builder.Services.AddScoped<IUserRepository, UserRepository>();
@@ -24,6 +29,7 @@ builder.Services.AddScoped<IAuthService, AuthService>();
 var connectionString = builder.Configuration.GetConnectionString("MySQL")
     ?? throw new InvalidOperationException("Connection string 'MySQL' not found.");
 
+// Database
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString)));
 

@@ -8,7 +8,7 @@ public class User
     public SocialType SocialType { get; set; }
     public string SocialId { get; set; } = null!; // OAuth 제공자가 발급하는 고유 ID
     public string Nickname { get; set; } = null!;
-    public Gender? Gender { get; set; }
+    public Gender Gender { get; set; } = Gender.Other;
     public string? Email { get; set; }
     public string? ProfileImageKey { get; set; }
     public UserStatus Status { get; set; } = UserStatus.Active;
