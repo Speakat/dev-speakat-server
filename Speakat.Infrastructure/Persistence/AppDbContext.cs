@@ -8,11 +8,15 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
 {
     public DbSet<User> Users => Set<User>();
     public DbSet<UserSetting> UserSettings => Set<UserSetting>();
+    public DbSet<Stage> Stages => Set<Stage>();
+    public DbSet<UserStage> UserStages => Set<UserStage>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
         modelBuilder.ApplyConfiguration(new UserConfiguration());
         modelBuilder.ApplyConfiguration(new UserSettingConfiguration());
+        modelBuilder.ApplyConfiguration(new StageConfiguration());
+        modelBuilder.ApplyConfiguration(new UserStageConfiguration());
     }
 }
