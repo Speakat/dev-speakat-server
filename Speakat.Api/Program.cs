@@ -12,6 +12,15 @@ var connectionString = builder.Configuration.GetConnectionString("MySQL")
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString)));
 
+//HttpClient로 Python AI 서비스 연결
+builder.Services.AddHttpClient<IAiPipelineClient, AiPipelineClient>(client =>
+{
+    client.BaseAddress = new Uri(builder.Configuration["AiService:BaseUrl"]!);
+});
+
+builder.Services.AddScoped<IQuestRepository, QuestRepository>();
+builder.Services.AddScoped<IEvaluateService, EvaluateService>();
+
 var app = builder.Build();
 
 if (app.Environment.IsDevelopment())
