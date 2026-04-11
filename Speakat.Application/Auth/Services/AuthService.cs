@@ -44,6 +44,7 @@ public class AuthService : IAuthService
                 SocialId = userInfo.SocialId,
                 Nickname = userInfo.Nickname,
                 Email = userInfo.Email,
+                Gender = userInfo.Gender,
                 Status = UserStatus.Active,
                 CreatedAt = DateTime.UtcNow,
                 UpdatedAt = DateTime.UtcNow

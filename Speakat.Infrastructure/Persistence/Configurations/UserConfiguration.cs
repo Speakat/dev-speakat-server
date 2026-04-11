@@ -29,7 +29,7 @@ public class UserConfiguration : IEntityTypeConfiguration<User>
         builder.Property(u => u.Gender)
             .HasColumnName("gender")
             .HasMaxLength(10)
-            .HasConversion<string?>();
+            .HasConversion<string>();
         
         builder.Property(u => u.Email)
             .HasColumnName("email")

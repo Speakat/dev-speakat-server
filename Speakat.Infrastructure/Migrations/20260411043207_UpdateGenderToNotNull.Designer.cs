@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Speakat.Infrastructure.Persistence;
 
@@ -11,9 +12,11 @@ using Speakat.Infrastructure.Persistence;
 namespace Speakat.Infrastructure.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260411043207_UpdateGenderToNotNull")]
+    partial class UpdateGenderToNotNull
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -21,6 +24,45 @@ namespace Speakat.Infrastructure.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 64);
 
             MySqlModelBuilderExtensions.AutoIncrementColumns(modelBuilder);
+
+            modelBuilder.Entity("Speakat.Domain.Entities.Stage", b =>
+                {
+                    b.Property<long>("StageId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint")
+                        .HasColumnName("stage_id");
+
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<long>("StageId"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime(6)")
+                        .HasColumnName("created_at");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("varchar(50)")
+                        .HasColumnName("description");
+
+                    b.Property<int>("SortOrder")
+                        .HasMaxLength(255)
+                        .HasColumnType("int")
+                        .HasColumnName("sort_order");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("varchar(255)")
+                        .HasColumnName("title");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("datetime(6)")
+                        .HasColumnName("updated_at");
+
+                    b.HasKey("StageId");
+
+                    b.ToTable("stages", (string)null);
+                });
 
             modelBuilder.Entity("Speakat.Domain.Entities.User", b =>
                 {
@@ -126,6 +168,41 @@ namespace Speakat.Infrastructure.Migrations
                     b.ToTable("user_settings", (string)null);
                 });
 
+            modelBuilder.Entity("Speakat.Domain.Entities.UserStage", b =>
+                {
+                    b.Property<long>("UserStageId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint")
+                        .HasColumnName("user_stage_id");
+
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<long>("UserStageId"));
+
+                    b.Property<DateTime?>("CompletedAt")
+                        .HasColumnType("datetime(6)")
+                        .HasColumnName("completed_at");
+
+                    b.Property<long>("StageId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("stage_id");
+
+                    b.Property<DateTime>("StartedAt")
+                        .HasColumnType("datetime(6)")
+                        .HasColumnName("started_at");
+
+                    b.Property<long>("UserId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("user_id");
+
+                    b.HasKey("UserStageId");
+
+                    b.HasIndex("StageId");
+
+                    b.HasIndex("UserId", "StageId")
+                        .HasDatabaseName("ix_user_stages_user_id_stage_id");
+
+                    b.ToTable("user_stages", (string)null);
+                });
+
             modelBuilder.Entity("Speakat.Domain.Entities.UserSetting", b =>
                 {
                     b.HasOne("Speakat.Domain.Entities.User", "User")
@@ -133,6 +210,25 @@ namespace Speakat.Infrastructure.Migrations
                         .HasForeignKey("Speakat.Domain.Entities.UserSetting", "UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("Speakat.Domain.Entities.UserStage", b =>
+                {
+                    b.HasOne("Speakat.Domain.Entities.Stage", "Stage")
+                        .WithMany()
+                        .HasForeignKey("StageId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Speakat.Domain.Entities.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Stage");
 
                     b.Navigation("User");
                 });
