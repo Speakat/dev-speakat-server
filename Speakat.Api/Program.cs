@@ -1,6 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using Scalar.AspNetCore;
-using Speakat.Application.Auth.Interfaces;
+using Speakat.Application.Auth.Providers;
 using Speakat.Application.Auth.Services;
 using Speakat.Application.Users.Repositories;
 using Speakat.Infrastructure.Auth;

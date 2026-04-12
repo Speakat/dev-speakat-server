@@ -1,6 +1,6 @@
 using Speakat.Domain.Enums;
 
-namespace Speakat.Application.Auth.Interfaces;
+namespace Speakat.Application.Auth.Providers;
 
 public interface IOAuthProvider
 {

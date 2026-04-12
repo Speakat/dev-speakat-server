@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using Speakat.Api.Common.Response;
-using Speakat.Application.Auth.Commands;
+using Speakat.Application.Auth.Dtos;
 using Speakat.Application.Auth.Services;
 using Speakat.Application.Common.Exceptions;
 using Speakat.Domain.Enums;

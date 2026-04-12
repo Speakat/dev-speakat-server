@@ -1,7 +1,7 @@
 using Speakat.Domain.Entities;
 using Speakat.Domain.Enums;
 
-namespace Speakat.Application.Users.Repositories;
+namespace Speakat.Application.Auth.Repositories;
 
 public interface IUserRepository
 {

@@ -1,7 +1,8 @@
-using Speakat.Application.Auth.Commands;
-using Speakat.Application.Auth.Interfaces;
+using Speakat.Application.Auth.Dtos;
+using Speakat.Application.Auth.Providers;
+using Speakat.Application.Auth.Repositories;
 using Speakat.Application.Common.Exceptions;
-using Speakat.Application.Users.Repositories;
+using Speakat.Application.Common.Interfaces;
 using Speakat.Domain.Entities;
 using Speakat.Domain.Enums;
 

@@ -1,5 +1,5 @@
 using Microsoft.EntityFrameworkCore;
-using Speakat.Application.Users.Repositories;
+using Speakat.Application.Auth.Repositories;
 using Speakat.Domain.Entities;
 using Speakat.Domain.Enums;
 

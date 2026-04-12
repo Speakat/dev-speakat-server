@@ -4,7 +4,7 @@ using System.Security.Cryptography;
 using System.Text;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
-using Speakat.Application.Auth.Interfaces;
+using Speakat.Application.Common.Interfaces;
 
 namespace Speakat.Infrastructure.Auth;
 
