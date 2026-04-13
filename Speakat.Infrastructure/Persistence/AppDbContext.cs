@@ -10,6 +10,8 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
     public DbSet<UserSetting> UserSettings => Set<UserSetting>();
     public DbSet<Stage> Stages => Set<Stage>();
     public DbSet<UserStage> UserStages => Set<UserStage>();
+    public DbSet<Quest> Quests => Set<Quest>();
+    public DbSet<UserQuest> UserQuests => Set<UserQuest>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -18,5 +20,7 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
         modelBuilder.ApplyConfiguration(new UserSettingConfiguration());
         modelBuilder.ApplyConfiguration(new StageConfiguration());
         modelBuilder.ApplyConfiguration(new UserStageConfiguration());
+        modelBuilder.ApplyConfiguration(new QuestConfiguration());
+        modelBuilder.ApplyConfiguration(new UserQuestConfiguration());
     }
 }
