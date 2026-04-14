@@ -77,6 +77,9 @@ builder.Services.AddSingleton<IJwtTokenService, JwtTokenService>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IAuthService, AuthService>();
 
+builder.Services.AddScoped<IStageRepository, StageRepository>();
+builder.Services.AddScoped<IStageService, StageService>();
+
 var connectionString = builder.Configuration.GetConnectionString("MySQL")
     ?? throw new InvalidOperationException("Connection string 'MySQL' not found.");
 
