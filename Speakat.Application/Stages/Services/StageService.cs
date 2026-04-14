@@ -45,4 +45,31 @@ public class StageService : IStageService
 
         return new StageListDto { Items = items };
     }
+
+    public async Task<StageDetailDto> GetStageAsync(long stageId, long userId)
+    {
+        var data = await _stageRepository.GetStageDetailAsync(stageId, userId)
+            ?? throw StageException.NotFound();
+
+        var isCompleted = data.Quests.Count > 0 && data.Quests.All(q => q.IsCompleted);
+
+        var status = ResolveStatus(isCompleted, data.PreviousStageCompleted);
+
+        return new StageDetailDto
+        {
+            StageId = data.StageId,
+            Title = data.Title,
+            Description = data.Description,
+            Status = status,
+            Quests = data.Quests.Select(q => new QuestItemDto
+            {
+                QuestId = q.QuestId,
+                Title = q.Title,
+                Description = q.Description,
+                SortOrder = q.SortOrder,
+                IsCompleted = q.IsCompleted,
+                AttemptCount = q.AttemptCount
+            }).ToList()
+        };
+    }
 }
