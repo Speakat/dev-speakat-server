@@ -1,6 +1,7 @@
 using Speakat.Application.Common.Exceptions;
 using Speakat.Application.Stages.Dtos;
 using Speakat.Application.Stages.Repositories;
+using Speakat.Domain.Enums;
 
 namespace Speakat.Application.Stages.Services;
 
@@ -13,8 +14,8 @@ public class StageService : IStageService
         _stageRepository = stageRepository;
     }
 
-    private static string ResolveStatus(bool isCompleted, bool previousCompleted) =>
-        isCompleted ? "COMPLETED" : previousCompleted ? "UNLOCKED" : "LOCKED";
+    private static StageStatus ResolveStatus(bool isCompleted, bool previousCompleted) =>
+        isCompleted ? StageStatus.Completed : previousCompleted ? StageStatus.Unlocked : StageStatus.Locked;
 
     // 유저id로 스테이지 목록 조회
     public async Task<StageListDto> GetStagesAsync(long userId)
