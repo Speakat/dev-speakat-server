@@ -26,9 +26,10 @@ public class AuthController : ControllerBase
     {
         // SocialType enum으로 변환
         if (!Enum.TryParse<SocialType>(provider, ignoreCase: true, out var socialType))
-            return BadRequest(ApiResponse<OAuthLoginResponseDto>.Fail(
-                "UNSUPPORTED_OAUTH_PROVIDER",
-                $"지원하지 않는 OAuth Provider: {provider}"));
+        {
+            var unsupported = AuthException.UnsupportedProvider();
+            return BadRequest(ApiResponse<OAuthLoginResponseDto>.Fail(unsupported.Code, unsupported.Message!));
+        }
 
         try
         {
