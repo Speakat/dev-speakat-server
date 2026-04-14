@@ -1,6 +1,6 @@
 using Speakat.Domain.Enums;
 
-namespace Speakat.Application.Auth.Commands;
+namespace Speakat.Application.Auth.Dtos;
 
 public class OAuthLoginResponseDto
 {

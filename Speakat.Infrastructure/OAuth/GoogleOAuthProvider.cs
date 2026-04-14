@@ -2,7 +2,7 @@ using System.Net.Http.Headers;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using Microsoft.Extensions.Configuration;
-using Speakat.Application.Auth.Interfaces;
+using Speakat.Application.Auth.Providers;
 using Speakat.Application.Common.Exceptions;
 using Speakat.Domain.Enums;
 

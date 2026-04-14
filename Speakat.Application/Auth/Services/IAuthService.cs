@@ -1,4 +1,4 @@
-using Speakat.Application.Auth.Commands;
+using Speakat.Application.Auth.Dtos;
 using Speakat.Domain.Enums;
 
 namespace Speakat.Application.Auth.Services;

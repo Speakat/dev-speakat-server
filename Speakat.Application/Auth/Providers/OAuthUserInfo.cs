@@ -1,6 +1,6 @@
 using Speakat.Domain.Enums;
 
-namespace Speakat.Application.Auth.Interfaces;
+namespace Speakat.Application.Auth.Providers;
 
 // OAuth에서 받아온 사용자 정보를 담는 내부 DTO
 public class OAuthUserInfo

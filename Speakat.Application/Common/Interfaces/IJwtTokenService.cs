@@ -1,4 +1,4 @@
-namespace Speakat.Application.Auth.Interfaces;
+namespace Speakat.Application.Common.Interfaces;
 
 public interface IJwtTokenService
 {

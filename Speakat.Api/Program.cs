@@ -1,8 +1,17 @@
+using System.Text;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
+using Microsoft.OpenApi.Models;
 using Scalar.AspNetCore;
-using Speakat.Application.Auth.Interfaces;
+using Speakat.Api.Common.Response;
+using Speakat.Application.Common.Exceptions;
+using Speakat.Application.Auth.Providers;
 using Speakat.Application.Auth.Services;
-using Speakat.Application.Users.Repositories;
+using Speakat.Application.Common.Interfaces;
+using Speakat.Application.Stages.Repositories;
+using Speakat.Application.Stages.Services;
+using Speakat.Application.Auth.Repositories;
 using Speakat.Infrastructure.Auth;
 using Speakat.Infrastructure.OAuth;
 using Speakat.Infrastructure.Persistence;
@@ -10,7 +19,20 @@ using Speakat.Infrastructure.Persistence.Repositories;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddOpenApi();
+builder.Services.AddOpenApi(options =>
+{
+    options.AddDocumentTransformer((document, _, _) =>
+    {
+        document.Components ??= new OpenApiComponents();
+        document.Components.SecuritySchemes["Bearer"] = new OpenApiSecurityScheme
+        {
+            Type = SecuritySchemeType.Http,
+            Scheme = "bearer",
+            BearerFormat = "JWT"
+        };
+        return Task.CompletedTask;
+    });
+});
 builder.Services.AddControllers();
 
 // HttpClient
@@ -19,6 +41,35 @@ builder.Services.AddTransient<IOAuthProvider>(sp => sp.GetRequiredService<Google
 
 builder.Services.AddHttpClient<KakaoOAuthProvider>();
 builder.Services.AddTransient<IOAuthProvider>(sp => sp.GetRequiredService<KakaoOAuthProvider>());
+
+// JWT 인증
+var secretKey = builder.Configuration["Jwt:SecretKey"]
+    ?? throw new InvalidOperationException("Jwt:SecretKey is not configured.");
+
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+    .AddJwtBearer(options =>
+    {
+        options.TokenValidationParameters = new TokenValidationParameters
+        {
+            ValidateIssuerSigningKey = true,
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretKey)),
+            ValidateIssuer = false,
+            ValidateAudience = false,
+            ClockSkew = TimeSpan.Zero
+        };
+        options.Events = new JwtBearerEvents
+        {
+            OnChallenge = async context =>
+            {
+                context.HandleResponse();
+                context.Response.ContentType = "application/json";
+                var isExpired = context.AuthenticateFailure is SecurityTokenExpiredException;
+                var ex = isExpired ? AuthException.AccessTokenExpired() : AuthException.InvalidToken();
+                var error = ApiResponse<object>.Fail(ex.Code, ex.Message!);
+                await context.Response.WriteAsJsonAsync(error);
+            }
+        };
+    });
 
 // Services
 builder.Services.AddSingleton<IJwtTokenService, JwtTokenService>();
@@ -48,6 +99,9 @@ if (app.Environment.IsDevelopment())
 
 // 개발용으로 https redirection 해제
 // app.UseHttpsRedirection();
+
+app.UseAuthentication();
+app.UseAuthorization();
 
 app.MapControllers();
 
