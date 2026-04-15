@@ -56,6 +56,9 @@ nunit-*.xml
 # IDE 설정 
 .idea/
 
+# JetBrains Rider
+*.DotSettings.user
+
 # macOS
 .DS_Store
 
