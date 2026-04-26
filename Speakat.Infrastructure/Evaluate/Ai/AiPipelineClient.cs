@@ -1,5 +1,7 @@
 using System.Net.Http.Json;
 
+namespace Speakat.Infrastructure.Evaluate.Ai;
+
 public class AiPipelineClient : IAiPipelineClient
 {
     private readonly HttpClient _http;
