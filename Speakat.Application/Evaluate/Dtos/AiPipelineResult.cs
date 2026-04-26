@@ -2,6 +2,7 @@ using System.Text.Json.Serialization;
 
 public record AiPipelineResult(
     string Roleplay,
+    [property: JsonPropertyName("roleplay_audio")]        string RoleplayAudio,
     int Score,
     string Grade,
     [property: JsonPropertyName("better_suggestions")]    List<string> BetterSuggestions,

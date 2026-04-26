@@ -17,11 +17,13 @@ public class EvaluateService : IEvaluateService
 
         var aiResult = await _ai.EvaluateAsync(request.Audio, request.QuestId, request.Turn); //ai 평가 요청
         bool isTurnPassed = aiResult.SimilarityPassed && aiResult.Score >= PassScore;
+        
         // bool isQuestComplete = isTurnPassed && request.IsLastTurn;
         bool isQuestComplete = isTurnPassed; //각 턴 통과 시 결과 반환
 
         return new EvaluateResponseDto(
             Roleplay:             aiResult.Roleplay,
+            RoleplayAudio:        aiResult.RoleplayAudio,
             Score:                aiResult.Score,
             Grade:                aiResult.Grade,
             BetterSuggestions:    aiResult.BetterSuggestions,
