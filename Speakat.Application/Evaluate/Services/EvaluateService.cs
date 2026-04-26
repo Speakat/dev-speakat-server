@@ -11,7 +11,7 @@ public class EvaluateService : IEvaluateService
         _questRepo = questRepo;
     }
 
-    public async Task<EvaluateRequestDto> EvaluateAsync(EvaluateRequestDto request)
+    public async Task<EvaluateResponseDto> EvaluateAsync(EvaluateRequestDto request)
     {
         var aiResult = await _ai.EvaluateAsync(request.Audio, request.QuestId, request.Turn); //ai 평가 요청
 

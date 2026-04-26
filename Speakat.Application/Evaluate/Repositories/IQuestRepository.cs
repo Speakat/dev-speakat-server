@@ -1,4 +1,6 @@
+using Speakat.Domain.Entities;
+
 public interface IQuestRepository
 {
-    Task<Quest> GetByIdAsync(int questId);
+    Task<Quest> GetByIdAsync(long questId);
 }
