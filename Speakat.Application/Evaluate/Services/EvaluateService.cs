@@ -13,9 +13,9 @@ public class EvaluateService : IEvaluateService
 
     public async Task<EvaluateResponseDto> EvaluateAsync(EvaluateRequestDto request)
     {
-        var aiResult = await _ai.EvaluateAsync(request.Audio, request.QuestId, request.Turn); //ai 평가 요청
-
         await _questRepo.GetByIdAsync(request.QuestId); //존재 검증용
+
+        var aiResult = await _ai.EvaluateAsync(request.Audio, request.QuestId, request.Turn); //ai 평가 요청
         bool isTurnPassed = aiResult.SimilarityPassed && aiResult.Score >= PassScore;
         // bool isQuestComplete = isTurnPassed && request.IsLastTurn;
         bool isQuestComplete = isTurnPassed; //각 턴 통과 시 결과 반환
