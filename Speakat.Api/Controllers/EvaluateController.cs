@@ -1,3 +1,7 @@
+using Microsoft.AspNetCore.Mvc;
+using Speakat.Api.Common.Response;
+using Speakat.Application.Common.Exceptions;
+
 [ApiController]
 [Route("evaluate")]
 public class EvaluateController : ControllerBase
