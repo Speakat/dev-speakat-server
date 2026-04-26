@@ -14,6 +14,7 @@ using Speakat.Application.Stages.Repositories;
 using Speakat.Application.Stages.Services;
 using Speakat.Application.Auth.Repositories;
 using Speakat.Infrastructure.Auth;
+using Speakat.Infrastructure.Evaluate.Ai;
 using Speakat.Infrastructure.OAuth;
 using Speakat.Infrastructure.Persistence;
 using Speakat.Infrastructure.Persistence.Repositories;
@@ -90,11 +91,14 @@ var connectionString = builder.Configuration.GetConnectionString("MySQL")
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString)));
 
-//HttpClient로 Python AI 서비스 연결
-builder.Services.AddHttpClient<IAiPipelineClient, AiPipelineClient>(client =>
-{
-    client.BaseAddress = new Uri(builder.Configuration["AiService:BaseUrl"]!);
-});
+//HttpClient로 Python AI 서비스 연결 (개발 환경에서는 스터빙 적용)
+if (builder.Environment.IsDevelopment()) //개발 환경인 경우
+    builder.Services.AddSingleton<IAiPipelineClient, StubAiPipelineClient>();
+else
+    builder.Services.AddHttpClient<IAiPipelineClient, AiPipelineClient>(client =>
+    {
+        client.BaseAddress = new Uri(builder.Configuration["AiService:BaseUrl"]!);
+    });
 
 builder.Services.AddScoped<IQuestRepository, QuestRepository>();
 builder.Services.AddScoped<IEvaluateService, EvaluateService>();
