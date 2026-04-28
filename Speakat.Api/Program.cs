@@ -106,6 +106,7 @@ if (app.Environment.IsDevelopment())
 // 개발용으로 https redirection 해제
 // app.UseHttpsRedirection();
 
+app.UseExceptionHandler();
 app.UseAuthentication();
 app.UseAuthorization();
 
