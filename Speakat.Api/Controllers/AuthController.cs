@@ -26,18 +26,9 @@ public class AuthController : ControllerBase
     {
         // SocialType enum으로 변환
         if (!Enum.TryParse<SocialType>(provider, ignoreCase: true, out var socialType))
-            return BadRequest(ApiResponse<OAuthLoginResponseDto>.Fail(
-                "UNSUPPORTED_OAUTH_PROVIDER",
-                $"지원하지 않는 OAuth Provider: {provider}"));
+            throw AuthException.UnsupportedProvider();
 
-        try
-        {
-            var result = await _authService.OAuthLoginAsync(socialType, request.AuthorizationCode);
-            return Ok(ApiResponse<OAuthLoginResponseDto>.Success(result));
-        }
-        catch (AuthException ex)
-        {
-            return StatusCode(ex.StatusCode, ApiResponse<OAuthLoginResponseDto>.Fail(ex.Code, ex.Message!));
-        }
+        var result = await _authService.OAuthLoginAsync(socialType, request.AuthorizationCode);
+        return Ok(ApiResponse<OAuthLoginResponseDto>.Success(result));
     }
 }
