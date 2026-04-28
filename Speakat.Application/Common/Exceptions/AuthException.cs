@@ -1,22 +1,9 @@
 namespace Speakat.Application.Common.Exceptions;
 
-public class AuthException : Exception
+public class AuthException : BusinessException
 {
-    public string Code { get; }
-    public int StatusCode { get; }
-    
-    // 에러 메시지를 포함하는 생성자
-    private AuthException(string code, string message, int statusCode) : base(message)
-    {
-        Code = code;
-        StatusCode = statusCode;
-    }
-    
-    // 에러 메시지와 내부 예외를 포함하는 생성자
-    public AuthException(string code, string message, Exception inner) : base(message, inner)
-    {
-        Code = code;
-    }
+
+    private AuthException(string code, string message, int statusCode) : base(code, message, statusCode) { }
 
     public static AuthException AccessTokenExpired() =>
         new("ACCESS_TOKEN_EXPIRED", "Access Token 만료", 401);
