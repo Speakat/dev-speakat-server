@@ -62,6 +62,9 @@ nunit-*.xml
 # macOS
 .DS_Store
 
+# ai Tool
+CLAUDE.md
+
 # env
 appsettings.Development.json
 appsettings.*.local.json

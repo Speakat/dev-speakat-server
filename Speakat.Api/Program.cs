@@ -5,6 +5,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using Scalar.AspNetCore;
+using Speakat.Api.Common.Exceptions;
 using Speakat.Api.Common.Response;
 using Speakat.Application.Common.Exceptions;
 using Speakat.Application.Auth.Providers;
@@ -34,6 +35,7 @@ builder.Services.AddOpenApi(options =>
         return Task.CompletedTask;
     });
 });
+builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
 builder.Services.AddControllers()
     .AddJsonOptions(options =>
         options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter()));
@@ -106,6 +108,7 @@ if (app.Environment.IsDevelopment())
 // 개발용으로 https redirection 해제
 // app.UseHttpsRedirection();
 
+app.UseExceptionHandler(o => { });
 app.UseAuthentication();
 app.UseAuthorization();
 
