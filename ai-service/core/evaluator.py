@@ -1,41 +1,35 @@
-"""
-LLM 통한 채점 
-"""
-import base64, json, re
+import json, re
 from openai import AsyncOpenAI
-from config import OPENAI_API_KEY, GPT_MODEL, SYSTEM_PROMPT
+from config import OPENAI_API_KEY, GPT_MODEL
+from core.session import get_history, append_turn
+from prompts.conversation import build_messages
+from prompts.quest_system import build_system_prompt
 
 _client = AsyncOpenAI(api_key=OPENAI_API_KEY)
 
 
-async def evaluate(audio_bytes: bytes) -> dict:
-    audio_b64     = base64.b64encode(audio_bytes).decode("utf-8")
-    collected     = []
+async def evaluate(session_id: str, quest_id: int, user_text: str, quest_prompt: dict) -> dict:
+    system_prompt = build_system_prompt(quest_prompt)
+    history = await get_history(session_id, quest_id)
 
-    async with _client.beta.realtime.connect(model=GPT_MODEL) as conn:
-        await conn.session.update(session={
-            "modalities": ["text"],
-            "instructions": SYSTEM_PROMPT,
-            "input_audio_format": "pcm16",
-            "input_audio_transcription": {"model": "whisper-1"},
-            "turn_detection": None,
-        })
-        await conn.input_audio_buffer.append(audio=audio_b64)
-        await conn.input_audio_buffer.commit()
-        await conn.response.create()
+    messages = [{"role": "system", "content": system_prompt}]
+    messages += build_messages(history)
+    messages.append({"role": "user", "content": user_text})
 
-        async for event in conn:
-            if event.type == "response.text.delta":
-                collected.append(event.delta)
-            elif event.type == "response.done":
-                break
-            elif event.type == "error":
-                raise RuntimeError(f"Realtime API 오류: {event.error}")
+    response = await _client.chat.completions.create(
+        model=GPT_MODEL,
+        messages=messages,
+        response_format={"type": "json_object"},
+    )
 
-    raw = "".join(collected).strip()
+    raw = response.choices[0].message.content.strip()
 
     match = re.search(r"\{.*\}", raw, re.DOTALL)
     if not match:
         raise ValueError(f"JSON 파싱 실패: {raw}")
 
-    return json.loads(match.group())
+    result = json.loads(match.group())
+
+    await append_turn(session_id, quest_id, user_text, result.get("npc_dialogue", ""))
+
+    return result
