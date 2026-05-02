@@ -72,3 +72,13 @@ appsettings.*.local.json
 
 # Docker
 docker-compose.override.yml
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+*.egg-info/
+.venv/
+test.wav
