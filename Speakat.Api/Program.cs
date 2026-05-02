@@ -103,6 +103,7 @@ else
     });
 
 builder.Services.AddScoped<IQuestRepository, QuestRepository>();
+builder.Services.AddScoped<IQuestDataService, MockQuestDataService>();
 builder.Services.AddScoped<IEvaluateService, EvaluateService>();
 
 var app = builder.Build();

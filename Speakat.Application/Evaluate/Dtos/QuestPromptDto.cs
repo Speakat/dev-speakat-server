@@ -1,20 +1,19 @@
-// QuestPromptDto.cs
+using System.Text.Json.Serialization;
+
 public record QuestPromptDto(
-    string         Scenario,
-    string         SuccessCriteria,
-    NpcDto         Npc,
-    List<ObjectiveDto> Objectives
+    [property: JsonPropertyName("scenario")]         string Scenario,
+    [property: JsonPropertyName("success_criteria")] string SuccessCriteria,
+    [property: JsonPropertyName("npc")]              NpcDto Npc,
+    [property: JsonPropertyName("objectives")]       List<ObjectiveDto> Objectives
 );
 
-// NpcDto.cs
 public record NpcDto(
-    string Name,   // Npcs.name
-    string Role,   // QuestNpcs.role
-    string Tone    // Npcs.tone
+    [property: JsonPropertyName("name")] string Name,
+    [property: JsonPropertyName("role")] string Role,
+    [property: JsonPropertyName("tone")] string Tone
 );
 
-// ObjectiveDto.cs
 public record ObjectiveDto(
-    string Name,        // Objectives.name
-    string Description  // Objectives.description
+    [property: JsonPropertyName("name")]        string Name,
+    [property: JsonPropertyName("description")] string Description
 );
