@@ -82,3 +82,4 @@ __pycache__/
 *.egg-info/
 .venv/
 test.wav
+test_evaluate.py
