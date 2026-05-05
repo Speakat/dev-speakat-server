@@ -1,21 +1,23 @@
-public class EvaluateService : IEvaluateService
+using Speakat.Application.Common.Exceptions;
+using Speakat.Application.Common.Interfaces;
+
+namespace Speakat.Application.Evaluate.Services;
+
+public class EvaluateService(IAiPipelineClient ai, IQuestDataService questData, ISessionStore sessionStore) : IEvaluateService
 {
     private const float PassThreshold = 0.7f;
 
-    private readonly IAiPipelineClient _ai;
-    private readonly IQuestDataService _questData;
-
-    public EvaluateService(IAiPipelineClient ai, IQuestDataService questData)
+    public async Task<EvaluateResponseDto> EvaluateAsync(EvaluateRequestDto request, long userId)
     {
-        _ai = ai;
-        _questData = questData;
-    }
+        var (sessionUserId, sessionQuestId) = await sessionStore.GetAsync(request.SessionId)
+            ?? throw SessionException.NotFound();
 
-    public async Task<EvaluateResponseDto> EvaluateAsync(EvaluateRequestDto request)
-    {
-        var questPrompt = await _questData.GetQuestPromptDtoAsync((int)request.QuestId);
+        if (sessionUserId != userId || sessionQuestId != request.QuestId)
+            throw SessionException.Forbidden();
 
-        var aiResult = await _ai.EvaluateAsync(request.Audio, request.QuestId, request.SessionId, request.Turn, questPrompt);
+        var questPrompt = await questData.GetQuestPromptDtoAsync((int)request.QuestId);
+
+        var aiResult = await ai.EvaluateAsync(request.Audio, request.QuestId, request.SessionId, request.Turn, questPrompt);
         bool isTurnPassed = aiResult.SimilarityPassed && aiResult.TurnEvaluation.ContextRelevance >= PassThreshold;
 
         return new EvaluateResponseDto(

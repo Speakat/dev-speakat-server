@@ -1,31 +1,22 @@
+using System.Security.Claims;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Speakat.Api.Common.Response;
-using Speakat.Application.Common.Exceptions;
+
+namespace Speakat.Api.Controllers;
 
 [ApiController]
 [Route("evaluate")]
-public class EvaluateController : ControllerBase
+[Authorize]
+public class EvaluateController(IEvaluateService evaluateService) : ControllerBase
 {
-    private readonly IEvaluateService _evaluateService;
-    public EvaluateController(IEvaluateService evaluateService)
-        => _evaluateService = evaluateService;
+    private long UserId => long.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
 
     [HttpPost]
     public async Task<ActionResult<ApiResponse<EvaluateResponseDto>>> EvaluateAsync(
         [FromBody] EvaluateRequestDto request)
     {
-        try
-        {
-            var result = await _evaluateService.EvaluateAsync(request);
-            return Ok(ApiResponse<EvaluateResponseDto>.Success(result));
-        }
-        catch (NotFoundException ex)
-        {
-            return NotFound(ApiResponse<EvaluateResponseDto>.Fail("NOT_FOUND", ex.Message));
-        }
-        catch (Exception ex)
-        {
-            return StatusCode(500, ApiResponse<EvaluateResponseDto>.Fail("EVALUATE_ERROR", ex.Message));
-        }
+        var result = await evaluateService.EvaluateAsync(request, UserId);
+        return Ok(ApiResponse<EvaluateResponseDto>.Success(result));
     }
 }

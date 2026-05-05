@@ -1,4 +1,4 @@
 public interface IEvaluateService
 {
-    Task<EvaluateResponseDto> EvaluateAsync(EvaluateRequestDto request);
+    Task<EvaluateResponseDto> EvaluateAsync(EvaluateRequestDto request, long userId);
 }
