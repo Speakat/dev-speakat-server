@@ -15,6 +15,7 @@ public class UserSettingConfiguration : IEntityTypeConfiguration<UserSetting>
 
         builder.Property(s => s.UserId).HasColumnName("user_id").HasColumnType("char(36)").HasMaxLength(36);
         builder.Property(s => s.ShowNpcScript).HasColumnName("show_npc_script");
+        builder.Property(s => s.StreakGoal).HasColumnName("streak_goal");
         builder.Property(s => s.CreatedAt).HasColumnName("created_at");
         builder.Property(s => s.UpdatedAt).HasColumnName("updated_at");
 
