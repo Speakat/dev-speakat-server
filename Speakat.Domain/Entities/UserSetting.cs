@@ -3,7 +3,7 @@ namespace Speakat.Domain.Entities;
 public class UserSetting
 {
     public long UserSettingId { get; set; }
-    public long UserId { get; set; }
+    public string UserId { get; set; } = null!;
     public bool ShowNpcScript { get; set; } = true;
     public DateTime CreatedAt { get; set; }
     public DateTime UpdatedAt { get; set; }

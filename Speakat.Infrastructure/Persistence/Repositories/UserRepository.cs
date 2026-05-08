@@ -34,6 +34,7 @@ public class UserRepository : IUserRepository
         else
         {
             // 신규 유저: Add
+            user.UserId = Guid.NewGuid().ToString();
             await _context.Users.AddAsync(user);
         }
         

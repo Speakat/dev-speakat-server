@@ -2,6 +2,6 @@ namespace Speakat.Application.Common.Interfaces;
 
 public interface IJwtTokenService
 {
-    string GenerateAccessToken(long userId);
+    string GenerateAccessToken(string userId);
     string GenerateRefreshToken();
 }

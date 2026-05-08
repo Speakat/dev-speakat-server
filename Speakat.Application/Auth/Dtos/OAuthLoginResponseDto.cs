@@ -4,7 +4,7 @@ namespace Speakat.Application.Auth.Dtos;
 
 public class OAuthLoginResponseDto
 {
-    public long UserId { get; set; }
+    public string UserId { get; set; } = null!;
     public string? Email { get; set; }
     public required string Nickname { get; set; }
     public string? ProfileImageUrl { get; set; }
