@@ -12,7 +12,7 @@ public class StageRepository : IStageRepository
         _context = context;
     }
 
-    public async Task<IReadOnlyList<StageProgressData>> GetStagesWithProgressAsync(long userId)
+    public async Task<IReadOnlyList<StageProgressData>> GetStagesWithProgressAsync(string userId)
     {
         return await _context.Stages
             .OrderBy(s => s.SortOrder)
@@ -29,7 +29,7 @@ public class StageRepository : IStageRepository
             .ToListAsync();
     }
 
-    public async Task<StageDetailData?> GetStageDetailAsync(long stageId, long userId)
+    public async Task<StageDetailData?> GetStageDetailAsync(long stageId, string userId)
     {
         var stage = await _context.Stages.FindAsync(stageId);
         if (stage == null) return null;
