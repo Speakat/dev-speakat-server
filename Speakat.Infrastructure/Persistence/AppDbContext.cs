@@ -11,6 +11,8 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
     public DbSet<Stage> Stages => Set<Stage>();
     public DbSet<UserStage> UserStages => Set<UserStage>();
     public DbSet<Quest> Quests => Set<Quest>();
+    public DbSet<Prompt> Prompts => Set<Prompt>();
+    public DbSet<Language> Languages => Set<Language>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -20,5 +22,7 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
         modelBuilder.ApplyConfiguration(new StageConfiguration());
         modelBuilder.ApplyConfiguration(new UserStageConfiguration());
         modelBuilder.ApplyConfiguration(new QuestConfiguration());
+        modelBuilder.ApplyConfiguration(new PromptConfiguration());
+        modelBuilder.ApplyConfiguration(new LanguageConfiguration());
     }
 }

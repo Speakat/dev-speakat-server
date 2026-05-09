@@ -14,6 +14,7 @@ public class QuestConfiguration : IEntityTypeConfiguration<Quest>
         builder.Property(q => q.QuestId).HasColumnName("quest_id");
 
         builder.Property(q => q.StageId).HasColumnName("stage_id");
+        builder.Property(q => q.PromptId).HasColumnName("prompt_id");
 
         builder.Property(q => q.Title)
             .HasColumnName("title")
@@ -21,6 +22,10 @@ public class QuestConfiguration : IEntityTypeConfiguration<Quest>
 
         builder.Property(q => q.Description)
             .HasColumnName("description")
+            .HasColumnType("text");
+
+        builder.Property(q => q.Thumbnail)
+            .HasColumnName("thumbnail")
             .HasColumnType("text");
 
         builder.Property(q => q.SortOrder)
@@ -32,5 +37,9 @@ public class QuestConfiguration : IEntityTypeConfiguration<Quest>
         builder.HasOne(q => q.Stage)
             .WithMany()
             .HasForeignKey(q => q.StageId);
+
+        builder.HasOne(q => q.Prompt)
+            .WithMany()
+            .HasForeignKey(q => q.PromptId);
     }
 }

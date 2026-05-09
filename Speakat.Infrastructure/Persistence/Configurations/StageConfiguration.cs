@@ -14,6 +14,12 @@ public class StageConfiguration : IEntityTypeConfiguration<Stage>
         builder.HasKey(s => s.StageId);
         builder.Property(s => s.StageId).HasColumnName("stage_id");
 
+        builder.Property(s => s.LanguageId).HasColumnName("language_id");
+
+        builder.HasOne(s => s.Language)
+            .WithMany()
+            .HasForeignKey(s => s.LanguageId);
+
         builder.Property(s => s.Title)
             .HasColumnName("title")
             .HasMaxLength(255);
