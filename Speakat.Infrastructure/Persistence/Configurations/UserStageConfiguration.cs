@@ -13,9 +13,8 @@ public class UserStageConfiguration : IEntityTypeConfiguration<UserStage>
         builder.HasKey(us => us.UserStageId);
         builder.Property(us => us.UserStageId).HasColumnName("user_stage_id");
 
-        builder.Property(us => us.UserId).HasColumnName("user_id").HasColumnType("char(36)").HasMaxLength(36);
+        builder.Property(us => us.UserId).HasColumnName("user_id");
         builder.Property(us => us.StageId).HasColumnName("stage_id");
-        builder.Property(us => us.Status).HasColumnName("status").HasMaxLength(20);
         builder.Property(us => us.StartedAt).HasColumnName("started_at");
         builder.Property(us => us.CompletedAt).HasColumnName("completed_at");
 

@@ -11,11 +11,7 @@ public class UserConfiguration : IEntityTypeConfiguration<User>
         builder.ToTable("users");
 
         builder.HasKey(u => u.UserId);
-        builder.Property(u => u.UserId)
-            .HasColumnName("user_id")
-            .HasColumnType("char(36)")
-            .HasMaxLength(36)
-            .ValueGeneratedNever();
+        builder.Property(u => u.UserId).HasColumnName("user_id");
 
         builder.Property(u => u.SocialType)
             .HasColumnName("social_type")

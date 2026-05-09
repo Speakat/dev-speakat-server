@@ -32,11 +32,11 @@ public class JwtTokenService : IJwtTokenService
     }
 
     // accessToken 생성
-    public string GenerateAccessToken(string userId)
+    public string GenerateAccessToken(long userId)
     {
         var claims = new[]
         {
-            new Claim(JwtRegisteredClaimNames.Sub, userId)
+            new Claim(JwtRegisteredClaimNames.Sub, userId.ToString())
         };
 
         var credentials = new SigningCredentials(_signingKey, Algorithm);
