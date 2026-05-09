@@ -9,4 +9,6 @@ public interface IAuthService
     Task<OAuthLoginResponseDto> OAuthLoginAsync(SocialType provider, string authorizationCode);
     
     Task<RefreshTokenResponseDto> RefreshAsync(string refreshToken);
+    
+    Task LogoutAsync(string refreshToken);
 }
