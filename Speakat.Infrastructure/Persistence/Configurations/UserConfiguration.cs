@@ -13,6 +13,12 @@ public class UserConfiguration : IEntityTypeConfiguration<User>
         builder.HasKey(u => u.UserId);
         builder.Property(u => u.UserId).HasColumnName("user_id");
 
+        builder.Property(u => u.UserUuid)
+            .HasColumnName("user_uuid")
+            .HasColumnType("char(36)")
+            .HasMaxLength(36)
+            .IsRequired();
+
         builder.Property(u => u.SocialType)
             .HasColumnName("social_type")
             .HasMaxLength(20)
@@ -51,6 +57,10 @@ public class UserConfiguration : IEntityTypeConfiguration<User>
         builder.HasIndex(u => new { u.SocialType, u.SocialId })
             .IsUnique()
             .HasDatabaseName("uq_users_social");
+
+        builder.HasIndex(u => u.UserUuid)
+            .IsUnique()
+            .HasDatabaseName("uq_users_user_uuid");
 
         builder.HasOne(u => u.Setting)
             .WithOne(s => s.User)
