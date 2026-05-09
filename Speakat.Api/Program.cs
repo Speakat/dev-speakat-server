@@ -96,8 +96,8 @@ builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IStageRepository, StageRepository>();
 builder.Services.AddScoped<IStageService, StageService>();
 
-var connectionString = builder.Configuration.GetConnectionString("MySQL")
-    ?? throw new InvalidOperationException("MySQL:Connection string is not found.");
+var mysqlConnectionString = builder.Configuration.GetConnectionString("MySQL")
+                            ?? throw new InvalidOperationException("MySQL:Connection string is not found.");
 
 // Database
 builder.Services.AddDbContext<AppDbContext>(options =>
