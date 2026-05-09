@@ -13,6 +13,8 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
     public DbSet<UserStage> UserStages => Set<UserStage>();
     public DbSet<Quest> Quests => Set<Quest>();
     
+    public  DbSet<GameSession> GameSessions => Set<GameSession>();
+    
     public DbSet<Npc> Npcs => Set<Npc>();
     public DbSet<QuestNpc> QuestNpcs => Set<QuestNpc>();
     public DbSet<Prompt> Prompts => Set<Prompt>();
@@ -32,6 +34,8 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
         modelBuilder.ApplyConfiguration(new StageConfiguration());
         modelBuilder.ApplyConfiguration(new UserStageConfiguration());
         modelBuilder.ApplyConfiguration(new QuestConfiguration());
+        
+        modelBuilder.ApplyConfiguration(new GameSessionConfiguration());
         
         modelBuilder.ApplyConfiguration(new NpcConfiguration());
         modelBuilder.ApplyConfiguration(new QuestNpcConfiguration());
