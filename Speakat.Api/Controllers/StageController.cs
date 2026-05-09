@@ -20,7 +20,7 @@ public class StageController : ControllerBase
         _stageService = stageService;
     }
 
-    private string UserId => User.FindFirstValue(ClaimTypes.NameIdentifier)!;
+    private long UserId => long.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
 
     // Stage 목록 조회
     [HttpGet]
