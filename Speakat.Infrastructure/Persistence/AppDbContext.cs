@@ -8,12 +8,19 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
 {
     public DbSet<User> Users => Set<User>();
     public DbSet<UserSetting> UserSettings => Set<UserSetting>();
+    
     public DbSet<Stage> Stages => Set<Stage>();
     public DbSet<UserStage> UserStages => Set<UserStage>();
     public DbSet<Quest> Quests => Set<Quest>();
+    
     public DbSet<Npc> Npcs => Set<Npc>();
     public DbSet<QuestNpc> QuestNpcs => Set<QuestNpc>();
     public DbSet<Prompt> Prompts => Set<Prompt>();
+    
+    public  DbSet<Word> Words => Set<Word>();
+    public DbSet<Flashcard> Flashcards => Set<Flashcard>();
+    public DbSet<UserFlashcard> UserFlashcards => Set<UserFlashcard>();
+    
     public DbSet<Language> Languages => Set<Language>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -29,6 +36,10 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
         modelBuilder.ApplyConfiguration(new NpcConfiguration());
         modelBuilder.ApplyConfiguration(new QuestNpcConfiguration());
         modelBuilder.ApplyConfiguration(new PromptConfiguration());
+        
+        modelBuilder.ApplyConfiguration(new WordConfiguration());
+        modelBuilder.ApplyConfiguration(new FlashcardConfiguration());
+        modelBuilder.ApplyConfiguration(new UserFlashcardConfiguration());
         
         modelBuilder.ApplyConfiguration(new LanguageConfiguration());
     }
