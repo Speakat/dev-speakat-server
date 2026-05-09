@@ -1,5 +1,4 @@
 import base64
-import traceback
 from fastapi import FastAPI, HTTPException
 from fastapi.responses import JSONResponse
 from models.request import EvaluateRequest
@@ -39,6 +38,8 @@ async def evaluate_endpoint(req: EvaluateRequest):
                     objective_progress=[],
                     is_quest_complete=False,
                     reason="주제와 관련 없는 발화입니다.",
+                    better_suggestions=[],
+                    recommendation_reason="",
                 ),
             )
 
@@ -66,4 +67,4 @@ async def evaluate_endpoint(req: EvaluateRequest):
         )
 
     except Exception as e:
-        return JSONResponse(status_code=500, content={"error": str(e), "trace": traceback.format_exc()})
+        return JSONResponse(status_code=500, content={"error": str(e)})
