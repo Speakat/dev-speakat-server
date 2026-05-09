@@ -6,6 +6,7 @@ namespace Speakat.Infrastructure.Auth;
 public class RedisRefreshTokenStore : IRefreshTokenStore
 {
     private const string KeyPrefix = "refresh:";
+    private const string BlacklistPrefix = "blacklist:refresh:";
 
     private readonly IDistributedCache _cache;
 
@@ -26,6 +27,17 @@ public class RedisRefreshTokenStore : IRefreshTokenStore
 
     public Task DeleteAsync(string refreshToken) =>
         _cache.RemoveAsync(Key(refreshToken));
+    
+    public Task BlacklistAsync(string refreshToken, TimeSpan ttl) =>
+        _cache.SetStringAsync(BlacklistKey(refreshToken), "1", new DistributedCacheEntryOptions
+        {
+            AbsoluteExpirationRelativeToNow = ttl
+        });
+
+    public async Task<bool> IsBlacklistedAsync(string refreshToken) =>
+        await _cache.GetStringAsync(BlacklistKey(refreshToken)) is not null;
 
     private static string Key(string refreshToken) => KeyPrefix + refreshToken;
+    
+    private static string BlacklistKey(string refreshToken) => BlacklistPrefix + refreshToken;
 }
