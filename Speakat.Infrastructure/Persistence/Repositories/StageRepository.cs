@@ -23,10 +23,7 @@ public class StageRepository : IStageRepository
                 s.Title,
                 s.Description,
                 _context.Quests.Count(q => q.StageId == s.StageId),
-                _context.Quests.Count(q => q.StageId == s.StageId &&
-                    _context.UserQuests.Any(uq => uq.QuestId == q.QuestId
-                        && uq.UserId == userId
-                        && uq.CompletedAt != null))
+                0
             ))
             .ToListAsync();
     }
@@ -52,8 +49,7 @@ public class StageRepository : IStageRepository
         else
         {
             var prevQuestCount = await _context.Quests.CountAsync(q => q.StageId == previousStage.StageId);
-            var prevCompletedCount = await _context.Quests.CountAsync(q => q.StageId == previousStage.StageId &&
-                _context.UserQuests.Any(uq => uq.QuestId == q.QuestId && uq.UserId == userId && uq.CompletedAt != null));
+            var prevCompletedCount = 0;
             previousStageCompleted = prevQuestCount > 0 && prevCompletedCount == prevQuestCount;
         }
 
@@ -65,8 +61,8 @@ public class StageRepository : IStageRepository
                 q.Title,
                 q.Description,
                 q.SortOrder,
-                _context.UserQuests.Count(uq => uq.QuestId == q.QuestId && uq.UserId == userId),
-                _context.UserQuests.Any(uq => uq.QuestId == q.QuestId && uq.UserId == userId && uq.CompletedAt != null)
+                0,
+                false
             ))
             .ToListAsync();
 
