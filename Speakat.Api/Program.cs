@@ -77,7 +77,7 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     });
 
 // Redis
-var redisConnectionString = builder.Configuration["Redis:ConnectionString"]
+var redisConnectionString = builder.Configuration.GetConnectionString("Redis")
     ?? throw new InvalidOperationException("Redis:Connection string is not configured.");
 
 builder.Services.AddStackExchangeRedisCache(options =>
