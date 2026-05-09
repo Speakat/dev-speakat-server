@@ -12,8 +12,10 @@ public class StageRepository : IStageRepository
         _context = context;
     }
 
-    public async Task<IReadOnlyList<StageProgressData>> GetStagesWithProgressAsync(long userId)
+    public async Task<IReadOnlyList<StageProgressData>> GetStagesWithProgressAsync(string userUuid)
     {
+        var userId = await FindUserIdAsync(userUuid) ?? 0;
+
         return await _context.Stages
             .OrderBy(s => s.SortOrder)
             .Select(s => new StageProgressData(
@@ -29,8 +31,10 @@ public class StageRepository : IStageRepository
             .ToListAsync();
     }
 
-    public async Task<StageDetailData?> GetStageDetailAsync(long stageId, long userId)
+    public async Task<StageDetailData?> GetStageDetailAsync(long stageId, string userUuid)
     {
+        var userId = await FindUserIdAsync(userUuid) ?? 0;
+
         var stage = await _context.Stages.FindAsync(stageId);
         if (stage == null) return null;
 
@@ -67,5 +71,13 @@ public class StageRepository : IStageRepository
             .ToListAsync();
 
         return new StageDetailData(stage.StageId, stage.Title, stage.Description, previousStageCompleted, quests);
+    }
+
+    private async Task<long?> FindUserIdAsync(string userUuid)
+    {
+        return await _context.Users
+            .Where(u => u.UserUuid == userUuid)
+            .Select(u => (long?)u.UserId)
+            .FirstOrDefaultAsync();
     }
 }
