@@ -79,4 +79,25 @@ public class AuthService : IAuthService
             IsNewUser = isNewUser
         };
     }
+
+    public async Task<RefreshTokenResponseDto> RefreshAsync(string refreshToken)
+    {
+        // Redis에서 userUuid 조회
+        var userUuid = await _refreshTokenStore.GetUserUuidAsync(refreshToken) ?? throw AuthException.InvalidToken();
+        
+        // 새 토큰 발급
+        var newAccessToken = _jwtTokenService.GenerateAccessToken(userUuid);
+        var newRefreshToken = _jwtTokenService.GenerateRefreshToken();
+        
+        // 기존 토큰 삭제 후 새 토큰 저장
+        await _refreshTokenStore.DeleteAsync(refreshToken);
+        await _refreshTokenStore.SaveAsync(newRefreshToken,
+            userUuid, RefreshTokenTtl);
+        
+        return new RefreshTokenResponseDto
+        {
+            AccessToken = newAccessToken,
+            RefreshToken = newRefreshToken
+        };
+    }
 }
