@@ -15,6 +15,10 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
     
     public  DbSet<GameSession> GameSessions => Set<GameSession>();
     
+    public DbSet<Objective> Objectives => Set<Objective>();
+    public DbSet<QuestObjective> QuestObjectives => Set<QuestObjective>();
+    public DbSet<SessionObjective> SessionObjectives => Set<SessionObjective>();
+    
     public DbSet<Npc> Npcs => Set<Npc>();
     public DbSet<QuestNpc> QuestNpcs => Set<QuestNpc>();
     public DbSet<Prompt> Prompts => Set<Prompt>();
@@ -36,6 +40,10 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
         modelBuilder.ApplyConfiguration(new QuestConfiguration());
         
         modelBuilder.ApplyConfiguration(new GameSessionConfiguration());
+        
+        modelBuilder.ApplyConfiguration(new ObjectiveConfiguration());
+        modelBuilder.ApplyConfiguration(new QuestObjectiveConfiguration());
+        modelBuilder.ApplyConfiguration(new SessionObjectiveConfiguration());
         
         modelBuilder.ApplyConfiguration(new NpcConfiguration());
         modelBuilder.ApplyConfiguration(new QuestNpcConfiguration());
