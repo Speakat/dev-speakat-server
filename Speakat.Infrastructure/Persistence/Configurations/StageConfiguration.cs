@@ -16,10 +16,6 @@ public class StageConfiguration : IEntityTypeConfiguration<Stage>
 
         builder.Property(s => s.LanguageId).HasColumnName("language_id");
 
-        builder.HasOne(s => s.Language)
-            .WithMany()
-            .HasForeignKey(s => s.LanguageId);
-
         builder.Property(s => s.Title)
             .HasColumnName("title")
             .HasMaxLength(255);
@@ -31,7 +27,16 @@ public class StageConfiguration : IEntityTypeConfiguration<Stage>
         builder.Property(s => s.SortOrder)
             .HasColumnName("sort_order");
 
-        builder.Property(s => s.CreatedAt).HasColumnName("created_at");
-        builder.Property(s => s.UpdatedAt).HasColumnName("updated_at");
+        builder.Property(s => s.CreatedAt)
+            .HasColumnName("created_at")
+            .HasDefaultValueSql("CURRENT_TIMESTAMP(6)");
+
+        builder.Property(s => s.UpdatedAt)
+            .HasColumnName("updated_at")
+            .HasDefaultValueSql("CURRENT_TIMESTAMP(6) ON UPDATE CURRENT_TIMESTAMP(6)");
+
+        builder.HasOne(s => s.Language)
+            .WithMany()
+            .HasForeignKey(s => s.LanguageId);
     }
 }

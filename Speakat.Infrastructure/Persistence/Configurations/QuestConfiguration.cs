@@ -31,8 +31,13 @@ public class QuestConfiguration : IEntityTypeConfiguration<Quest>
         builder.Property(q => q.SortOrder)
             .HasColumnName("sort_order");
         
-        builder.Property(q => q.CreatedAt).HasColumnName("created_at");
-        builder.Property(q => q.UpdatedAt).HasColumnName("updated_at");
+        builder.Property(q => q.CreatedAt)
+            .HasColumnName("created_at")
+            .HasDefaultValueSql("CURRENT_TIMESTAMP(6)");
+
+        builder.Property(q => q.UpdatedAt)
+            .HasColumnName("updated_at")
+            .HasDefaultValueSql("CURRENT_TIMESTAMP(6) ON UPDATE CURRENT_TIMESTAMP(6)");
 
         builder.HasOne(q => q.Stage)
             .WithMany()

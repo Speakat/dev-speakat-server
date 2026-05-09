@@ -24,11 +24,15 @@ public class GameSessionConfiguration : IEntityTypeConfiguration<GameSession>
             .HasColumnName("status")
             .HasMaxLength(20);
 
-        builder.Property(gs => gs.StartedAt).HasColumnName("started_at");
-        builder.Property(gs => gs.EndedAt).HasColumnName("ended_at");
         builder.Property(gs => gs.SemanticScore).HasColumnName("semantic_score");
         builder.Property(gs => gs.GrammarScore).HasColumnName("grammar_score");
         builder.Property(gs => gs.NaturalnessScore).HasColumnName("naturalness_score");
+        
+        builder.Property(gs => gs.StartedAt)
+            .HasColumnName("started_at")
+            .HasDefaultValueSql("CURRENT_TIMESTAMP(6)");
+        builder.Property(gs => gs.EndedAt)
+            .HasColumnName("ended_at");
 
         builder.HasOne(gs => gs.User)
             .WithMany()

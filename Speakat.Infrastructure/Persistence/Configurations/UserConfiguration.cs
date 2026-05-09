@@ -50,8 +50,13 @@ public class UserConfiguration : IEntityTypeConfiguration<User>
             .HasMaxLength(20)
             .HasConversion<string>();
 
-        builder.Property(u => u.CreatedAt).HasColumnName("created_at");
-        builder.Property(u => u.UpdatedAt).HasColumnName("updated_at");
+        builder.Property(u => u.CreatedAt)
+            .HasColumnName("created_at")
+            .HasDefaultValueSql("CURRENT_TIMESTAMP(6)");
+
+        builder.Property(u => u.UpdatedAt)
+            .HasColumnName("updated_at")
+            .HasDefaultValueSql("CURRENT_TIMESTAMP(6) ON UPDATE CURRENT_TIMESTAMP(6)");
         builder.Property(u => u.DeletedAt).HasColumnName("deleted_at");
 
         builder.HasIndex(u => new { u.SocialType, u.SocialId })

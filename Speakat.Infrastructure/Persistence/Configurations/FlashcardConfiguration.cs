@@ -12,10 +12,14 @@ public class FlashcardConfiguration : IEntityTypeConfiguration<Flashcard>
 
         builder.HasKey(f => f.FlashcardId);
         builder.Property(f => f.FlashcardId).HasColumnName("flashcard_id");
-
+        
         builder.Property(f => f.WordId).HasColumnName("word_id");
-        builder.Property(f => f.CreatedAt).HasColumnName("created_at");
+        
         builder.Property(f => f.IsMastered).HasColumnName("is_mastered");
+        
+        builder.Property(f => f.CreatedAt)
+            .HasColumnName("created_at")
+            .HasDefaultValueSql("CURRENT_TIMESTAMP(6)");
 
         builder.HasOne(f => f.Word)
             .WithMany()

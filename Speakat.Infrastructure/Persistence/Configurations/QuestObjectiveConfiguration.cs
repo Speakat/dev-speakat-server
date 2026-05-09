@@ -15,6 +15,7 @@ public class QuestObjectiveConfiguration : IEntityTypeConfiguration<QuestObjecti
 
         builder.Property(qo => qo.QuestId).HasColumnName("quest_id");
         builder.Property(qo => qo.ObjectiveId).HasColumnName("objective_id");
+        
         builder.Property(qo => qo.SortOrder).HasColumnName("sort_order");
 
         builder.HasOne(qo => qo.Quest)

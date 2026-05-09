@@ -14,7 +14,6 @@ public class UserFlashcardConfiguration : IEntityTypeConfiguration<UserFlashcard
         builder.Property(uf => uf.UserFlashcardId).HasColumnName("user_flashcard_id");
 
         builder.Property(uf => uf.UserId).HasColumnName("user_id");
-
         builder.Property(uf => uf.FlashcardId).HasColumnName("flashcard_id");
         builder.Property(uf => uf.QuestId).HasColumnName("quest_id");
 
@@ -22,7 +21,9 @@ public class UserFlashcardConfiguration : IEntityTypeConfiguration<UserFlashcard
             .HasColumnName("recommendation_reason")
             .HasColumnType("text");
 
-        builder.Property(uf => uf.SavedAt).HasColumnName("saved_at");
+        builder.Property(uf => uf.SavedAt)
+            .HasColumnName("saved_at")
+            .HasDefaultValueSql("CURRENT_TIMESTAMP(6)");
 
         builder.HasOne(uf => uf.User)
             .WithMany()
