@@ -76,6 +76,17 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
         };
     });
 
+// Redis
+var redisConnectionString = builder.Configuration["Redis:ConnectionString"]
+    ?? throw new InvalidOperationException("Redis:Connection string is not configured.");
+
+builder.Services.AddStackExchangeRedisCache(options =>
+{
+    options.Configuration = redisConnectionString;
+});
+
+builder.Services.AddSingleton<IRefreshTokenStore, RedisRefreshTokenStore>();
+
 // Services
 builder.Services.AddSingleton<IJwtTokenService, JwtTokenService>();
 

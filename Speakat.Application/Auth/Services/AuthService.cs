@@ -10,18 +10,23 @@ namespace Speakat.Application.Auth.Services;
 
 public class AuthService : IAuthService
 {
+    private static readonly TimeSpan RefreshTokenTtl = TimeSpan.FromDays(14);
+
     private readonly IEnumerable<IOAuthProvider> _oauthProviders;
     private readonly IUserRepository _userRepository;
     private readonly IJwtTokenService _jwtTokenService;
+    private readonly IRefreshTokenStore _refreshTokenStore;
 
     public AuthService(
         IEnumerable<IOAuthProvider> oauthProviders,
         IUserRepository userRepository,
-        IJwtTokenService jwtTokenService)
+        IJwtTokenService jwtTokenService,
+        IRefreshTokenStore refreshTokenStore)
     {
         _oauthProviders = oauthProviders;
         _userRepository = userRepository;
         _jwtTokenService = jwtTokenService;
+        _refreshTokenStore = refreshTokenStore;
     }
 
     public async Task<OAuthLoginResponseDto> OAuthLoginAsync(SocialType provider, string authorizationCode)
@@ -57,6 +62,9 @@ public class AuthService : IAuthService
         // JWT 발급
         var accessToken = _jwtTokenService.GenerateAccessToken(user!.UserUuid);
         var refreshToken = _jwtTokenService.GenerateRefreshToken();
+
+        // Redis에 저장
+        await _refreshTokenStore.SaveAsync(refreshToken, user.UserUuid, RefreshTokenTtl);
 
         return new OAuthLoginResponseDto
         {
