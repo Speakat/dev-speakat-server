@@ -15,8 +15,8 @@ public class UserConfiguration : IEntityTypeConfiguration<User>
 
         builder.Property(u => u.UserUuid)
             .HasColumnName("user_uuid")
-            .HasColumnType("char(36)")
             .HasMaxLength(36)
+            .HasConversion<string>()
             .IsRequired();
 
         builder.Property(u => u.SocialType)
