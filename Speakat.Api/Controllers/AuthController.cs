@@ -31,4 +31,13 @@ public class AuthController : ControllerBase
         var result = await _authService.OAuthLoginAsync(socialType, request.AuthorizationCode);
         return Ok(ApiResponse<OAuthLoginResponseDto>.Success(result));
     }
+    
+    // 토큰 재발급
+    [HttpPost("refresh")]
+    public async Task<ActionResult<ApiResponse<RefreshTokenResponseDto>>> RefreshAsync(
+        [FromBody] RefreshTokenRequestDto request)
+    {
+        var result = await _authService.RefreshAsync(request.RefreshToken);
+        return Ok(ApiResponse<RefreshTokenResponseDto>.Success(result));
+    }
 }

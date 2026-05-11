@@ -10,18 +10,23 @@ namespace Speakat.Application.Auth.Services;
 
 public class AuthService : IAuthService
 {
+    private static readonly TimeSpan RefreshTokenTtl = TimeSpan.FromDays(14);
+
     private readonly IEnumerable<IOAuthProvider> _oauthProviders;
     private readonly IUserRepository _userRepository;
     private readonly IJwtTokenService _jwtTokenService;
+    private readonly IRefreshTokenStore _refreshTokenStore;
 
     public AuthService(
         IEnumerable<IOAuthProvider> oauthProviders,
         IUserRepository userRepository,
-        IJwtTokenService jwtTokenService)
+        IJwtTokenService jwtTokenService,
+        IRefreshTokenStore refreshTokenStore)
     {
         _oauthProviders = oauthProviders;
         _userRepository = userRepository;
         _jwtTokenService = jwtTokenService;
+        _refreshTokenStore = refreshTokenStore;
     }
 
     public async Task<OAuthLoginResponseDto> OAuthLoginAsync(SocialType provider, string authorizationCode)
@@ -58,6 +63,9 @@ public class AuthService : IAuthService
         var accessToken = _jwtTokenService.GenerateAccessToken(user!.UserUuid);
         var refreshToken = _jwtTokenService.GenerateRefreshToken();
 
+        // Redis에 저장
+        await _refreshTokenStore.SaveAsync(refreshToken, user.UserUuid, RefreshTokenTtl);
+
         return new OAuthLoginResponseDto
         {
             UserUuid = user.UserUuid,
@@ -69,6 +77,27 @@ public class AuthService : IAuthService
             AccessToken = accessToken,
             RefreshToken = refreshToken,
             IsNewUser = isNewUser
+        };
+    }
+
+    public async Task<RefreshTokenResponseDto> RefreshAsync(string refreshToken)
+    {
+        // Redis에서 userUuid 조회
+        var userUuid = await _refreshTokenStore.GetUserUuidAsync(refreshToken) ?? throw AuthException.InvalidToken();
+        
+        // 새 토큰 발급
+        var newAccessToken = _jwtTokenService.GenerateAccessToken(userUuid);
+        var newRefreshToken = _jwtTokenService.GenerateRefreshToken();
+        
+        // 기존 토큰 삭제 후 새 토큰 저장
+        await _refreshTokenStore.DeleteAsync(refreshToken);
+        await _refreshTokenStore.SaveAsync(newRefreshToken,
+            userUuid, RefreshTokenTtl);
+        
+        return new RefreshTokenResponseDto
+        {
+            AccessToken = newAccessToken,
+            RefreshToken = newRefreshToken
         };
     }
 }
