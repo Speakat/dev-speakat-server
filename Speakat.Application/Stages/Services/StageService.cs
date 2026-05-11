@@ -18,9 +18,9 @@ public class StageService : IStageService
         isCompleted ? StageStatus.Completed : previousCompleted ? StageStatus.Unlocked : StageStatus.Locked;
 
     // 유저id로 스테이지 목록 조회
-    public async Task<StageListDto> GetStagesAsync(long userId)
+    public async Task<StageListDto> GetStagesAsync(string userUuid)
     {
-        var stages = await _stageRepository.GetStagesWithProgressAsync(userId);
+        var stages = await _stageRepository.GetStagesWithProgressAsync(userUuid);
 
         var items = new List<StageItemDto>();
         var previousCompleted = true; // 첫 스테이지 이전은 완료 처리
@@ -47,9 +47,9 @@ public class StageService : IStageService
         return new StageListDto { Items = items };
     }
 
-    public async Task<StageDetailDto> GetStageAsync(long stageId, long userId)
+    public async Task<StageDetailDto> GetStageAsync(long stageId, string userUuid)
     {
-        var data = await _stageRepository.GetStageDetailAsync(stageId, userId)
+        var data = await _stageRepository.GetStageDetailAsync(stageId, userUuid)
             ?? throw StageException.NotFound();
 
         var isCompleted = data.Quests.Count > 0 && data.Quests.All(q => q.IsCompleted);

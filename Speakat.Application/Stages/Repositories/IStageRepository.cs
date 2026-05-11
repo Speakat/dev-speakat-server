@@ -27,6 +27,6 @@ public record StageDetailData(
 
 public interface IStageRepository
 {
-    Task<IReadOnlyList<StageProgressData>> GetStagesWithProgressAsync(long userId);
-    Task<StageDetailData?> GetStageDetailAsync(long stageId, long userId);
+    Task<IReadOnlyList<StageProgressData>> GetStagesWithProgressAsync(string userUuid);
+    Task<StageDetailData?> GetStageDetailAsync(long stageId, string userUuid);
 }

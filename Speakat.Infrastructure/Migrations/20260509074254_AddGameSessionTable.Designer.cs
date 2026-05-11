@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Speakat.Infrastructure.Persistence;
 
@@ -11,9 +12,11 @@ using Speakat.Infrastructure.Persistence;
 namespace Speakat.Infrastructure.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260509074254_AddGameSessionTable")]
+    partial class AddGameSessionTable
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -32,10 +35,8 @@ namespace Speakat.Infrastructure.Migrations
                     MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<long>("FlashcardId"));
 
                     b.Property<DateTime>("CreatedAt")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("datetime(6)")
-                        .HasColumnName("created_at")
-                        .HasDefaultValueSql("CURRENT_TIMESTAMP(6)");
+                        .HasColumnName("created_at");
 
                     b.Property<bool>("IsMastered")
                         .HasColumnType("tinyint(1)")
@@ -80,10 +81,8 @@ namespace Speakat.Infrastructure.Migrations
                         .HasColumnName("semantic_score");
 
                     b.Property<DateTime>("StartedAt")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("datetime(6)")
-                        .HasColumnName("started_at")
-                        .HasDefaultValueSql("CURRENT_TIMESTAMP(6)");
+                        .HasColumnName("started_at");
 
                     b.Property<string>("Status")
                         .IsRequired()
@@ -155,30 +154,6 @@ namespace Speakat.Infrastructure.Migrations
                     b.ToTable("npcs", (string)null);
                 });
 
-            modelBuilder.Entity("Speakat.Domain.Entities.Objective", b =>
-                {
-                    b.Property<long>("ObjectiveId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint")
-                        .HasColumnName("objective_id");
-
-                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<long>("ObjectiveId"));
-
-                    b.Property<string>("Description")
-                        .HasColumnType("text")
-                        .HasColumnName("description");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasMaxLength(255)
-                        .HasColumnType("varchar(255)")
-                        .HasColumnName("name");
-
-                    b.HasKey("ObjectiveId");
-
-                    b.ToTable("objectives", (string)null);
-                });
-
             modelBuilder.Entity("Speakat.Domain.Entities.Prompt", b =>
                 {
                     b.Property<long>("PromptId")
@@ -213,10 +188,8 @@ namespace Speakat.Infrastructure.Migrations
                     MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<long>("QuestId"));
 
                     b.Property<DateTime>("CreatedAt")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("datetime(6)")
-                        .HasColumnName("created_at")
-                        .HasDefaultValueSql("CURRENT_TIMESTAMP(6)");
+                        .HasColumnName("created_at");
 
                     b.Property<string>("Description")
                         .IsRequired()
@@ -247,10 +220,8 @@ namespace Speakat.Infrastructure.Migrations
                         .HasColumnName("title");
 
                     b.Property<DateTime?>("UpdatedAt")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("datetime(6)")
-                        .HasColumnName("updated_at")
-                        .HasDefaultValueSql("CURRENT_TIMESTAMP(6) ON UPDATE CURRENT_TIMESTAMP(6)");
+                        .HasColumnName("updated_at");
 
                     b.HasKey("QuestId");
 
@@ -292,68 +263,6 @@ namespace Speakat.Infrastructure.Migrations
                     b.ToTable("quest_npcs", (string)null);
                 });
 
-            modelBuilder.Entity("Speakat.Domain.Entities.QuestObjective", b =>
-                {
-                    b.Property<long>("QuestObjectiveId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint")
-                        .HasColumnName("quest_objective_id");
-
-                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<long>("QuestObjectiveId"));
-
-                    b.Property<long>("ObjectiveId")
-                        .HasColumnType("bigint")
-                        .HasColumnName("objective_id");
-
-                    b.Property<long>("QuestId")
-                        .HasColumnType("bigint")
-                        .HasColumnName("quest_id");
-
-                    b.Property<int?>("SortOrder")
-                        .HasColumnType("int")
-                        .HasColumnName("sort_order");
-
-                    b.HasKey("QuestObjectiveId");
-
-                    b.HasIndex("ObjectiveId");
-
-                    b.HasIndex("QuestId");
-
-                    b.ToTable("quest_objectives", (string)null);
-                });
-
-            modelBuilder.Entity("Speakat.Domain.Entities.SessionObjective", b =>
-                {
-                    b.Property<long>("SessionObjectiveId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint")
-                        .HasColumnName("session_objective_id");
-
-                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<long>("SessionObjectiveId"));
-
-                    b.Property<bool>("IsAchieved")
-                        .HasColumnType("tinyint(1)")
-                        .HasColumnName("is_achieved");
-
-                    b.Property<long>("QuestObjectiveId")
-                        .HasColumnType("bigint")
-                        .HasColumnName("quest_objective_id");
-
-                    b.Property<string>("SessionId")
-                        .IsRequired()
-                        .HasMaxLength(36)
-                        .HasColumnType("varchar(36)")
-                        .HasColumnName("session_id");
-
-                    b.HasKey("SessionObjectiveId");
-
-                    b.HasIndex("QuestObjectiveId");
-
-                    b.HasIndex("SessionId");
-
-                    b.ToTable("session_objectives", (string)null);
-                });
-
             modelBuilder.Entity("Speakat.Domain.Entities.Stage", b =>
                 {
                     b.Property<long>("StageId")
@@ -364,10 +273,8 @@ namespace Speakat.Infrastructure.Migrations
                     MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<long>("StageId"));
 
                     b.Property<DateTime>("CreatedAt")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("datetime(6)")
-                        .HasColumnName("created_at")
-                        .HasDefaultValueSql("CURRENT_TIMESTAMP(6)");
+                        .HasColumnName("created_at");
 
                     b.Property<string>("Description")
                         .IsRequired()
@@ -389,10 +296,8 @@ namespace Speakat.Infrastructure.Migrations
                         .HasColumnName("title");
 
                     b.Property<DateTime?>("UpdatedAt")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("datetime(6)")
-                        .HasColumnName("updated_at")
-                        .HasDefaultValueSql("CURRENT_TIMESTAMP(6) ON UPDATE CURRENT_TIMESTAMP(6)");
+                        .HasColumnName("updated_at");
 
                     b.HasKey("StageId");
 
@@ -411,10 +316,8 @@ namespace Speakat.Infrastructure.Migrations
                     MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<long>("UserId"));
 
                     b.Property<DateTime>("CreatedAt")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("datetime(6)")
-                        .HasColumnName("created_at")
-                        .HasDefaultValueSql("CURRENT_TIMESTAMP(6)");
+                        .HasColumnName("created_at");
 
                     b.Property<DateTime?>("DeletedAt")
                         .HasColumnType("datetime(6)")
@@ -461,10 +364,8 @@ namespace Speakat.Infrastructure.Migrations
                         .HasColumnName("status");
 
                     b.Property<DateTime>("UpdatedAt")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("datetime(6)")
-                        .HasColumnName("updated_at")
-                        .HasDefaultValueSql("CURRENT_TIMESTAMP(6) ON UPDATE CURRENT_TIMESTAMP(6)");
+                        .HasColumnName("updated_at");
 
                     b.Property<string>("UserUuid")
                         .IsRequired()
@@ -507,10 +408,8 @@ namespace Speakat.Infrastructure.Migrations
                         .HasColumnName("recommendation_reason");
 
                     b.Property<DateTime>("SavedAt")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("datetime(6)")
-                        .HasColumnName("saved_at")
-                        .HasDefaultValueSql("CURRENT_TIMESTAMP(6)");
+                        .HasColumnName("saved_at");
 
                     b.Property<long>("UserId")
                         .HasColumnType("bigint")
@@ -537,15 +436,11 @@ namespace Speakat.Infrastructure.Migrations
                     MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<long>("UserSettingId"));
 
                     b.Property<DateTime>("CreatedAt")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("datetime(6)")
-                        .HasColumnName("created_at")
-                        .HasDefaultValueSql("CURRENT_TIMESTAMP(6)");
+                        .HasColumnName("created_at");
 
                     b.Property<bool>("ShowNpcScript")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("tinyint(1)")
-                        .HasDefaultValue(true)
                         .HasColumnName("show_npc_script");
 
                     b.Property<int?>("StreakGoal")
@@ -553,10 +448,8 @@ namespace Speakat.Infrastructure.Migrations
                         .HasColumnName("streak_goal");
 
                     b.Property<DateTime>("UpdatedAt")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("datetime(6)")
-                        .HasColumnName("updated_at")
-                        .HasDefaultValueSql("CURRENT_TIMESTAMP(6) ON UPDATE CURRENT_TIMESTAMP(6)");
+                        .HasColumnName("updated_at");
 
                     b.Property<long>("UserId")
                         .HasColumnType("bigint")
@@ -589,10 +482,8 @@ namespace Speakat.Infrastructure.Migrations
                         .HasColumnName("stage_id");
 
                     b.Property<DateTime>("StartedAt")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("datetime(6)")
-                        .HasColumnName("started_at")
-                        .HasDefaultValueSql("CURRENT_TIMESTAMP(6)");
+                        .HasColumnName("started_at");
 
                     b.Property<long>("UserId")
                         .HasColumnType("bigint")
@@ -715,44 +606,6 @@ namespace Speakat.Infrastructure.Migrations
                     b.Navigation("Npc");
 
                     b.Navigation("Quest");
-                });
-
-            modelBuilder.Entity("Speakat.Domain.Entities.QuestObjective", b =>
-                {
-                    b.HasOne("Speakat.Domain.Entities.Objective", "Objective")
-                        .WithMany()
-                        .HasForeignKey("ObjectiveId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("Speakat.Domain.Entities.Quest", "Quest")
-                        .WithMany()
-                        .HasForeignKey("QuestId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Objective");
-
-                    b.Navigation("Quest");
-                });
-
-            modelBuilder.Entity("Speakat.Domain.Entities.SessionObjective", b =>
-                {
-                    b.HasOne("Speakat.Domain.Entities.QuestObjective", "QuestObjective")
-                        .WithMany()
-                        .HasForeignKey("QuestObjectiveId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("Speakat.Domain.Entities.GameSession", "GameSession")
-                        .WithMany()
-                        .HasForeignKey("SessionId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("GameSession");
-
-                    b.Navigation("QuestObjective");
                 });
 
             modelBuilder.Entity("Speakat.Domain.Entities.Stage", b =>

@@ -55,12 +55,12 @@ public class AuthService : IAuthService
         }
 
         // JWT 발급
-        var accessToken = _jwtTokenService.GenerateAccessToken(user!.UserId);
+        var accessToken = _jwtTokenService.GenerateAccessToken(user!.UserUuid);
         var refreshToken = _jwtTokenService.GenerateRefreshToken();
 
         return new OAuthLoginResponseDto
         {
-            UserId = user.UserId,
+            UserUuid = user.UserUuid,
             Email = user.Email,
             Nickname = user.Nickname,
             // TODO: 이미지 업로드 구현 후 ProfileImageKey 변환

@@ -5,6 +5,7 @@ namespace Speakat.Domain.Entities;
 public class User
 {
     public long UserId { get; set; }
+    public string UserUuid { get; set; } = null!;
     public SocialType SocialType { get; set; }
     public string SocialId { get; set; } = null!; // OAuth 제공자가 발급하는 고유 ID
     public string Nickname { get; set; } = null!;

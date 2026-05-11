@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Speakat.Infrastructure.Persistence;
 
@@ -11,9 +12,11 @@ using Speakat.Infrastructure.Persistence;
 namespace Speakat.Infrastructure.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260509075804_AddTimestampDefaults")]
+    partial class AddTimestampDefaults
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -80,10 +83,8 @@ namespace Speakat.Infrastructure.Migrations
                         .HasColumnName("semantic_score");
 
                     b.Property<DateTime>("StartedAt")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("datetime(6)")
-                        .HasColumnName("started_at")
-                        .HasDefaultValueSql("CURRENT_TIMESTAMP(6)");
+                        .HasColumnName("started_at");
 
                     b.Property<string>("Status")
                         .IsRequired()
@@ -507,10 +508,8 @@ namespace Speakat.Infrastructure.Migrations
                         .HasColumnName("recommendation_reason");
 
                     b.Property<DateTime>("SavedAt")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("datetime(6)")
-                        .HasColumnName("saved_at")
-                        .HasDefaultValueSql("CURRENT_TIMESTAMP(6)");
+                        .HasColumnName("saved_at");
 
                     b.Property<long>("UserId")
                         .HasColumnType("bigint")
@@ -543,9 +542,7 @@ namespace Speakat.Infrastructure.Migrations
                         .HasDefaultValueSql("CURRENT_TIMESTAMP(6)");
 
                     b.Property<bool>("ShowNpcScript")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("tinyint(1)")
-                        .HasDefaultValue(true)
                         .HasColumnName("show_npc_script");
 
                     b.Property<int?>("StreakGoal")
@@ -589,10 +586,8 @@ namespace Speakat.Infrastructure.Migrations
                         .HasColumnName("stage_id");
 
                     b.Property<DateTime>("StartedAt")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("datetime(6)")
-                        .HasColumnName("started_at")
-                        .HasDefaultValueSql("CURRENT_TIMESTAMP(6)");
+                        .HasColumnName("started_at");
 
                     b.Property<long>("UserId")
                         .HasColumnType("bigint")

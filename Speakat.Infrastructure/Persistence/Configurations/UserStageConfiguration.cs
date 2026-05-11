@@ -15,8 +15,13 @@ public class UserStageConfiguration : IEntityTypeConfiguration<UserStage>
 
         builder.Property(us => us.UserId).HasColumnName("user_id");
         builder.Property(us => us.StageId).HasColumnName("stage_id");
-        builder.Property(us => us.StartedAt).HasColumnName("started_at");
-        builder.Property(us => us.CompletedAt).HasColumnName("completed_at");
+        
+        builder.Property(us => us.StartedAt)
+            .HasColumnName("started_at")
+            .HasDefaultValueSql("CURRENT_TIMESTAMP(6)");
+        
+        builder.Property(us => us.CompletedAt)
+            .HasColumnName("completed_at");
 
         builder.HasOne(us => us.User)
             .WithMany()
