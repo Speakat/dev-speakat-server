@@ -1,3 +1,5 @@
+using System.Security.Cryptography;
+using System.Text;
 using Microsoft.Extensions.Caching.Distributed;
 using Speakat.Application.Common.Interfaces;
 
@@ -27,5 +29,9 @@ public class RedisRefreshTokenStore : IRefreshTokenStore
     public Task DeleteAsync(string refreshToken) =>
         _cache.RemoveAsync(Key(refreshToken));
 
-    private static string Key(string refreshToken) => KeyPrefix + refreshToken;
+    private static string Key(string refreshToken)
+    {
+        var hash = SHA256.HashData(Encoding.UTF8.GetBytes(refreshToken));
+        return KeyPrefix + Convert.ToHexString(hash).ToLowerInvariant();
+    }
 }
