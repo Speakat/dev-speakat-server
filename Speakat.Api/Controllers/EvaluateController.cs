@@ -6,7 +6,7 @@ using Speakat.Api.Common.Response;
 namespace Speakat.Api.Controllers;
 
 [ApiController]
-[Route("/sessions/{session_id}/speech")]
+[Route("sessions/{session_id}/speech")]
 [Authorize]
 public class EvaluateController(IEvaluateService evaluateService) : ControllerBase
 {
