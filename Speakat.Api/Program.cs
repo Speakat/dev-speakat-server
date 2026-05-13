@@ -96,13 +96,13 @@ builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString)));
 
 //HttpClient로 Python AI 서비스 연결 (개발 환경에서는 스터빙 적용)
-// if (builder.Environment.IsDevelopment()) //개발 환경인 경우
-//     builder.Services.AddSingleton<IAiPipelineClient, StubAiPipelineClient>();
-// else
-builder.Services.AddHttpClient<IAiPipelineClient, AiPipelineClient>(client =>
-{
-    client.BaseAddress = new Uri(builder.Configuration["AiService:BaseUrl"]!);
-});
+if (builder.Environment.IsDevelopment()) //개발 환경인 경우
+    builder.Services.AddSingleton<IAiPipelineClient, StubAiPipelineClient>();
+else
+    builder.Services.AddHttpClient<IAiPipelineClient, AiPipelineClient>(client =>
+    {
+        client.BaseAddress = new Uri(builder.Configuration["AiService:BaseUrl"]!);
+    });
 
 // Redis 세션 저장소
 builder.Services.AddStackExchangeRedisCache(options =>
