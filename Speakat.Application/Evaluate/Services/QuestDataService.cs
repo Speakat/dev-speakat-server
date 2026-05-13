@@ -16,3 +16,8 @@
 //         Scenario = quest.Prompt.Scenario,
 //     }
 // }
+
+// public async Task<string> GetOpeningLineAsync(int questId)
+// {
+//     // TODO: opening_line 저장 위치 결정 후 구현
+// }

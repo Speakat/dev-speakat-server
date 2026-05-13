@@ -1,8 +1,9 @@
+namespace Speakat.Application.Evaluate.Services;
+
 public class MockQuestDataService : IQuestDataService
 {
     public Task<QuestPromptDto> GetQuestPromptDtoAsync(int questId)
     {
-        //엔티티 없이 하드코딩 반환(테스트용)
         var mock = new QuestPromptDto(
             Scenario: "A customer walks into a coffee shop on a sunny morning.",
             SuccessCriteria: "Order a drink and complete the payment interaction.",
@@ -11,14 +12,19 @@ public class MockQuestDataService : IQuestDataService
                 Role: "barista at a busy downtown coffee shop",
                 Tone: "friendly and upbeat"
             ),
-            Objectives: new List<ObjectiveDto>
-            {
+            Objectives:
+            [
                 new("order_drink", "Order an iced latte"),
                 new("order_food",  "Order a blueberry muffin"),
                 new("pay",         "Complete the payment")
-            }
+            ]
         );
 
         return Task.FromResult(mock);
+    }
+
+    public Task<string> GetOpeningLineAsync(int questId)
+    {
+        return Task.FromResult("Hi there! Welcome to the coffee shop. What can I get for you today?");
     }
 }

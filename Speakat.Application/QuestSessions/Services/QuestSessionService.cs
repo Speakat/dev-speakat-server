@@ -1,15 +1,12 @@
 using Speakat.Application.Common.Interfaces;
 
-public class QuestSessionService : IQuestSessionService
+public class QuestSessionService(ISessionStore store, IQuestDataService questData) : IQuestSessionService
 {
-    private readonly ISessionStore _store;
-
-    public QuestSessionService(ISessionStore store) => _store = store;
-
-    public async Task<string> CreateSessionAsync(long userId, long questId)
+    public async Task<CreateSessionResponseDto> CreateSessionAsync(long userId, long questId)
     {
         var sessionId = Guid.NewGuid().ToString();
-        await _store.SaveAsync(sessionId, userId, questId);
-        return sessionId;
+        await store.SaveAsync(sessionId, userId, questId);
+        var openingLine = await questData.GetOpeningLineAsync((int)questId);
+        return new CreateSessionResponseDto(sessionId, openingLine);
     }
 }

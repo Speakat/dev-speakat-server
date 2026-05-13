@@ -1,4 +1,4 @@
 public interface IQuestSessionService
 {
-    Task<string> CreateSessionAsync(long userId, long questId);
+    Task<CreateSessionResponseDto> CreateSessionAsync(long userId, long questId);
 }
