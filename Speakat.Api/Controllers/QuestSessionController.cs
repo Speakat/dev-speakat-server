@@ -6,7 +6,7 @@ using Speakat.Api.Common.Response;
 namespace Speakat.Api.Controllers;
 
 [ApiController]
-[Route("quests/{questId}/sessions")]
+[Route("sessions")]
 [Authorize]
 public class QuestSessionController : ControllerBase
 {
@@ -19,9 +19,9 @@ public class QuestSessionController : ControllerBase
 
     [HttpPost]
     public async Task<ActionResult<ApiResponse<CreateSessionResponseDto>>> CreateSessionAsync(
-        [FromRoute] long questId)
+        [FromBody] CreateSessionRequestDto request)
     {
-        var sessionId = await _sessionService.CreateSessionAsync(UserId, questId);
-        return Ok(ApiResponse<CreateSessionResponseDto>.Success(new CreateSessionResponseDto(sessionId)));
+        var result = await _sessionService.CreateSessionAsync(UserId, request.QuestId);
+        return Ok(ApiResponse<CreateSessionResponseDto>.Success(result));
     }
 }
