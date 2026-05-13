@@ -47,7 +47,8 @@ async def evaluate_endpoint(req: EvaluateRequest):
         result = await evaluate(req.session_id, req.quest_id, user_text, req.quest_prompt)
 
         npc_dialogue_text = result.get("npc_dialogue", "")
-        npc_dialogue_audio = await speak_roleplay(npc_dialogue_text)
+        npc_voice = req.quest_prompt.get("npc", {}).get("voice", "alloy")
+        npc_dialogue_audio = await speak_roleplay(npc_dialogue_text, npc_voice)
         turn_eval = result.get("turn_evaluation", {})
 
         # 4. 퀘스트 완료 시 평균 점수 + 목표 달성 여부 계산
