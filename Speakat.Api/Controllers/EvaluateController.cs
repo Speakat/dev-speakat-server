@@ -6,7 +6,7 @@ using Speakat.Api.Common.Response;
 namespace Speakat.Api.Controllers;
 
 [ApiController]
-[Route("evaluate")]
+[Route("/sessions/{session_id}/speech")]
 [Authorize]
 public class EvaluateController(IEvaluateService evaluateService) : ControllerBase
 {
@@ -14,9 +14,10 @@ public class EvaluateController(IEvaluateService evaluateService) : ControllerBa
 
     [HttpPost]
     public async Task<ActionResult<ApiResponse<EvaluateResponseDto>>> EvaluateAsync(
+        [FromRoute(Name = "session_id")] string sessionId,
         [FromBody] EvaluateRequestDto request)
     {
-        var result = await evaluateService.EvaluateAsync(request, UserId);
+        var result = await evaluateService.EvaluateAsync(request, sessionId, UserId);
         return Ok(ApiResponse<EvaluateResponseDto>.Success(result));
     }
 }

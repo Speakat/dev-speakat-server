@@ -7,9 +7,9 @@ public class EvaluateService(IAiPipelineClient ai, IQuestDataService questData, 
 {
     private const float PassThreshold = 0.7f;
 
-    public async Task<EvaluateResponseDto> EvaluateAsync(EvaluateRequestDto request, long userId)
+    public async Task<EvaluateResponseDto> EvaluateAsync(EvaluateRequestDto request, string sessionId, long userId)
     {
-        var (sessionUserId, sessionQuestId) = await sessionStore.GetAsync(request.SessionId)
+        var (sessionUserId, sessionQuestId) = await sessionStore.GetAsync(sessionId)
             ?? throw SessionException.NotFound();
 
         if (sessionUserId != userId || sessionQuestId != request.QuestId)
@@ -17,14 +17,13 @@ public class EvaluateService(IAiPipelineClient ai, IQuestDataService questData, 
 
         var questPrompt = await questData.GetQuestPromptDtoAsync((int)request.QuestId);
 
-        var aiResult = await ai.EvaluateAsync(request.Audio, request.QuestId, request.SessionId, request.Turn, questPrompt);
+        var aiResult = await ai.EvaluateAsync(request.Audio, request.QuestId, sessionId, request.Turn, questPrompt);
         bool isTurnPassed = aiResult.SimilarityPassed && aiResult.TurnEvaluation.ContextRelevance >= PassThreshold;
 
         return new EvaluateResponseDto(
             NpcDialogue:      aiResult.NpcDialogue,
             NpcDialogueAudio: aiResult.NpcDialogueAudio,
             IsTurnPassed:     isTurnPassed,
-            IsQuestComplete:  aiResult.TurnEvaluation.IsQuestComplete,
             TurnEvaluation:   aiResult.TurnEvaluation,
             QuestResult:      aiResult.QuestResult
         );
