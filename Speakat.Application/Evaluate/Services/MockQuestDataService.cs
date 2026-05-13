@@ -10,7 +10,8 @@ public class MockQuestDataService : IQuestDataService
             Npc: new NpcDto(
                 Name: "Emma",
                 Role: "barista at a busy downtown coffee shop",
-                Tone: "friendly and upbeat"
+                Tone: "friendly and upbeat",
+                Voice: "alloy"
             ),
             Objectives:
             [

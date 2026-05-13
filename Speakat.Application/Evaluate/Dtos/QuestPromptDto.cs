@@ -10,7 +10,8 @@ public record QuestPromptDto(
 public record NpcDto(
     [property: JsonPropertyName("name")] string Name,
     [property: JsonPropertyName("role")] string Role,
-    [property: JsonPropertyName("tone")] string Tone
+    [property: JsonPropertyName("tone")] string Tone,
+    [property: JsonPropertyName("voice")] string Voice
 );
 
 public record ObjectiveDto(
