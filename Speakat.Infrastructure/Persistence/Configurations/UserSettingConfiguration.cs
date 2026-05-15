@@ -14,9 +14,21 @@ public class UserSettingConfiguration : IEntityTypeConfiguration<UserSetting>
         builder.Property(s => s.UserSettingId).HasColumnName("user_setting_id");
 
         builder.Property(s => s.UserId).HasColumnName("user_id");
-        builder.Property(s => s.ShowNpcScript).HasColumnName("show_npc_script");
-        builder.Property(s => s.CreatedAt).HasColumnName("created_at");
-        builder.Property(s => s.UpdatedAt).HasColumnName("updated_at");
+        
+        builder.Property(s => s.ShowNpcScript)
+            .HasColumnName("show_npc_script")
+            .HasDefaultValue(true);
+        
+        builder.Property(s => s.StreakGoal)
+            .HasColumnName("streak_goal");
+
+        builder.Property(s => s.CreatedAt)
+            .HasColumnName("created_at")
+            .HasDefaultValueSql("CURRENT_TIMESTAMP(6)");
+
+        builder.Property(s => s.UpdatedAt)
+            .HasColumnName("updated_at")
+            .HasDefaultValueSql("CURRENT_TIMESTAMP(6) ON UPDATE CURRENT_TIMESTAMP(6)");
 
         builder.HasIndex(s => s.UserId)
             .IsUnique()

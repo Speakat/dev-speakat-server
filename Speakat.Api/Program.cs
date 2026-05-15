@@ -79,6 +79,17 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
         };
     });
 
+// Redis
+var redisConnectionString = builder.Configuration.GetConnectionString("Redis")
+    ?? throw new InvalidOperationException("Redis:Connection string is not configured.");
+
+builder.Services.AddStackExchangeRedisCache(options =>
+{
+    options.Configuration = redisConnectionString;
+});
+
+builder.Services.AddSingleton<IRefreshTokenStore, RedisRefreshTokenStore>();
+
 // Services
 builder.Services.AddSingleton<IJwtTokenService, JwtTokenService>();
 
@@ -88,12 +99,12 @@ builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IStageRepository, StageRepository>();
 builder.Services.AddScoped<IStageService, StageService>();
 
-var connectionString = builder.Configuration.GetConnectionString("MySQL")
-    ?? throw new InvalidOperationException("Connection string 'MySQL' not found.");
+var mysqlConnectionString = builder.Configuration.GetConnectionString("MySQL")
+                            ?? throw new InvalidOperationException("MySQL:Connection string is not found.");
 
 // Database
 builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString)));
+    options.UseMySql(mysqlConnectionString, ServerVersion.AutoDetect(mysqlConnectionString)));
 
 //HttpClient로 Python AI 서비스 연결 (개발 환경에서는 스터빙 적용)
 if (builder.Environment.IsDevelopment()) //개발 환경인 경우

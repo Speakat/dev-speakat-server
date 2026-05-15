@@ -20,20 +20,20 @@ public class StageController : ControllerBase
         _stageService = stageService;
     }
 
-    private long UserId => long.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
+    private string UserUuid => User.FindFirstValue(ClaimTypes.NameIdentifier)!;
 
     // Stage 목록 조회
     [HttpGet]
     public async Task<ActionResult<ApiResponse<StageListDto>>> GetStagesAsync()
     {
-        var result = await _stageService.GetStagesAsync(UserId);
+        var result = await _stageService.GetStagesAsync(UserUuid);
         return Ok(ApiResponse<StageListDto>.Success(result));
     }
 
     [HttpGet("{stageId}")]
     public async Task<ActionResult<ApiResponse<StageDetailDto>>> GetStageAsync([FromRoute] long stageId)
     {
-        var result = await _stageService.GetStageAsync(stageId, UserId);
+        var result = await _stageService.GetStageAsync(stageId, UserUuid);
         return Ok(ApiResponse<StageDetailDto>.Success(result));
     }
 }

@@ -13,6 +13,12 @@ public class UserConfiguration : IEntityTypeConfiguration<User>
         builder.HasKey(u => u.UserId);
         builder.Property(u => u.UserId).HasColumnName("user_id");
 
+        builder.Property(u => u.UserUuid)
+            .HasColumnName("user_uuid")
+            .HasMaxLength(36)
+            .HasConversion<string>()
+            .IsRequired();
+
         builder.Property(u => u.SocialType)
             .HasColumnName("social_type")
             .HasMaxLength(20)
@@ -44,13 +50,22 @@ public class UserConfiguration : IEntityTypeConfiguration<User>
             .HasMaxLength(20)
             .HasConversion<string>();
 
-        builder.Property(u => u.CreatedAt).HasColumnName("created_at");
-        builder.Property(u => u.UpdatedAt).HasColumnName("updated_at");
+        builder.Property(u => u.CreatedAt)
+            .HasColumnName("created_at")
+            .HasDefaultValueSql("CURRENT_TIMESTAMP(6)");
+
+        builder.Property(u => u.UpdatedAt)
+            .HasColumnName("updated_at")
+            .HasDefaultValueSql("CURRENT_TIMESTAMP(6) ON UPDATE CURRENT_TIMESTAMP(6)");
         builder.Property(u => u.DeletedAt).HasColumnName("deleted_at");
 
         builder.HasIndex(u => new { u.SocialType, u.SocialId })
             .IsUnique()
             .HasDatabaseName("uq_users_social");
+
+        builder.HasIndex(u => u.UserUuid)
+            .IsUnique()
+            .HasDatabaseName("uq_users_user_uuid");
 
         builder.HasOne(u => u.Setting)
             .WithOne(s => s.User)
