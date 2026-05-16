@@ -14,6 +14,8 @@ using Speakat.Application.Common.Interfaces;
 using Speakat.Application.Stages.Repositories;
 using Speakat.Application.Stages.Services;
 using Speakat.Application.Auth.Repositories;
+using Speakat.Application.Quests.Repositories;
+using Speakat.Application.Quests.Services;
 using Speakat.Infrastructure.Auth;
 using Speakat.Infrastructure.OAuth;
 using Speakat.Infrastructure.Persistence;
@@ -95,6 +97,9 @@ builder.Services.AddScoped<IAuthService, AuthService>();
 
 builder.Services.AddScoped<IStageRepository, StageRepository>();
 builder.Services.AddScoped<IStageService, StageService>();
+
+builder.Services.AddScoped<IQuestRepository, QuestRepository>();
+builder.Services.AddScoped<IQuestService, QuestService>();
 
 var mysqlConnectionString = builder.Configuration.GetConnectionString("MySQL")
                             ?? throw new InvalidOperationException("MySQL:Connection string is not found.");
