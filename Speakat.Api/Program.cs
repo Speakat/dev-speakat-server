@@ -15,9 +15,12 @@ using Speakat.Application.Stages.Repositories;
 using Speakat.Application.Stages.Services;
 using Speakat.Application.Auth.Repositories;
 using Speakat.Infrastructure.Auth;
+using Speakat.Infrastructure.Evaluate.Ai;
 using Speakat.Infrastructure.OAuth;
 using Speakat.Infrastructure.Persistence;
 using Speakat.Infrastructure.Persistence.Repositories;
+using Speakat.Application.Evaluate.Services;
+using Speakat.Infrastructure.QuestSessions;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -102,6 +105,27 @@ var mysqlConnectionString = builder.Configuration.GetConnectionString("MySQL")
 // Database
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseMySql(mysqlConnectionString, ServerVersion.AutoDetect(mysqlConnectionString)));
+
+//HttpClient로 Python AI 서비스 연결 (개발 환경에서는 스터빙 적용)
+if (builder.Environment.IsDevelopment()) //개발 환경인 경우
+    builder.Services.AddSingleton<IAiPipelineClient, StubAiPipelineClient>();
+else
+    builder.Services.AddHttpClient<IAiPipelineClient, AiPipelineClient>(client =>
+    {
+        client.BaseAddress = new Uri(builder.Configuration["AiService:BaseUrl"]!);
+    });
+
+// Redis 세션 저장소
+builder.Services.AddStackExchangeRedisCache(options =>
+{
+    options.Configuration = builder.Configuration.GetConnectionString("Redis");
+});
+builder.Services.AddScoped<ISessionStore, RedisSessionStore>();
+builder.Services.AddScoped<IQuestSessionService, QuestSessionService>();
+
+builder.Services.AddScoped<IQuestRepository, QuestRepository>();
+builder.Services.AddScoped<IQuestDataService, MockQuestDataService>();
+builder.Services.AddScoped<IEvaluateService, EvaluateService>();
 
 var app = builder.Build();
 
