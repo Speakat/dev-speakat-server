@@ -18,6 +18,7 @@ using Speakat.Infrastructure.Auth;
 using Speakat.Infrastructure.OAuth;
 using Speakat.Infrastructure.Persistence;
 using Speakat.Infrastructure.Persistence.Repositories;
+using StackExchange.Redis;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -81,27 +82,26 @@ var redisConnectionString = builder.Configuration.GetConnectionString("Redis")
     ?? throw new InvalidOperationException("Redis:Connection string is not configured.");
 
 builder.Services.AddStackExchangeRedisCache(options =>
-{
-    options.Configuration = redisConnectionString;
-});
+    options.Configuration = redisConnectionString);
 
-builder.Services.AddSingleton<IRefreshTokenStore, RedisRefreshTokenStore>();
+builder.Services.AddSingleton<IConnectionMultiplexer>(ConnectionMultiplexer.Connect(redisConnectionString));
+
+// Database
+var mysqlConnectionString = builder.Configuration.GetConnectionString("MySQL")
+                            ?? throw new InvalidOperationException("MySQL:Connection string is not found.");
+
+builder.Services.AddDbContext<AppDbContext>(options =>
+    options.UseMySql(mysqlConnectionString, ServerVersion.AutoDetect(mysqlConnectionString)));
 
 // Services
 builder.Services.AddSingleton<IJwtTokenService, JwtTokenService>();
+builder.Services.AddSingleton<IRefreshTokenStore, RedisRefreshTokenStore>();
 
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IAuthService, AuthService>();
 
 builder.Services.AddScoped<IStageRepository, StageRepository>();
 builder.Services.AddScoped<IStageService, StageService>();
-
-var mysqlConnectionString = builder.Configuration.GetConnectionString("MySQL")
-                            ?? throw new InvalidOperationException("MySQL:Connection string is not found.");
-
-// Database
-builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseMySql(mysqlConnectionString, ServerVersion.AutoDetect(mysqlConnectionString)));
 
 var app = builder.Build();
 
