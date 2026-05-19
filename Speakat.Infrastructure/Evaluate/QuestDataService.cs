@@ -41,9 +41,13 @@ public class QuestDataService(AppDbContext db) : IQuestDataService
         );
     }
 
-    public Task<string> GetOpeningLineAsync(int questId)
+    public async Task<string> GetOpeningLineAsync(int questId)
     {
-        // TODO: opening_line 컬럼 위치 확정 후 구현
-        throw new NotImplementedException("opening_line 저장 위치 미확정");
+        var quest = await db.Quests
+            .Include(q => q.Prompt)
+            .FirstOrDefaultAsync(q => q.QuestId == questId)
+            ?? throw new NotFoundException($"Quest {questId} 없음");
+
+        return quest.Prompt!.OpeningLine;
     }
 }
