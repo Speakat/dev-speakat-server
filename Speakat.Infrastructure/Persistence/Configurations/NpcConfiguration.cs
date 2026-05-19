@@ -24,5 +24,10 @@ public class NpcConfiguration : IEntityTypeConfiguration<Npc>
         builder.Property(n => n.Tone)
             .HasColumnName("tone")
             .HasColumnType("text");
+
+        builder.Property(n => n.Voice)
+            .HasColumnName("voice")
+            .HasMaxLength(255)
+            .HasDefaultValue("alloy");
     }
 }
