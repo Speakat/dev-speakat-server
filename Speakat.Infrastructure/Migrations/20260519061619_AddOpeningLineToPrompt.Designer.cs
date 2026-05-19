@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Speakat.Infrastructure.Persistence;
 
@@ -11,9 +12,11 @@ using Speakat.Infrastructure.Persistence;
 namespace Speakat.Infrastructure.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260519061619_AddOpeningLineToPrompt")]
+    partial class AddOpeningLineToPrompt
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -151,8 +154,11 @@ namespace Speakat.Infrastructure.Migrations
                         .HasColumnName("tone");
 
                     b.Property<string>("Voice")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
                         .HasMaxLength(255)
                         .HasColumnType("varchar(255)")
+                        .HasDefaultValue("alloy")
                         .HasColumnName("voice");
 
                     b.HasKey("NpcId");

@@ -6,4 +6,5 @@ public class Npc
     public string Name { get; set; } = null!;
     public string ImageUrl { get; set; } = null!;
     public string Tone { get; set; } = null!;
+    public string? Voice { get; set; }
 }

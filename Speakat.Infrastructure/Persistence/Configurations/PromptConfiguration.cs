@@ -20,5 +20,9 @@ public class PromptConfiguration : IEntityTypeConfiguration<Prompt>
         builder.Property(p => p.SuccessCriteria)
             .HasColumnName("success_criteria")
             .HasColumnType("text");
+
+        builder.Property(p => p.OpeningLine)
+            .HasColumnName("opening_line")
+            .HasColumnType("text");
     }
 }
