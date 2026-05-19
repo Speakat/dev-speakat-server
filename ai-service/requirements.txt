@@ -1,0 +1,8 @@
+fastapi
+uvicorn[standard]
+pydantic
+openai
+transformers
+torch
+pyaudio
+redis[hiredis]
