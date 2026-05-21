@@ -3,7 +3,7 @@ using Speakat.Application.Common.Interfaces;
 
 namespace Speakat.Application.Evaluate.Services;
 
-public class EvaluateService(IAiPipelineClient ai, IQuestDataService questData, ISessionStore sessionStore, IGameSessionRepository gameSessionRepo) : IEvaluateService
+public class EvaluateService(IAiPipelineClient ai, IQuestDataService questData, ISessionStore sessionStore, IGameSessionRepository gameSessionRepo, IFlashcardRepository flashcardRepo) : IEvaluateService
 {
     private const float PassThreshold = 0.7f;
 
@@ -19,6 +19,8 @@ public class EvaluateService(IAiPipelineClient ai, IQuestDataService questData, 
 
         var aiResult = await ai.EvaluateAsync(request.Audio, request.QuestId, sessionId, request.Turn, questPrompt);
         bool isTurnPassed = aiResult.SimilarityPassed && aiResult.TurnEvaluation.ContextRelevance >= PassThreshold;
+
+        await flashcardRepo.SaveAsync(userId, request.QuestId, aiResult.TurnEvaluation);
 
         if (aiResult.QuestResult is not null)
             if(aiResult.QuestResult.IsQuestSuccess)
