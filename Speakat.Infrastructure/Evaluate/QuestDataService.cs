@@ -31,7 +31,7 @@ public class QuestDataService(AppDbContext db) : IQuestDataService
                 Name:  questNpc.Npc!.Name,
                 Role:  questNpc.Role,
                 Tone:  questNpc.Npc.Tone,
-                Voice: questNpc.Npc.Voice
+                Voice: questNpc.Npc.Voice ?? throw new InvalidOperationException($"NPC {questNpc.NpcId}에 voice가 설정되지 않았습니다.")
             ),
             Objectives: objectives
                 .Select(qo => new ObjectiveDto(
