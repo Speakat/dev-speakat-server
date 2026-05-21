@@ -18,7 +18,10 @@ public class EvaluateService(IAiPipelineClient ai, IQuestDataService questData, 
         var questPrompt = await questData.GetQuestPromptDtoAsync((int)request.QuestId);
 
         var aiResult = await ai.EvaluateAsync(request.Audio, request.QuestId, sessionId, request.Turn, questPrompt);
-        bool isTurnPassed = aiResult.SimilarityPassed && aiResult.TurnEvaluation.ContextRelevance >= PassThreshold;
+        bool isTurnPassed = aiResult.SimilarityPassed
+            && aiResult.TurnEvaluation.ContextRelevance >= PassThreshold
+            && aiResult.TurnEvaluation.GrammarAccuracy >= PassThreshold
+            && aiResult.TurnEvaluation.ExpressionQuality >= PassThreshold;
 
         await flashcardRepo.SaveAsync(userId, request.QuestId, aiResult.TurnEvaluation);
 
