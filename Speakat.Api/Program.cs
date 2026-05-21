@@ -127,6 +127,7 @@ builder.Services.AddScoped<IQuestSessionService, QuestSessionService>();
 builder.Services.AddScoped<IQuestRepository, QuestRepository>();
 builder.Services.AddScoped<IQuestDataService, QuestDataService>();
 builder.Services.AddScoped<IGameSessionRepository, GameSessionRepository>();
+builder.Services.AddScoped<IFlashcardRepository, FlashcardRepository>();
 builder.Services.AddScoped<IEvaluateService, EvaluateService>();
 
 var app = builder.Build();
