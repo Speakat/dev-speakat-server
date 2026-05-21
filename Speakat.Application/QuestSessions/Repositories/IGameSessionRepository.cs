@@ -1,5 +1,3 @@
-namespace Speakat.Application.Common.Interfaces;
-
 public interface IGameSessionRepository
 {
     Task CreateAsync(string sessionId, long userId, long questId);

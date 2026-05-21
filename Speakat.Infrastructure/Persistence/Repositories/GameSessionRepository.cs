@@ -1,5 +1,4 @@
 using Microsoft.EntityFrameworkCore;
-using Speakat.Application.Common.Interfaces;
 using Speakat.Domain.Entities;
 using Speakat.Infrastructure.Persistence;
 
