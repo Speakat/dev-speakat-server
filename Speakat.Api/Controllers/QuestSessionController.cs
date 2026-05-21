@@ -2,26 +2,25 @@ using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Speakat.Api.Common.Response;
+using Speakat.Application.Auth.Repositories;
+using Speakat.Application.Common.Exceptions;
 
 namespace Speakat.Api.Controllers;
 
 [ApiController]
 [Route("sessions")]
 [Authorize]
-public class QuestSessionController : ControllerBase
+public class QuestSessionController(IQuestSessionService sessionService, IUserRepository userRepo) : ControllerBase
 {
-    private readonly IQuestSessionService _sessionService;
-
-    public QuestSessionController(IQuestSessionService sessionService)
-        => _sessionService = sessionService;
-
-    private long UserId => long.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
+    private string UserUuid => User.FindFirstValue(ClaimTypes.NameIdentifier)!;
 
     [HttpPost]
     public async Task<ActionResult<ApiResponse<CreateSessionResponseDto>>> CreateSessionAsync(
         [FromBody] CreateSessionRequestDto request)
     {
-        var result = await _sessionService.CreateSessionAsync(UserId, request.QuestId);
+        var user = await userRepo.FindByUuidAsync(UserUuid)
+            ?? throw new NotFoundException("유저를 찾을 수 없습니다.");
+        var result = await sessionService.CreateSessionAsync(user.UserId, request.QuestId);
         return Ok(ApiResponse<CreateSessionResponseDto>.Success(result));
     }
 }
