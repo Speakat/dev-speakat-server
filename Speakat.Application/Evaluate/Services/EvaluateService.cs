@@ -3,7 +3,7 @@ using Speakat.Application.Common.Interfaces;
 
 namespace Speakat.Application.Evaluate.Services;
 
-public class EvaluateService(IAiPipelineClient ai, IQuestDataService questData, ISessionStore sessionStore, IGameSessionRepository gameSessionRepo, IFlashcardRepository flashcardRepo) : IEvaluateService
+public class EvaluateService(IAiPipelineClient ai, IQuestDataService questData, ISessionStore sessionStore, IGameSessionRepository gameSessionRepo, IFlashcardRepository flashcardRepo, IUserStageRepository userStageRepo) : IEvaluateService
 {
     private const float PassThreshold = 0.7f;
 
@@ -24,7 +24,10 @@ public class EvaluateService(IAiPipelineClient ai, IQuestDataService questData, 
 
         if (aiResult.QuestResult is not null)
             if(aiResult.QuestResult.IsQuestSuccess)
+            {
                 await gameSessionRepo.CompleteAsync(sessionId, request.QuestId, aiResult.QuestResult);
+                await userStageRepo.TryCompleteAsync(userId, request.QuestId);
+            }
             else
                 await gameSessionRepo.FailedAsync(sessionId, request.QuestId, aiResult.QuestResult);
 
