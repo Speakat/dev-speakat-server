@@ -82,8 +82,11 @@ public class AuthService : IAuthService
 
     public async Task<RefreshTokenResponseDto> RefreshAsync(string refreshToken)
     {
+        if (await _refreshTokenStore.IsBlacklistedAsync(refreshToken))
+            throw AuthException.BlacklistedToken();
+        
         // Redis에서 userUuid 조회
-        var userUuid = await _refreshTokenStore.GetUserUuidAsync(refreshToken) ?? throw AuthException.InvalidToken();
+        var userUuid = await _refreshTokenStore.GetUserUuidAsync(refreshToken) ?? throw AuthException.RefreshTokenExpired();
         
         // 새 토큰 발급
         var newAccessToken = _jwtTokenService.GenerateAccessToken(userUuid);
@@ -99,5 +102,11 @@ public class AuthService : IAuthService
             AccessToken = newAccessToken,
             RefreshToken = newRefreshToken
         };
+    }
+
+    public async Task LogoutAsync(string refreshToken)
+    {
+        await _refreshTokenStore.BlacklistAsync(refreshToken);
+        await _refreshTokenStore.DeleteAsync(refreshToken);
     }
 }

@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Speakat.Api.Common.Response;
 using Speakat.Application.Auth.Dtos;
@@ -39,5 +40,15 @@ public class AuthController : ControllerBase
     {
         var result = await _authService.RefreshAsync(request.RefreshToken);
         return Ok(ApiResponse<RefreshTokenResponseDto>.Success(result));
+    }
+    
+    // 로그아웃
+    [HttpPost("logout")]
+    [Authorize]
+    public async Task<IActionResult> LogoutAsync(
+        [FromBody] RefreshTokenRequestDto request)
+    {
+        await _authService.LogoutAsync(request.RefreshToken);
+        return NoContent();
     }
 }
