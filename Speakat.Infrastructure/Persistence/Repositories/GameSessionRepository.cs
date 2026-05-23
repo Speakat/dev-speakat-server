@@ -29,6 +29,9 @@ public class GameSessionRepository(AppDbContext db) : IGameSessionRepository
         var session = await db.GameSessions.FindAsync(sessionId)
             ?? throw new InvalidOperationException($"GameSession {sessionId} 없음");
 
+        if (session.Status != "IN_PROGRESS")
+            throw new InvalidOperationException($"GameSession {sessionId}은 이미 종료된 세션입니다.");
+
         session.Status           = status;
         session.EndedAt          = DateTime.UtcNow;
         session.SemanticScore    = (int)Math.Round(questResult.AverageContextRelevance  * 100);
