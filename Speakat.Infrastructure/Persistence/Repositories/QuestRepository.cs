@@ -1,4 +1,6 @@
 using Microsoft.EntityFrameworkCore;
+using Speakat.Application.Common.Exceptions;
+using Speakat.Domain.Entities;
 using Speakat.Infrastructure.Persistence;
 
 namespace Speakat.Application.Quests.Repositories;
@@ -81,6 +83,12 @@ public class QuestRepository : IQuestRepository
             bestScore,
             attemptCount
         );
+    }
+
+    public async Task<Quest> GetByIdAsync(long questId)
+    {
+        return await _context.Quests.FindAsync(questId)
+               ?? throw new NotFoundException($"Quest {questId} 없음");
     }
 
     private async Task<long?> FindUserIdAsync(string userUuid)

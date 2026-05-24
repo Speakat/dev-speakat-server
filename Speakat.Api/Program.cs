@@ -103,7 +103,6 @@ builder.Services.AddSingleton<IConnectionMultiplexer>(ConnectionMultiplexer.Conn
 builder.Services.AddScoped<ISessionStore, RedisSessionStore>();
 builder.Services.AddScoped<IQuestSessionService, QuestSessionService>();
 
-builder.Services.AddScoped<IQuestRepository, QuestRepository>();
 builder.Services.AddScoped<IQuestDataService, MockQuestDataService>();
 builder.Services.AddScoped<IEvaluateService, EvaluateService>();
 
@@ -123,9 +122,6 @@ builder.Services.AddScoped<IAuthService, AuthService>();
 
 builder.Services.AddScoped<IStageRepository, StageRepository>();
 builder.Services.AddScoped<IStageService, StageService>();
-
-builder.Services.AddScoped<IQuestRepository, QuestRepository>();
-builder.Services.AddScoped<IQuestService, QuestService>();
 
 builder.Services.AddScoped<IQuestRepository, QuestRepository>();
 builder.Services.AddScoped<IQuestService, QuestService>();

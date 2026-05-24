@@ -1,4 +1,5 @@
 using Speakat.Application.Quests.Dtos;
+using Speakat.Domain.Entities;
 
 namespace Speakat.Application.Quests.Repositories;
 
@@ -18,4 +19,5 @@ public record QuestDetailData(
 public interface IQuestRepository
 {
     Task<QuestDetailData?> GetQuestDetailAsync(long questId, string userUuid);
+    Task<Quest> GetByIdAsync(long questId);
 }
