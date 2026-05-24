@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using Speakat.Application.Common.Exceptions;
 using Speakat.Domain.Entities;
 using Speakat.Infrastructure.Persistence;
 
@@ -8,6 +9,16 @@ public class GameSessionRepository(AppDbContext db) : IGameSessionRepository
 {
     public async Task CreateAsync(string sessionId, long userId, long questId)
     {
+        var existingSessions = await db.GameSessions
+            .Where(gs => gs.UserId == userId && gs.QuestId == questId && gs.Status == "IN_PROGRESS")
+            .ToListAsync();
+
+        foreach (var existing in existingSessions)
+        {
+            existing.Status  = "ABANDONED";
+            existing.EndedAt = DateTime.UtcNow;
+        }
+
         db.GameSessions.Add(new GameSession
         {
             SessionId = sessionId,
@@ -16,6 +27,24 @@ public class GameSessionRepository(AppDbContext db) : IGameSessionRepository
             Status    = "IN_PROGRESS",
         });
         await db.SaveChangesAsync();
+    }
+
+    public async Task<EndSessionResponseDto> AbandonAsync(string sessionId, long userId)
+    {
+        var session = await db.GameSessions.FindAsync(sessionId)
+            ?? throw SessionException.NotFound();
+
+        if (session.UserId != userId)
+            throw SessionException.Forbidden();
+
+        if (session.Status != "IN_PROGRESS")
+            throw SessionException.AlreadyEnded();
+
+        session.Status  = "FAILED";
+        session.EndedAt = DateTime.UtcNow;
+        await db.SaveChangesAsync();
+
+        return new EndSessionResponseDto(session.SessionId, session.Status, session.EndedAt.Value);
     }
 
     public Task CompleteAsync(string sessionId, long questId, QuestResult questResult) =>
@@ -28,6 +57,9 @@ public class GameSessionRepository(AppDbContext db) : IGameSessionRepository
     {
         var session = await db.GameSessions.FindAsync(sessionId)
             ?? throw new InvalidOperationException($"GameSession {sessionId} 없음");
+
+        if (session.Status != "IN_PROGRESS")
+            throw new InvalidOperationException($"GameSession {sessionId}은 이미 종료된 세션입니다.");
 
         session.Status           = status;
         session.EndedAt          = DateTime.UtcNow;
