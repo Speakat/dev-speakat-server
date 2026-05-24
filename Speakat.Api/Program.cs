@@ -134,6 +134,7 @@ builder.Services.AddScoped<IEvaluateService, EvaluateService>();
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 
 builder.Services.AddScoped<IFlashcardRepository, FlashcardRepository>();
+builder.Services.AddScoped<IFlashcardService, FlashcardService>();
 
 var app = builder.Build();
 

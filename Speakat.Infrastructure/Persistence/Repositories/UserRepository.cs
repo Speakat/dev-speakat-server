@@ -43,6 +43,14 @@ public class UserRepository : IUserRepository
         await _context.SaveChangesAsync();
         return user;
     }
+
+    public async Task<long?> FindUserIdByUuidAsync(string userUuid)
+    {
+        return await _context.Users
+            .Where(u => u.UserUuid == userUuid)
+            .Select(u => (long?)u.UserId)
+            .FirstOrDefaultAsync();
+    }
     
     // 존재하는 닉네임인지 찾기
     public Task<bool> ExistsNicknameAsync(string nickname) =>

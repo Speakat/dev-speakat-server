@@ -49,7 +49,7 @@ public class StageRepository : IStageRepository
         else
         {
             var prevQuestCount = await _context.Quests.CountAsync(q => q.StageId == previousStage.StageId);
-            var prevCompletedCount = 0;
+            var prevCompletedCount = 0; // TODO: db에서 유저가 완료한 퀘스트 수
             previousStageCompleted = prevQuestCount > 0 && prevCompletedCount == prevQuestCount;
         }
 
@@ -67,13 +67,5 @@ public class StageRepository : IStageRepository
             .ToListAsync();
 
         return new StageDetailData(stage.StageId, stage.Title, stage.Description, previousStageCompleted, quests);
-    }
-
-    private async Task<long?> FindUserIdAsync(string userUuid)
-    {
-        return await _context.Users
-            .Where(u => u.UserUuid == userUuid)
-            .Select(u => (long?)u.UserId)
-            .FirstOrDefaultAsync();
     }
 }
