@@ -28,7 +28,9 @@ public class QuestSessionController(IQuestSessionService sessionService, IUserRe
     public async Task<ActionResult<ApiResponse<EndSessionResponseDto>>> EndSessionAsync(
         [FromRoute(Name = "session_id")] string sessionId)
     {
-        var result = await _sessionService.EndSessionAsync(sessionId, UserId);
+        var user = await userRepo.FindByUuidAsync(UserUuid)
+            ?? throw new NotFoundException("유저를 찾을 수 없습니다.");
+        var result = await sessionService.EndSessionAsync(sessionId, user.UserId);
         return Ok(ApiResponse<EndSessionResponseDto>.Success(result));
     }
 }
