@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using Speakat.Application.Common.Exceptions;
 using Speakat.Domain.Entities;
 using Speakat.Infrastructure.Persistence;
 
@@ -16,6 +17,24 @@ public class GameSessionRepository(AppDbContext db) : IGameSessionRepository
             Status    = "IN_PROGRESS",
         });
         await db.SaveChangesAsync();
+    }
+
+    public async Task<EndSessionResponseDto> AbandonAsync(string sessionId, long userId)
+    {
+        var session = await db.GameSessions.FindAsync(sessionId)
+            ?? throw SessionException.NotFound();
+
+        if (session.UserId != userId)
+            throw SessionException.Forbidden();
+
+        if (session.Status != "IN_PROGRESS")
+            throw SessionException.AlreadyEnded();
+
+        session.Status  = "ABANDONED";
+        session.EndedAt = DateTime.UtcNow;
+        await db.SaveChangesAsync();
+
+        return new EndSessionResponseDto(session.SessionId, session.Status, session.EndedAt.Value);
     }
 
     public Task CompleteAsync(string sessionId, long questId, QuestResult questResult) =>

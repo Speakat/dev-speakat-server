@@ -23,4 +23,7 @@ public class QuestSessionService(ISessionStore store, IQuestDataService questDat
         await store.SaveAsync(sessionId, userId, questId);
         return new CreateSessionResponseDto(sessionId, openingLine);
     }
+
+    public Task<EndSessionResponseDto> EndSessionAsync(string sessionId, long userId)
+        => gameSessionRepo.AbandonAsync(sessionId, userId);
 }
