@@ -9,6 +9,16 @@ public class GameSessionRepository(AppDbContext db) : IGameSessionRepository
 {
     public async Task CreateAsync(string sessionId, long userId, long questId)
     {
+        var existingSessions = await db.GameSessions
+            .Where(gs => gs.UserId == userId && gs.QuestId == questId && gs.Status == "IN_PROGRESS")
+            .ToListAsync();
+
+        foreach (var existing in existingSessions)
+        {
+            existing.Status  = "ABANDONED";
+            existing.EndedAt = DateTime.UtcNow;
+        }
+
         db.GameSessions.Add(new GameSession
         {
             SessionId = sessionId,
@@ -30,7 +40,7 @@ public class GameSessionRepository(AppDbContext db) : IGameSessionRepository
         if (session.Status != "IN_PROGRESS")
             throw SessionException.AlreadyEnded();
 
-        session.Status  = "ABANDONED";
+        session.Status  = "FAILED";
         session.EndedAt = DateTime.UtcNow;
         await db.SaveChangesAsync();
 
