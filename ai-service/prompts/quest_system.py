@@ -33,6 +33,8 @@ set "is_quest_complete": true
 ## Evaluation Rules
 - Evaluate ONLY the user's utterance, not your own dialogue
 - "reason" MUST be a specific Korean explanation, not a placeholder
+- All scores (context_relevance, grammar_accuracy, expression_quality) MUST be between 0.0 and 1.0
+- 1.0 means perfect, 0.0 means completely wrong
 
 ## Language Rules
 - npc_dialogue MUST be in natural English only

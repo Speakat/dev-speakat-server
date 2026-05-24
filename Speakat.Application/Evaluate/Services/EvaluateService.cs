@@ -3,7 +3,7 @@ using Speakat.Application.Common.Interfaces;
 
 namespace Speakat.Application.Evaluate.Services;
 
-public class EvaluateService(IAiPipelineClient ai, IQuestDataService questData, ISessionStore sessionStore) : IEvaluateService
+public class EvaluateService(IAiPipelineClient ai, IQuestDataService questData, ISessionStore sessionStore, IGameSessionRepository gameSessionRepo, IFlashcardRepository flashcardRepo, IUserStageRepository userStageRepo) : IEvaluateService
 {
     private const float PassThreshold = 0.7f;
 
@@ -18,7 +18,21 @@ public class EvaluateService(IAiPipelineClient ai, IQuestDataService questData, 
         var questPrompt = await questData.GetQuestPromptDtoAsync((int)request.QuestId);
 
         var aiResult = await ai.EvaluateAsync(request.Audio, request.QuestId, sessionId, request.Turn, questPrompt);
-        bool isTurnPassed = aiResult.SimilarityPassed && aiResult.TurnEvaluation.ContextRelevance >= PassThreshold;
+        bool isTurnPassed = aiResult.SimilarityPassed
+            && aiResult.TurnEvaluation.ContextRelevance >= PassThreshold
+            && aiResult.TurnEvaluation.GrammarAccuracy >= PassThreshold
+            && aiResult.TurnEvaluation.ExpressionQuality >= PassThreshold;
+
+        await flashcardRepo.SaveAsync(userId, request.QuestId, aiResult.TurnEvaluation);
+
+        if (aiResult.QuestResult is not null)
+            if(aiResult.QuestResult.IsQuestSuccess)
+            {
+                await gameSessionRepo.CompleteAsync(sessionId, request.QuestId, aiResult.QuestResult);
+                await userStageRepo.TryCompleteAsync(userId, request.QuestId);
+            }
+            else
+                await gameSessionRepo.FailedAsync(sessionId, request.QuestId, aiResult.QuestResult);
 
         return new EvaluateResponseDto(
             NpcDialogue:      aiResult.NpcDialogue,

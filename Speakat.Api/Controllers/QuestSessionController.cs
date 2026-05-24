@@ -24,4 +24,12 @@ public class QuestSessionController : ControllerBase
         var result = await _sessionService.CreateSessionAsync(UserId, request.QuestId);
         return Ok(ApiResponse<CreateSessionResponseDto>.Success(result));
     }
+
+    [HttpPost("{session_id}/end")]
+    public async Task<ActionResult<ApiResponse<EndSessionResponseDto>>> EndSessionAsync(
+        [FromRoute(Name = "session_id")] string sessionId)
+    {
+        var result = await _sessionService.EndSessionAsync(sessionId, UserId);
+        return Ok(ApiResponse<EndSessionResponseDto>.Success(result));
+    }
 }

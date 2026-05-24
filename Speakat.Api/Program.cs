@@ -15,6 +15,7 @@ using Speakat.Application.Stages.Repositories;
 using Speakat.Application.Stages.Services;
 using Speakat.Application.Auth.Repositories;
 using Speakat.Infrastructure.Auth;
+using Speakat.Infrastructure.Evaluate;
 using Speakat.Infrastructure.Evaluate.Ai;
 using Speakat.Infrastructure.OAuth;
 using Speakat.Infrastructure.Persistence;
@@ -102,7 +103,12 @@ builder.Services.AddScoped<ISessionStore, RedisSessionStore>();
 builder.Services.AddScoped<IQuestSessionService, QuestSessionService>();
 
 builder.Services.AddScoped<IQuestRepository, QuestRepository>();
-builder.Services.AddScoped<IQuestDataService, MockQuestDataService>();
+builder.Services.AddScoped<IQuestDataService, QuestDataService>();
+builder.Services.AddScoped<IGameSessionRepository, GameSessionRepository>();
+builder.Services.AddScoped<IFlashcardRepository, FlashcardRepository>();
+builder.Services.AddScoped<IUserStageRepository, UserStageRepository>();
+builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
+builder.Services.AddHostedService<SessionCleanupService>();
 builder.Services.AddScoped<IEvaluateService, EvaluateService>();
 
 // Database
