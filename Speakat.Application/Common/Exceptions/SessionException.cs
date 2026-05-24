@@ -9,4 +9,7 @@ public class SessionException : BusinessException
 
     public static SessionException Forbidden() =>
         new("SESSION_FORBIDDEN", "해당 세션에 대한 권한이 없습니다.", 403);
+
+    public static SessionException AlreadyEnded() =>
+        new("SESSION_ALREADY_ENDED", "이미 종료된 세션입니다.", 409);
 }

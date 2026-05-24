@@ -47,7 +47,9 @@ async def evaluate_endpoint(req: EvaluateRequest):
         result = await evaluate(req.session_id, req.quest_id, user_text, req.quest_prompt)
 
         npc_dialogue_text = result.get("npc_dialogue", "")
-        npc_voice = req.quest_prompt.get("npc", {}).get("voice", "alloy")
+        npc_voice = req.quest_prompt.get("npc", {}).get("voice")
+        if npc_voice is None:
+            raise ValueError("quest_prompt.npc.voice가 설정되지 않았습니다.")
         npc_dialogue_audio = await speak_roleplay(npc_dialogue_text, npc_voice)
         turn_eval = result.get("turn_evaluation", {})
 

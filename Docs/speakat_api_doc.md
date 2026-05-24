@@ -585,7 +585,7 @@ Speakat은 자체 이메일 회원가입 없이 **Google / Kakao OAuth 소셜 �
 
 #### `POST /sessions/{sessionId}/end` 🔒- 게임 세션 강제 종료 (포기/오류)
 
-> 정상 완료 시에는 `/speech` 응답의 `questResult`로 결과가 반환됩니다. 이 엔드포인트는 중도 포기(`ABANDONED`) 또는 오류 처리 용도입니다.
+> 정상 완료 시에는 `/speech` 응답의 `questResult`로 결과가 반환됩니다. 이 엔드포인트는 중도 포기(`FAILED`) 또는 오류 처리 용도입니다.
 
 **Response (200 OK):**
 
@@ -594,7 +594,7 @@ Speakat은 자체 이메일 회원가입 없이 **Google / Kakao OAuth 소셜 �
   "isSuccess": true,
   "data": {
     "sessionId": "a1b2c3d4-5678-90ab-cdef-1234567890ab",
-    "status": "ABANDONED",
+    "status": "FAILED",
     "endedAt": "2026-04-07T14:28:05Z"
   }
 }
@@ -603,11 +603,9 @@ Speakat은 자체 이메일 회원가입 없이 **Google / Kakao OAuth 소셜 �
 | status 값 | 설명 |
 |-----------|------|
 | `IN_PROGRESS` | 진행 중 |
-| `ANALYZING` | AI 분석 중 (일시적 상태) |
 | `COMPLETED` | 정상 완료 |
-| `ABANDONED` | 사용자 중도 포기 |
-| `FAILED` | 퀘스트 실패 (목표 미달성) |
-| `ERROR` | 오류로 인한 비정상 종료 |
+| `ABANDONED` | 비정상 종료 |
+| `FAILED` | 퀘스트 실패 (목표 미달성) 및 사용자 정상 포기 |
 
 **에러:**
 - `SESSION_NOT_FOUND`: 존재하지 않는 세션

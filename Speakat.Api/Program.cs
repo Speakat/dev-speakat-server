@@ -17,6 +17,7 @@ using Speakat.Application.Auth.Repositories;
 using Speakat.Application.Quests.Repositories;
 using Speakat.Application.Quests.Services;
 using Speakat.Infrastructure.Auth;
+using Speakat.Infrastructure.Evaluate;
 using Speakat.Infrastructure.Evaluate.Ai;
 using Speakat.Infrastructure.OAuth;
 using Speakat.Infrastructure.Persistence;
@@ -103,9 +104,6 @@ builder.Services.AddSingleton<IConnectionMultiplexer>(ConnectionMultiplexer.Conn
 builder.Services.AddScoped<ISessionStore, RedisSessionStore>();
 builder.Services.AddScoped<IQuestSessionService, QuestSessionService>();
 
-builder.Services.AddScoped<IQuestDataService, MockQuestDataService>();
-builder.Services.AddScoped<IEvaluateService, EvaluateService>();
-
 // Database
 var mysqlConnectionString = builder.Configuration.GetConnectionString("MySQL")
                             ?? throw new InvalidOperationException("MySQL:Connection string is not found.");
@@ -125,6 +123,17 @@ builder.Services.AddScoped<IStageService, StageService>();
 
 builder.Services.AddScoped<IQuestRepository, QuestRepository>();
 builder.Services.AddScoped<IQuestService, QuestService>();
+builder.Services.AddScoped<IQuestDataService, QuestDataService>();
+
+builder.Services.AddScoped<IUserStageRepository, UserStageRepository>();
+
+builder.Services.AddScoped<IGameSessionRepository, GameSessionRepository>();
+builder.Services.AddHostedService<SessionCleanupService>();
+
+builder.Services.AddScoped<IEvaluateService, EvaluateService>();
+builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
+
+builder.Services.AddScoped<IFlashcardRepository, FlashcardRepository>();
 
 var app = builder.Build();
 

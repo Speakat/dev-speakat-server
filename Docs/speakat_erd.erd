@@ -4,8 +4,8 @@
   "settings": {
     "width": 3000,
     "height": 3000,
-    "scrollTop": -954.2535,
-    "scrollLeft": -1571.6667,
+    "scrollTop": -1251.7535,
+    "scrollLeft": -588.3333,
     "zoomLevel": 0.73,
     "show": 431,
     "database": 4,
@@ -1468,19 +1468,19 @@
         "id": "5XMR_mlNbL3AwQHk55fT9",
         "tableId": "0VXYYFfu-8ht0dMcNTQTm",
         "name": "status",
-        "comment": "IN_PROGRESS, ANALYZING, COMPLETED, ABANDONED, FAILED, ERROR",
+        "comment": "IN_PROGRESS, COMPLETED, ABANDONED, FAILED",
         "dataType": "VARCHAR(20)",
         "default": "",
         "options": 8,
         "ui": {
           "keys": 0,
           "widthName": 60,
-          "widthComment": 415,
+          "widthComment": 294,
           "widthDataType": 83,
           "widthDefault": 60
         },
         "meta": {
-          "updateAt": 1777614724651,
+          "updateAt": 1779606055340,
           "createAt": 1776567576243
         }
       },
@@ -3173,7 +3173,7 @@
           "columnIds": [
             "9hvR8dWO_VRagqF-LdReZ"
           ],
-          "x": 1255.0093,
+          "x": 1134.0093,
           "y": 1406.2343,
           "direction": 2
         },
@@ -3304,7 +3304,7 @@
           "columnIds": [
             "TJcUoOxY9B9wWoa7_xJMm"
           ],
-          "x": 1255.0093,
+          "x": 1134.0093,
           "y": 1542.2343,
           "direction": 2
         },
