@@ -14,7 +14,9 @@ public class UserRepository : IUserRepository
         _context = context;
     }
     
-    // 특정 유저 찾기
+    public async Task<User?> FindByUuidAsync(string userUuid)
+        => await _context.Users.FirstOrDefaultAsync(u => u.UserUuid == userUuid);
+
     public async Task<User?> FindBySocialTypeAndSocialIdAsync(SocialType socialType, string socialId)
     {
         return await _context.Users
