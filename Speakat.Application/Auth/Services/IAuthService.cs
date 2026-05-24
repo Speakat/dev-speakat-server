@@ -11,4 +11,6 @@ public interface IAuthService
     Task<RefreshTokenResponseDto> RefreshAsync(string refreshToken);
     
     Task LogoutAsync(string refreshToken);
+    
+    Task<CheckNicknameResponseDto> CheckNicknameAsync(string nickname);
 }

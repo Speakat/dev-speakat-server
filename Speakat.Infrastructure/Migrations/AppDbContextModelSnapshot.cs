@@ -150,6 +150,11 @@ namespace Speakat.Infrastructure.Migrations
                         .HasColumnType("text")
                         .HasColumnName("tone");
 
+                    b.Property<string>("Voice")
+                        .HasMaxLength(255)
+                        .HasColumnType("varchar(255)")
+                        .HasColumnName("voice");
+
                     b.HasKey("NpcId");
 
                     b.ToTable("npcs", (string)null);
@@ -187,6 +192,11 @@ namespace Speakat.Infrastructure.Migrations
                         .HasColumnName("prompt_id");
 
                     MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<long>("PromptId"));
+
+                    b.Property<string>("OpeningLine")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("opening_line");
 
                     b.Property<string>("Scenario")
                         .IsRequired()

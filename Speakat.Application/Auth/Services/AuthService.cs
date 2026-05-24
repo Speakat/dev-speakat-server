@@ -83,10 +83,10 @@ public class AuthService : IAuthService
     public async Task<RefreshTokenResponseDto> RefreshAsync(string refreshToken)
     {
         if (await _refreshTokenStore.IsBlacklistedAsync(refreshToken))
-            throw AuthException.InvalidToken();
+            throw AuthException.BlacklistedToken();
         
         // Redis에서 userUuid 조회
-        var userUuid = await _refreshTokenStore.GetUserUuidAsync(refreshToken) ?? throw AuthException.InvalidToken();
+        var userUuid = await _refreshTokenStore.GetUserUuidAsync(refreshToken) ?? throw AuthException.RefreshTokenExpired();
         
         // 새 토큰 발급
         var newAccessToken = _jwtTokenService.GenerateAccessToken(userUuid);
@@ -106,7 +106,20 @@ public class AuthService : IAuthService
 
     public async Task LogoutAsync(string refreshToken)
     {
-        await _refreshTokenStore.BlacklistAsync(refreshToken, RefreshTokenTtl);
+        await _refreshTokenStore.BlacklistAsync(refreshToken);
         await _refreshTokenStore.DeleteAsync(refreshToken);
+    }
+
+    public async Task<CheckNicknameResponseDto> CheckNicknameAsync(string nickname)
+    {
+        var exists = await _userRepository.ExistsNicknameAsync(nickname);
+        
+        if (!exists)
+            return new CheckNicknameResponseDto { Available = true };
+
+        var suggestion = $"{nickname}_{Random.Shared.Next(10, 10000)}";
+        while(await _userRepository.ExistsNicknameAsync(suggestion))
+            suggestion = $"{nickname}_{Random.Shared.Next(10, 10000)}";
+        return new CheckNicknameResponseDto { Available = false, Suggestion = suggestion };
     }
 }

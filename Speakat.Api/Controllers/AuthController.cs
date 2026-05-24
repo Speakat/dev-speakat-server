@@ -51,4 +51,13 @@ public class AuthController : ControllerBase
         await _authService.LogoutAsync(request.RefreshToken);
         return NoContent();
     }
+    
+    // 닉네임 검사
+    [HttpPost("check-nickname")]
+    public async Task<ActionResult<ApiResponse<CheckNicknameResponseDto>>> CheckNicknameAsync(
+        [FromBody] CheckNicknameRequestDto request)
+    {
+        var result = await _authService.CheckNicknameAsync(request.Nickname);
+        return Ok(ApiResponse<CheckNicknameResponseDto>.Success(result));
+    }
 }

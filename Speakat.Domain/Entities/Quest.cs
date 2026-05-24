@@ -1,3 +1,4 @@
+
 namespace Speakat.Domain.Entities;
 
 public class Quest
