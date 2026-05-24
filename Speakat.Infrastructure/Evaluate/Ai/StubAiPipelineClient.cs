@@ -19,7 +19,13 @@ public class StubAiPipelineClient : IAiPipelineClient
                 BetterSuggestions:    ["apologize", "sorry", "regret"],
                 RecommendationReason: "스터빙 고정 추천 이유입니다."
             ),
-            QuestResult: null
+            QuestResult: new QuestResult(
+                AverageContextRelevance:  0.85f,
+                AverageGrammarAccuracy:   0.90f,
+                AverageExpressionQuality: 0.80f,
+                AchievedObjectives:       ["apologize"],
+                IsQuestSuccess:           true
+            )
         );
         return Task.FromResult(result);
     }

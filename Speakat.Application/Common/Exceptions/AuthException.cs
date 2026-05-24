@@ -11,6 +11,9 @@ public class AuthException : BusinessException
     public static AuthException InvalidToken() =>
         new("INVALID_TOKEN", "유효하지 않은 토큰", 401);
     
+    public static AuthException BlacklistedToken() =>
+        new("BLACKLIST_TOKEN", "블랙리스트 토큰", 401);
+    
     public static AuthException RefreshTokenExpired() =>
         new("REFRESH_TOKEN_EXPIRED", "Refresh Token 만료", 401);
     
