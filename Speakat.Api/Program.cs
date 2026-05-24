@@ -14,6 +14,8 @@ using Speakat.Application.Common.Interfaces;
 using Speakat.Application.Stages.Repositories;
 using Speakat.Application.Stages.Services;
 using Speakat.Application.Auth.Repositories;
+using Speakat.Application.Quests.Repositories;
+using Speakat.Application.Quests.Services;
 using Speakat.Infrastructure.Auth;
 using Speakat.Infrastructure.Evaluate;
 using Speakat.Infrastructure.Evaluate.Ai;
@@ -102,15 +104,6 @@ builder.Services.AddSingleton<IConnectionMultiplexer>(ConnectionMultiplexer.Conn
 builder.Services.AddScoped<ISessionStore, RedisSessionStore>();
 builder.Services.AddScoped<IQuestSessionService, QuestSessionService>();
 
-builder.Services.AddScoped<IQuestRepository, QuestRepository>();
-builder.Services.AddScoped<IQuestDataService, QuestDataService>();
-builder.Services.AddScoped<IGameSessionRepository, GameSessionRepository>();
-builder.Services.AddScoped<IFlashcardRepository, FlashcardRepository>();
-builder.Services.AddScoped<IUserStageRepository, UserStageRepository>();
-builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
-builder.Services.AddHostedService<SessionCleanupService>();
-builder.Services.AddScoped<IEvaluateService, EvaluateService>();
-
 // Database
 var mysqlConnectionString = builder.Configuration.GetConnectionString("MySQL")
                             ?? throw new InvalidOperationException("MySQL:Connection string is not found.");
@@ -127,6 +120,20 @@ builder.Services.AddScoped<IAuthService, AuthService>();
 
 builder.Services.AddScoped<IStageRepository, StageRepository>();
 builder.Services.AddScoped<IStageService, StageService>();
+
+builder.Services.AddScoped<IQuestRepository, QuestRepository>();
+builder.Services.AddScoped<IQuestService, QuestService>();
+builder.Services.AddScoped<IQuestDataService, QuestDataService>();
+
+builder.Services.AddScoped<IUserStageRepository, UserStageRepository>();
+
+builder.Services.AddScoped<IGameSessionRepository, GameSessionRepository>();
+builder.Services.AddHostedService<SessionCleanupService>();
+
+builder.Services.AddScoped<IEvaluateService, EvaluateService>();
+builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
+
+builder.Services.AddScoped<IFlashcardRepository, FlashcardRepository>();
 
 var app = builder.Build();
 
