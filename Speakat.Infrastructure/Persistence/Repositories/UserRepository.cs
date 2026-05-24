@@ -41,4 +41,8 @@ public class UserRepository : IUserRepository
         await _context.SaveChangesAsync();
         return user;
     }
+    
+    // 존재하는 닉네임인지 찾기
+    public Task<bool> ExistsNicknameAsync(string nickname) =>
+        _context.Users.AnyAsync(u => u.Nickname == nickname);
 }

@@ -109,4 +109,17 @@ public class AuthService : IAuthService
         await _refreshTokenStore.BlacklistAsync(refreshToken);
         await _refreshTokenStore.DeleteAsync(refreshToken);
     }
+
+    public async Task<CheckNicknameResponseDto> CheckNicknameAsync(string nickname)
+    {
+        var exists = await _userRepository.ExistsNicknameAsync(nickname);
+        
+        if (!exists)
+            return new CheckNicknameResponseDto { Available = true };
+
+        var suggestion = $"{nickname}_{Random.Shared.Next(10, 10000)}";
+        while(await _userRepository.ExistsNicknameAsync(suggestion))
+            suggestion = $"{nickname}_{Random.Shared.Next(10, 10000)}";
+        return new CheckNicknameResponseDto { Available = false, Suggestion = suggestion };
+    }
 }
