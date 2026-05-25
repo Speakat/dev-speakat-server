@@ -7,10 +7,11 @@ public class QuestSessionService(ISessionStore store, IQuestDataService questDat
         var openingLine = await questData.GetOpeningLineAsync((int)questId);
         var sessionId = Guid.NewGuid().ToString();
 
+        IReadOnlyList<string> abandonedSessionIds;
         await unitOfWork.BeginTransactionAsync();
         try
         {
-            await gameSessionRepo.CreateAsync(sessionId, userId, questId);
+            abandonedSessionIds = await gameSessionRepo.CreateAsync(sessionId, userId, questId);
             await userStageRepo.EnsureStartedAsync(userId, questId);
             await unitOfWork.CommitAsync();
         }
@@ -19,6 +20,9 @@ public class QuestSessionService(ISessionStore store, IQuestDataService questDat
             await unitOfWork.RollbackAsync();
             throw;
         }
+
+        foreach (var abandonedId in abandonedSessionIds)
+            await store.DeleteAsync(abandonedId);
 
         await store.SaveAsync(sessionId, userId, questId);
         return new CreateSessionResponseDto(sessionId, openingLine);

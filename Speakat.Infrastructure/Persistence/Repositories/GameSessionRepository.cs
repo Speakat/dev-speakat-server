@@ -7,7 +7,7 @@ namespace Speakat.Infrastructure.Persistence.Repositories;
 
 public class GameSessionRepository(AppDbContext db) : IGameSessionRepository
 {
-    public async Task CreateAsync(string sessionId, long userId, long questId)
+    public async Task<IReadOnlyList<string>> CreateAsync(string sessionId, long userId, long questId)
     {
         var existingSessions = await db.GameSessions
             .Where(gs => gs.UserId == userId && gs.QuestId == questId && gs.Status == "IN_PROGRESS")
@@ -27,6 +27,8 @@ public class GameSessionRepository(AppDbContext db) : IGameSessionRepository
             Status    = "IN_PROGRESS",
         });
         await db.SaveChangesAsync();
+
+        return [.. existingSessions.Select(s => s.SessionId)];
     }
 
     public async Task<EndSessionResponseDto> AbandonAsync(string sessionId, long userId)
