@@ -28,6 +28,13 @@ public class FlashcardsController : ControllerBase
         return Ok(ApiResponse<FlashcardListDto>.Success(result));
     }
 
+    [HttpGet("{flashcardId}")]
+    public async Task<ActionResult<ApiResponse<FlashcardDetailDto>>> GetFlashcardDetailAsync(long flashcardId)
+    {
+        var result = await _flashcardService.GetFlashcardDetailAsync(UserUuid, flashcardId);
+        return Ok(ApiResponse<FlashcardDetailDto>.Success(result));
+    }
+
     [HttpPatch("{flashcardId}")]
     public async Task<ActionResult<ApiResponse<PatchFlashcardResultDto>>> PatchFlashcardAsync(
         long flashcardId,
