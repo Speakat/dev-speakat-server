@@ -41,6 +41,21 @@ public class FlashcardRepository : IFlashcardRepository
         return flashcard;
     }
 
+    public async Task<Flashcard?> UpdateIsMasteredAsync(long userId, long flashcardId, bool isMastered)
+    {
+        var hasFlashcard = await _context.UserFlashcards
+            .AnyAsync(uf => uf.UserId == userId && uf.FlashcardId == flashcardId);
+
+        if (!hasFlashcard) return null;
+
+        var flashcard = await _context.Flashcards.FindAsync(flashcardId);
+        if (flashcard is null) return null;
+
+        flashcard.IsMastered = isMastered;
+        await _context.SaveChangesAsync();
+        return flashcard;
+    }
+
     public async Task<IReadOnlyList<FlashcardData>> GetFlashcardsAsync(
         long userId,
         long? cursorId,

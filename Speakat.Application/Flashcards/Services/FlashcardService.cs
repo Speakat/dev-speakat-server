@@ -1,5 +1,6 @@
 using System.Text;
 using Speakat.Application.Auth.Repositories;
+using Speakat.Application.Common.Exceptions;
 using Speakat.Application.Flashcards.Dtos;
 using Speakat.Application.Flashcards.Repositories;
 
@@ -51,6 +52,20 @@ public class FlashcardService : IFlashcardService
             }).ToList(),
             NextCursor = nextCursor,
             HasMore = hasMore
+        };
+    }
+
+    public async Task<PatchFlashcardResultDto> UpdateIsMasteredAsync(string userUuid, long flashcardId, bool isMastered)
+    {
+        var userId = await _userRepository.FindUserIdByUuidAsync(userUuid) ?? throw new UnauthorizedAccessException();
+
+        var flashcard = await _flashcardRepository.UpdateIsMasteredAsync(userId, flashcardId, isMastered)
+            ?? throw FlashcardException.NotFound();
+
+        return new PatchFlashcardResultDto
+        {
+            FlashcardId = flashcard.FlashcardId,
+            IsMastered = flashcard.IsMastered
         };
     }
 

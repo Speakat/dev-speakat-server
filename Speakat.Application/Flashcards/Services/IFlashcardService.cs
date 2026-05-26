@@ -9,4 +9,6 @@ public interface IFlashcardService
         string? cursor,
         int size,
         long? questId);
+
+    Task<PatchFlashcardResultDto> UpdateIsMasteredAsync(string userUuid, long flashcardId, bool isMastered);
 }

@@ -27,4 +27,13 @@ public class FlashcardsController : ControllerBase
         var result = await _flashcardService.GetFlashcardsAsync(UserUuid, cursor, size, questId);
         return Ok(ApiResponse<FlashcardListDto>.Success(result));
     }
+
+    [HttpPatch("{flashcardId}")]
+    public async Task<ActionResult<ApiResponse<PatchFlashcardResultDto>>> PatchFlashcardAsync(
+        long flashcardId,
+        [FromBody] PatchFlashcardRequestDto request)
+    {
+        var result = await _flashcardService.UpdateIsMasteredAsync(UserUuid, flashcardId, request.IsMastered);
+        return Ok(ApiResponse<PatchFlashcardResultDto>.Success(result));
+    }
 }

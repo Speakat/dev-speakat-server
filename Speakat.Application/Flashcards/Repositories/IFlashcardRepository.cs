@@ -21,4 +21,6 @@ public interface IFlashcardRepository
         long? cursorId,
         int size,
         long? questId);
+
+    Task<Flashcard?> UpdateIsMasteredAsync(long userId, long flashcardId, bool isMastered);
 }
