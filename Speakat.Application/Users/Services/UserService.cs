@@ -43,6 +43,12 @@ public class UserService(
         };
     }
 
+    public async Task DeleteAccountAsync(string userUuid)
+    {
+        var userId = await userRepository.FindUserIdByUuidAsync(userUuid) ?? throw new UnauthorizedAccessException();
+        await userRepository.SoftDeleteAsync(userId);
+    }
+
     private static EnglishLevel CalculateEnglishLevel(double? semantic, double? grammar, double? naturalness)
     {
         var values = new[] { semantic, grammar, naturalness }

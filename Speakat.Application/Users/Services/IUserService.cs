@@ -7,4 +7,6 @@ public interface IUserService
     Task<UserProfileDto> GetProfileAsync(string userUuid);
 
     Task<PatchUserResultDto> UpdateProfileAsync(string userUuid, string? nickname, string? profileImageKey);
+
+    Task DeleteAccountAsync(string userUuid);
 }
