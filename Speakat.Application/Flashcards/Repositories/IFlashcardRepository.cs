@@ -1,3 +1,5 @@
+using Speakat.Domain.Entities;
+
 namespace Speakat.Application.Flashcards.Repositories;
 
 public record FlashcardData(
