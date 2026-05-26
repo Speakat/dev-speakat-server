@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using Speakat.Application.Auth.Repositories;
 using Speakat.Application.Stages.Repositories;
 
 namespace Speakat.Infrastructure.Persistence.Repositories;
@@ -6,15 +7,17 @@ namespace Speakat.Infrastructure.Persistence.Repositories;
 public class StageRepository : IStageRepository
 {
     private readonly AppDbContext _context;
+    private readonly IUserRepository _userRepository;
 
-    public StageRepository(AppDbContext context)
+    public StageRepository(AppDbContext context, IUserRepository userRepository)
     {
         _context = context;
+        _userRepository = userRepository;
     }
 
     public async Task<IReadOnlyList<StageProgressData>> GetStagesWithProgressAsync(string userUuid)
     {
-        var userId = await FindUserIdAsync(userUuid) ?? 0;
+        var userId = await _userRepository.FindUserIdByUuidAsync(userUuid) ?? 0;
 
         return await _context.Stages
             .OrderBy(s => s.SortOrder)
@@ -30,7 +33,7 @@ public class StageRepository : IStageRepository
 
     public async Task<StageDetailData?> GetStageDetailAsync(long stageId, string userUuid)
     {
-        var userId = await FindUserIdAsync(userUuid) ?? 0;
+        var userId = await _userRepository.FindUserIdByUuidAsync(userUuid) ?? 0;
 
         var stage = await _context.Stages.FindAsync(stageId);
         if (stage == null) return null;
