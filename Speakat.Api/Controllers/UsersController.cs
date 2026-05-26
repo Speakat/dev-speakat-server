@@ -20,4 +20,12 @@ public class UsersController(IUserService userService) : ControllerBase
         var result = await userService.GetProfileAsync(UserUuid);
         return Ok(ApiResponse<UserProfileDto>.Success(result));
     }
+
+    [HttpPatch("me")]
+    public async Task<ActionResult<ApiResponse<PatchUserResultDto>>> PatchProfileAsync(
+        [FromBody] PatchUserRequestDto request)
+    {
+        var result = await userService.UpdateProfileAsync(UserUuid, request.Nickname, request.ProfileImageKey);
+        return Ok(ApiResponse<PatchUserResultDto>.Success(result));
+    }
 }

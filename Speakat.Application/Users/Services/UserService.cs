@@ -1,4 +1,5 @@
 using Speakat.Application.Auth.Repositories;
+using Speakat.Application.Common.Exceptions;
 using Speakat.Application.Users.Dtos;
 using Speakat.Application.Users.Repositories;
 using Speakat.Domain.Enums;
@@ -22,6 +23,23 @@ public class UserService(
             Nickname = data.Nickname,
             ProfileImageUrl = null, // TODO: S3 이미지 업로드 구현 후 ProfileImageKey → URL 변환
             EnglishLevel = CalculateEnglishLevel(data.AvgSemanticScore, data.AvgGrammarScore, data.AvgNaturalnessScore)
+        };
+    }
+
+    public async Task<PatchUserResultDto> UpdateProfileAsync(string userUuid, string? nickname, string? profileImageKey)
+    {
+        var userId = await userRepository.FindUserIdByUuidAsync(userUuid) ?? throw new UnauthorizedAccessException();
+
+        if (nickname is not null && await userRepository.ExistsNicknameAsync(nickname))
+            throw UserException.DuplicateNickname();
+
+        var (uuid, updatedNickname, _) = await userProfileRepository.UpdateProfileAsync(userId, nickname, profileImageKey);
+
+        return new PatchUserResultDto
+        {
+            UserId = uuid,
+            Nickname = updatedNickname,
+            ProfileImageUrl = null // TODO: S3 이미지 업로드 구현 후 ProfileImageKey → URL 변환
         };
     }
 

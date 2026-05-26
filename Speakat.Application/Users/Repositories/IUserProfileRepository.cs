@@ -12,4 +12,7 @@ public record UserProfileData(
 public interface IUserProfileRepository
 {
     Task<UserProfileData?> GetProfileDataAsync(long userId);
+
+    Task<(string UserUuid, string Nickname, string? ProfileImageKey)> UpdateProfileAsync(
+        long userId, string? nickname, string? profileImageKey);
 }

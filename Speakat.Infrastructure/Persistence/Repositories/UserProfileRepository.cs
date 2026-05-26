@@ -34,4 +34,21 @@ public class UserProfileRepository(AppDbContext db) : IUserProfileRepository
             scores?.AvgNaturalness
         );
     }
+
+    public async Task<(string UserUuid, string Nickname, string? ProfileImageKey)> UpdateProfileAsync(
+        long userId, string? nickname, string? profileImageKey)
+    {
+        var user = await db.Users.FindAsync(userId)
+            ?? throw new InvalidOperationException($"User {userId} 없음");
+
+        if (nickname is not null)
+            user.Nickname = nickname;
+
+        if (profileImageKey is not null)
+            user.ProfileImageKey = profileImageKey;
+
+        await db.SaveChangesAsync();
+
+        return (user.UserUuid, user.Nickname, user.ProfileImageKey);
+    }
 }
