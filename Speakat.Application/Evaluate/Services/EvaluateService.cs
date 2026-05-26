@@ -1,5 +1,6 @@
 using Speakat.Application.Common.Exceptions;
 using Speakat.Application.Common.Interfaces;
+using Speakat.Application.Flashcards.Repositories;
 
 namespace Speakat.Application.Evaluate.Services;
 

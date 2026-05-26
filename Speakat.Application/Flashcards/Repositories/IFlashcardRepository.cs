@@ -14,6 +14,8 @@ public record FlashcardData(
 
 public interface IFlashcardRepository
 {
+    Task SaveAsync(long userId, long questId, TurnEvaluationResult evaluationResult);
+
     Task<IReadOnlyList<FlashcardData>> GetFlashcardsAsync(
         long userId,
         long? cursorId,
