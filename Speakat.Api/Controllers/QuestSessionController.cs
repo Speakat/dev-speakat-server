@@ -21,7 +21,7 @@ public class QuestSessionController(IQuestSessionService sessionService, IUserRe
         var user = await userRepo.FindByUuidAsync(UserUuid)
             ?? throw new NotFoundException("유저를 찾을 수 없습니다.");
         var result = await sessionService.CreateSessionAsync(user.UserId, request.QuestId);
-        return Ok(ApiResponse<CreateSessionResponseDto>.Success(result));
+        return StatusCode(201, ApiResponse<CreateSessionResponseDto>.Success(result));
     }
 
     [HttpPost("{session_id}/end")]
