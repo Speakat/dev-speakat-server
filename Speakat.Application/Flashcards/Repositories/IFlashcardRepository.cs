@@ -14,6 +14,15 @@ public record FlashcardData(
     string QuestTitle
 );
 
+public record FlashcardDetailData(
+    long FlashcardId,
+    string Word,
+    string Meaning,
+    string Phonetic,
+    string? AudioUrl,
+    bool IsMastered
+);
+
 public interface IFlashcardRepository
 {
     Task SaveAsync(long userId, long questId, TurnEvaluationResult evaluationResult);
@@ -23,6 +32,8 @@ public interface IFlashcardRepository
         long? cursorId,
         int size,
         long? questId);
+
+    Task<FlashcardDetailData?> GetFlashcardDetailAsync(long userId, long flashcardId);
 
     Task<Flashcard?> UpdateIsMasteredAsync(long userId, long flashcardId, bool isMastered);
 }

@@ -41,6 +41,28 @@ public class FlashcardRepository : IFlashcardRepository
         return flashcard;
     }
 
+    public async Task<FlashcardDetailData?> GetFlashcardDetailAsync(long userId, long flashcardId)
+    {
+        return await _context.UserFlashcards
+            .Where(uf => uf.UserId == userId && uf.FlashcardId == flashcardId)
+            .Join(_context.Flashcards,
+                uf => uf.FlashcardId,
+                f => f.FlashcardId,
+                (uf, f) => new { f })
+            .Join(_context.Words,
+                x => x.f.WordId,
+                w => w.WordId,
+                (x, w) => new FlashcardDetailData(
+                    x.f.FlashcardId,
+                    w.Text,
+                    w.Definition,
+                    w.Phonetic,
+                    w.AudioUrl,
+                    x.f.IsMastered
+                ))
+            .FirstOrDefaultAsync();
+    }
+
     public async Task<Flashcard?> UpdateIsMasteredAsync(long userId, long flashcardId, bool isMastered)
     {
         var hasFlashcard = await _context.UserFlashcards

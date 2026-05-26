@@ -55,6 +55,24 @@ public class FlashcardService : IFlashcardService
         };
     }
 
+    public async Task<FlashcardDetailDto> GetFlashcardDetailAsync(string userUuid, long flashcardId)
+    {
+        var userId = await _userRepository.FindUserIdByUuidAsync(userUuid) ?? throw new UnauthorizedAccessException();
+
+        var data = await _flashcardRepository.GetFlashcardDetailAsync(userId, flashcardId)
+            ?? throw FlashcardException.NotFound();
+
+        return new FlashcardDetailDto
+        {
+            FlashcardId = data.FlashcardId,
+            Word = data.Word,
+            Meaning = data.Meaning,
+            Phonetic = data.Phonetic,
+            AudioUrl = data.AudioUrl,
+            IsMastered = data.IsMastered
+        };
+    }
+
     public async Task<PatchFlashcardResultDto> UpdateIsMasteredAsync(string userUuid, long flashcardId, bool isMastered)
     {
         var userId = await _userRepository.FindUserIdByUuidAsync(userUuid) ?? throw new UnauthorizedAccessException();

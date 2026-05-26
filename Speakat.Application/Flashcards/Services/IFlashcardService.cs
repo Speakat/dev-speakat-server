@@ -10,5 +10,7 @@ public interface IFlashcardService
         int size,
         long? questId);
 
+    Task<FlashcardDetailDto> GetFlashcardDetailAsync(string userUuid, long flashcardId);
+
     Task<PatchFlashcardResultDto> UpdateIsMasteredAsync(string userUuid, long flashcardId, bool isMastered);
 }
