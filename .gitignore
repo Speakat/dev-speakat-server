@@ -7,6 +7,9 @@
 ##
 ## Get latest from https://github.com/github/gitignore/blob/main/Dotnet.gitignore
 
+# Build logs
+build.log
+
 # Build results
 [Dd]ebug/
 [Dd]ebugPublic/
@@ -52,3 +55,38 @@ CodeCoverage/
 *.VisualState.xml
 TestResult.xml
 nunit-*.xml
+
+# IDE 설정 
+.idea/
+
+# JetBrains Rider
+*.DotSettings.user
+
+# macOS
+.DS_Store
+
+# ai Tool
+CLAUDE.md
+teacher.md
+
+# env
+appsettings.Development.json
+appsettings.*.local.json
+.env
+
+# Docker
+docker-compose.override.yml
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+*.egg-info/
+.venv/
+test.wav
+test_evaluate.py
+
+#AWS
+*.ppk
