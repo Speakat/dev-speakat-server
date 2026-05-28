@@ -35,4 +35,11 @@ public class UsersController(IUserService userService) : ControllerBase
         await userService.DeleteAccountAsync(UserUuid);
         return NoContent();
     }
+
+    [HttpGet("me/settings")]
+    public async Task<ActionResult<ApiResponse<UserSettingsDto>>> GetSettingsAsync()
+    {
+        var result = await userService.GetSettingsAsync(UserUuid);
+        return Ok(ApiResponse<UserSettingsDto>.Success(result));
+    }
 }

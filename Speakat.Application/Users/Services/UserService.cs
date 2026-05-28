@@ -8,7 +8,8 @@ namespace Speakat.Application.Users.Services;
 
 public class UserService(
     IUserRepository userRepository,
-    IUserProfileRepository userProfileRepository) : IUserService
+    IUserProfileRepository userProfileRepository,
+    IUserSettingsRepository userSettingsRepository) : IUserService
 {
     public async Task<UserProfileDto> GetProfileAsync(string userUuid)
     {
@@ -47,6 +48,20 @@ public class UserService(
     {
         var userId = await userRepository.FindUserIdByUuidAsync(userUuid) ?? throw new UnauthorizedAccessException();
         await userRepository.SoftDeleteAsync(userId);
+    }
+
+    public async Task<UserSettingsDto> GetSettingsAsync(string userUuid)
+    {
+        var userId = await userRepository.FindUserIdByUuidAsync(userUuid) ?? throw new UnauthorizedAccessException();
+
+        var settings = await userSettingsRepository.GetByUserIdAsync(userId)
+            ?? throw new UnauthorizedAccessException();
+
+        return new UserSettingsDto
+        {
+            ShowNpcScript = settings.ShowNpcScript,
+            StreakGoal = settings.StreakGoal
+        };
     }
 
     private static EnglishLevel CalculateEnglishLevel(double? semantic, double? grammar, double? naturalness)
