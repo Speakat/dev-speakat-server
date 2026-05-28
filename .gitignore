@@ -87,3 +87,6 @@ __pycache__/
 .venv/
 test.wav
 test_evaluate.py
+
+#AWS
+*.ppk

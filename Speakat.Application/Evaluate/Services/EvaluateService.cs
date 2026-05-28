@@ -35,12 +35,31 @@ public class EvaluateService(IAiPipelineClient ai, IQuestDataService questData, 
             else
                 await gameSessionRepo.FailedAsync(sessionId, request.QuestId, aiResult.QuestResult);
 
+        var turnEvaluation = new TurnEvaluationDto(
+            ContextRelevance:     aiResult.TurnEvaluation.ContextRelevance,
+            GrammarAccuracy:      aiResult.TurnEvaluation.GrammarAccuracy,
+            ExpressionQuality:    aiResult.TurnEvaluation.ExpressionQuality,
+            ObjectiveProgress:    aiResult.TurnEvaluation.ObjectiveProgress,
+            IsQuestComplete:      aiResult.TurnEvaluation.IsQuestComplete,
+            Reason:               aiResult.TurnEvaluation.Reason,
+            BetterSuggestions:    aiResult.TurnEvaluation.BetterSuggestions,
+            RecommendationReason: aiResult.TurnEvaluation.RecommendationReason
+        );
+
+        var questResult = aiResult.QuestResult is { } qr ? new QuestResultDto(
+            AverageContextRelevance:  qr.AverageContextRelevance,
+            AverageGrammarAccuracy:   qr.AverageGrammarAccuracy,
+            AverageExpressionQuality: qr.AverageExpressionQuality,
+            AchievedObjectives:       qr.AchievedObjectives,
+            IsQuestSuccess:           qr.IsQuestSuccess
+        ) : null;
+
         return new EvaluateResponseDto(
             NpcDialogue:      aiResult.NpcDialogue,
             NpcDialogueAudio: aiResult.NpcDialogueAudio,
             IsTurnPassed:     isTurnPassed,
-            TurnEvaluation:   aiResult.TurnEvaluation,
-            QuestResult:      aiResult.QuestResult
+            TurnEvaluation:   turnEvaluation,
+            QuestResult:      questResult
         );
     }
 }

@@ -30,4 +30,7 @@ public class RedisSessionStore : ISessionStore
         var questId = doc.RootElement.GetProperty("questId").GetInt64();
         return (userId, questId);
     }
+
+    public Task DeleteAsync(string sessionId)
+        => _cache.RemoveAsync($"session:{sessionId}");
 }

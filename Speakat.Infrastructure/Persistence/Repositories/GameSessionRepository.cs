@@ -7,7 +7,7 @@ namespace Speakat.Infrastructure.Persistence.Repositories;
 
 public class GameSessionRepository(AppDbContext db) : IGameSessionRepository
 {
-    public async Task CreateAsync(string sessionId, long userId, long questId)
+    public async Task<IReadOnlyList<string>> CreateAsync(string sessionId, long userId, long questId)
     {
         var existingSessions = await db.GameSessions
             .Where(gs => gs.UserId == userId && gs.QuestId == questId && gs.Status == "IN_PROGRESS")
@@ -27,6 +27,8 @@ public class GameSessionRepository(AppDbContext db) : IGameSessionRepository
             Status    = "IN_PROGRESS",
         });
         await db.SaveChangesAsync();
+
+        return [.. existingSessions.Select(s => s.SessionId)];
     }
 
     public async Task<EndSessionResponseDto> AbandonAsync(string sessionId, long userId)
@@ -56,10 +58,10 @@ public class GameSessionRepository(AppDbContext db) : IGameSessionRepository
     private async Task FinalizeAsync(string sessionId, long questId, QuestResult questResult, string status)
     {
         var session = await db.GameSessions.FindAsync(sessionId)
-            ?? throw new InvalidOperationException($"GameSession {sessionId} 없음");
+            ?? throw SessionException.NotFound();
 
         if (session.Status != "IN_PROGRESS")
-            throw new InvalidOperationException($"GameSession {sessionId}은 이미 종료된 세션입니다.");
+            throw SessionException.AlreadyEnded();
 
         session.Status           = status;
         session.EndedAt          = DateTime.UtcNow;
