@@ -2,6 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using Speakat.Application.Auth.Repositories;
 using Speakat.Domain.Entities;
 using Speakat.Domain.Enums;
+using Speakat.Infrastructure.Persistence;
 
 namespace Speakat.Infrastructure.Persistence.Repositories;
 
@@ -43,8 +44,26 @@ public class UserRepository : IUserRepository
         await _context.SaveChangesAsync();
         return user;
     }
+
+    public async Task<long?> FindUserIdByUuidAsync(string userUuid)
+    {
+        return await _context.Users
+            .Where(u => u.UserUuid == userUuid)
+            .Select(u => (long?)u.UserId)
+            .FirstOrDefaultAsync();
+    }
     
     // 존재하는 닉네임인지 찾기
     public Task<bool> ExistsNicknameAsync(string nickname) =>
         _context.Users.AnyAsync(u => u.Nickname == nickname);
+
+    public async Task SoftDeleteAsync(long userId)
+    {
+        var user = await _context.Users.FindAsync(userId)
+            ?? throw new InvalidOperationException($"User {userId} 없음");
+
+        user.Status = UserStatus.Deleted;
+        user.DeletedAt = DateTime.UtcNow;
+        await _context.SaveChangesAsync();
+    }
 }
