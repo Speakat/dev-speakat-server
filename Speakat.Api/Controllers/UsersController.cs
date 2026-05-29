@@ -42,4 +42,11 @@ public class UsersController(IUserService userService) : ControllerBase
         var result = await userService.GetSettingsAsync(UserUuid);
         return Ok(ApiResponse<UserSettingsDto>.Success(result));
     }
+
+    [HttpGet("me/stats")]
+    public async Task<ActionResult<ApiResponse<UserStatsDto>>> GetStatsAsync()
+    {
+        var result = await userService.GetStatsAsync(UserUuid);
+        return Ok(ApiResponse<UserStatsDto>.Success(result));
+    }
 }

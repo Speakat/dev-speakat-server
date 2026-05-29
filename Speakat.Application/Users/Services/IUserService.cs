@@ -11,4 +11,6 @@ public interface IUserService
     Task DeleteAccountAsync(string userUuid);
 
     Task<UserSettingsDto> GetSettingsAsync(string userUuid);
+
+    Task<UserStatsDto> GetStatsAsync(string userUuid);
 }

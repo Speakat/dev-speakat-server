@@ -142,6 +142,7 @@ builder.Services.AddScoped<IFlashcardService, FlashcardService>();
 
 builder.Services.AddScoped<IUserProfileRepository, UserProfileRepository>();
 builder.Services.AddScoped<IUserSettingsRepository, UserSettingsRepository>();
+builder.Services.AddScoped<IUserStatsRepository, UserStatsRepository>();
 builder.Services.AddScoped<IUserService, UserService>();
 
 var app = builder.Build();

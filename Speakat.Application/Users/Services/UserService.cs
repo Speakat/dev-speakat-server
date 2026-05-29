@@ -9,7 +9,8 @@ namespace Speakat.Application.Users.Services;
 public class UserService(
     IUserRepository userRepository,
     IUserProfileRepository userProfileRepository,
-    IUserSettingsRepository userSettingsRepository) : IUserService
+    IUserSettingsRepository userSettingsRepository,
+    IUserStatsRepository userStatsRepository) : IUserService
 {
     public async Task<UserProfileDto> GetProfileAsync(string userUuid)
     {
@@ -61,6 +62,23 @@ public class UserService(
         {
             ShowNpcScript = settings.ShowNpcScript,
             StreakGoal = settings.StreakGoal
+        };
+    }
+
+    public async Task<UserStatsDto> GetStatsAsync(string userUuid)
+    {
+        var userId = await userRepository.FindUserIdByUuidAsync(userUuid) ?? throw new UnauthorizedAccessException();
+
+        var data = await userStatsRepository.GetStatsAsync(userId);
+
+        return new UserStatsDto
+        {
+            TotalQuestsCompleted = data.TotalQuestsCompleted,
+            TotalSessionsPlayed = data.TotalSessionsPlayed,
+            TotalStagesCompleted = data.TotalStagesCompleted,
+            AvgSemanticScore = data.AvgSemanticScore,
+            AvgGrammarScore = data.AvgGrammarScore,
+            AvgNaturalnessScore = data.AvgNaturalnessScore
         };
     }
 
