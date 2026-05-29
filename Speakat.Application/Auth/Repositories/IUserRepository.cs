@@ -17,4 +17,6 @@ public interface IUserRepository
     
     // 존재하는 닉네임인지 찾기
     Task<bool> ExistsNicknameAsync(string nickname);
+
+    Task SoftDeleteAsync(long userId);
 }

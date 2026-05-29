@@ -28,4 +28,11 @@ public class UsersController(IUserService userService) : ControllerBase
         var result = await userService.UpdateProfileAsync(UserUuid, request.Nickname, request.ProfileImageKey);
         return Ok(ApiResponse<PatchUserResultDto>.Success(result));
     }
+
+    [HttpDelete("me")]
+    public async Task<IActionResult> DeleteAccountAsync()
+    {
+        await userService.DeleteAccountAsync(UserUuid);
+        return NoContent();
+    }
 }
