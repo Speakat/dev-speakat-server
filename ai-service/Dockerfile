@@ -1,24 +1,33 @@
-FROM python:3.11-slim
+FROM python:3.11-slim AS builder
 
-WORKDIR /app
-
-# 시스템 의존성 (pyaudio용)
 RUN apt-get update && apt-get install -y --no-install-recommends \
     build-essential \
     gcc \
-    libc6-dev \
-    python3-dev \
-    portaudio19-dev \
     && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /app
 
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-# 임베딩 모델 빌드 시점에 다운로드 (이미지에 포함)
+# ONNX 모델과 토크나이저를 빌드 시점에 다운로드
+ENV HF_HOME=/hf_cache
 RUN python -c "\
-from transformers import AutoTokenizer, AutoModel; \
-AutoTokenizer.from_pretrained('sentence-transformers/all-MiniLM-L6-v2'); \
-AutoModel.from_pretrained('sentence-transformers/all-MiniLM-L6-v2')"
+from huggingface_hub import hf_hub_download; \
+hf_hub_download('sentence-transformers/all-MiniLM-L6-v2', 'onnx/model.onnx'); \
+hf_hub_download('sentence-transformers/all-MiniLM-L6-v2', 'tokenizer.json')"
+
+
+FROM python:3.11-slim
+
+WORKDIR /app
+
+# 빌드 도구 제외하고 패키지와 모델만 복사
+COPY --from=builder /usr/local/lib/python3.11/site-packages /usr/local/lib/python3.11/site-packages
+COPY --from=builder /usr/local/bin /usr/local/bin
+COPY --from=builder /hf_cache /hf_cache
+
+ENV HF_HOME=/hf_cache
 
 COPY . .
 
