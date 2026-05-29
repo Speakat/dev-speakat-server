@@ -11,7 +11,8 @@ public class UserService(
     IUserProfileRepository userProfileRepository,
     IUserSettingsRepository userSettingsRepository,
     IUserStatsRepository userStatsRepository,
-    IUserStreakRepository userStreakRepository) : IUserService
+    IUserStreakRepository userStreakRepository,
+    IUserCalendarRepository userCalendarRepository) : IUserService
 {
     public async Task<UserProfileDto> GetProfileAsync(string userUuid)
     {
@@ -99,6 +100,20 @@ public class UserService(
             LongestStreak = longestStreak,
             TodayCompleted = dates.Contains(today),
             StreakGoal = streakGoal
+        };
+    }
+
+    public async Task<UserCalendarDto> GetCalendarAsync(string userUuid, int year, int month)
+    {
+        var userId = await userRepository.FindUserIdByUuidAsync(userUuid) ?? throw new UnauthorizedAccessException();
+
+        var days = await userCalendarRepository.GetMonthlyActivityAsync(userId, year, month);
+
+        return new UserCalendarDto
+        {
+            Year = year,
+            Month = month,
+            Days = days.Select(d => new CalendarDayDto { Date = d.Date, SessionCount = d.SessionCount }).ToList()
         };
     }
 

@@ -56,4 +56,20 @@ public class UsersController(IUserService userService) : ControllerBase
         var result = await userService.GetStreakAsync(UserUuid);
         return Ok(ApiResponse<UserStreakDto>.Success(result));
     }
+
+    [HttpGet("me/calendar")]
+    public async Task<ActionResult<ApiResponse<UserCalendarDto>>> GetCalendarAsync(
+        [FromQuery] int? year,
+        [FromQuery] int? month)
+    {
+        var today = DateTime.UtcNow;
+        var y = year ?? today.Year;
+        var m = month ?? today.Month;
+
+        if (m < 1 || m > 12 || y < 1)
+            return BadRequest(ApiResponse<UserCalendarDto>.Fail("INVALID_DATE", "유효하지 않은 연도/월"));
+
+        var result = await userService.GetCalendarAsync(UserUuid, y, m);
+        return Ok(ApiResponse<UserCalendarDto>.Success(result));
+    }
 }

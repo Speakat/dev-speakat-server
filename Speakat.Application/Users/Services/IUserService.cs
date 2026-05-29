@@ -15,4 +15,6 @@ public interface IUserService
     Task<UserStatsDto> GetStatsAsync(string userUuid);
 
     Task<UserStreakDto> GetStreakAsync(string userUuid);
+
+    Task<UserCalendarDto> GetCalendarAsync(string userUuid, int year, int month);
 }

@@ -144,6 +144,7 @@ builder.Services.AddScoped<IUserProfileRepository, UserProfileRepository>();
 builder.Services.AddScoped<IUserSettingsRepository, UserSettingsRepository>();
 builder.Services.AddScoped<IUserStatsRepository, UserStatsRepository>();
 builder.Services.AddScoped<IUserStreakRepository, UserStreakRepository>();
+builder.Services.AddScoped<IUserCalendarRepository, UserCalendarRepository>();
 builder.Services.AddScoped<IUserService, UserService>();
 
 var app = builder.Build();
