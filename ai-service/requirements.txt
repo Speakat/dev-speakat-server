@@ -2,7 +2,7 @@ fastapi
 uvicorn[standard]
 pydantic
 openai
-transformers
-torch
-pyaudio
+onnxruntime
+tokenizers
+huggingface_hub
 redis[hiredis]
