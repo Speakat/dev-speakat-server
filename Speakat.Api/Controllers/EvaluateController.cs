@@ -8,7 +8,7 @@ using Speakat.Application.Common.Exceptions;
 namespace Speakat.Api.Controllers;
 
 [ApiController]
-[Route("sessions/{session_id}/speech")]
+[Route("sessions/{sessionId}/speech")]
 [Authorize]
 public class EvaluateController(IEvaluateService evaluateService, IUserRepository userRepo) : ControllerBase
 {
@@ -16,7 +16,7 @@ public class EvaluateController(IEvaluateService evaluateService, IUserRepositor
 
     [HttpPost]
     public async Task<ActionResult<ApiResponse<EvaluateResponseDto>>> EvaluateAsync(
-        [FromRoute(Name = "session_id")] string sessionId,
+        string sessionId,
         [FromBody] EvaluateRequestDto request)
     {
         var user = await userRepo.FindByUuidAsync(UserUuid)
