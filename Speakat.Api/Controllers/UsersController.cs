@@ -42,4 +42,12 @@ public class UsersController(IUserService userService) : ControllerBase
         var result = await userService.GetSettingsAsync(UserUuid);
         return Ok(ApiResponse<UserSettingsDto>.Success(result));
     }
+
+    [HttpPatch("me/settings")]
+    public async Task<ActionResult<ApiResponse<UserSettingsDto>>> PatchSettingsAsync(
+        [FromBody] PatchUserSettingsRequestDto request)
+    {
+        var result = await userService.UpdateSettingsAsync(UserUuid, request.ShowNpcScript, request.StreakGoal);
+        return Ok(ApiResponse<UserSettingsDto>.Success(result));
+    }
 }

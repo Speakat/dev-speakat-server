@@ -64,6 +64,19 @@ public class UserService(
         };
     }
 
+    public async Task<UserSettingsDto> UpdateSettingsAsync(string userUuid, bool? showNpcScript, int? streakGoal)
+    {
+        var userId = await userRepository.FindUserIdByUuidAsync(userUuid) ?? throw new UnauthorizedAccessException();
+
+        var settings = await userSettingsRepository.UpdateAsync(userId, showNpcScript, streakGoal);
+
+        return new UserSettingsDto
+        {
+            ShowNpcScript = settings.ShowNpcScript,
+            StreakGoal = settings.StreakGoal
+        };
+    }
+
     private static EnglishLevel CalculateEnglishLevel(double? semantic, double? grammar, double? naturalness)
     {
         var values = new[] { semantic, grammar, naturalness }

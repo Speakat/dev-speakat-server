@@ -11,4 +11,6 @@ public interface IUserService
     Task DeleteAccountAsync(string userUuid);
 
     Task<UserSettingsDto> GetSettingsAsync(string userUuid);
+
+    Task<UserSettingsDto> UpdateSettingsAsync(string userUuid, bool? showNpcScript, int? streakGoal);
 }
