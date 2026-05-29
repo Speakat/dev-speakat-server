@@ -49,4 +49,11 @@ public class UsersController(IUserService userService) : ControllerBase
         var result = await userService.GetStatsAsync(UserUuid);
         return Ok(ApiResponse<UserStatsDto>.Success(result));
     }
+
+    [HttpGet("me/streak")]
+    public async Task<ActionResult<ApiResponse<UserStreakDto>>> GetStreakAsync()
+    {
+        var result = await userService.GetStreakAsync(UserUuid);
+        return Ok(ApiResponse<UserStreakDto>.Success(result));
+    }
 }

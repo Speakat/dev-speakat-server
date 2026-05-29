@@ -13,4 +13,6 @@ public interface IUserService
     Task<UserSettingsDto> GetSettingsAsync(string userUuid);
 
     Task<UserStatsDto> GetStatsAsync(string userUuid);
+
+    Task<UserStreakDto> GetStreakAsync(string userUuid);
 }
