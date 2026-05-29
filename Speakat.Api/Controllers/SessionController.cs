@@ -10,7 +10,10 @@ namespace Speakat.Api.Controllers;
 [ApiController]
 [Route("sessions")]
 [Authorize]
-public class QuestSessionController(IQuestSessionService sessionService, IUserRepository userRepo) : ControllerBase
+public class SessionController(
+    IQuestSessionService sessionService,
+    IEvaluateService evaluateService,
+    IUserRepository userRepo) : ControllerBase
 {
     private string UserUuid => User.FindFirstValue(ClaimTypes.NameIdentifier)!;
 
@@ -32,5 +35,16 @@ public class QuestSessionController(IQuestSessionService sessionService, IUserRe
             ?? throw new NotFoundException("유저를 찾을 수 없습니다.");
         var result = await sessionService.EndSessionAsync(sessionId, user.UserId);
         return Ok(ApiResponse<EndSessionResponseDto>.Success(result));
+    }
+
+    [HttpPost("{sessionId}/speech")]
+    public async Task<ActionResult<ApiResponse<EvaluateResponseDto>>> EvaluateAsync(
+        string sessionId,
+        [FromBody] EvaluateRequestDto request)
+    {
+        var user = await userRepo.FindByUuidAsync(UserUuid)
+            ?? throw new NotFoundException("유저를 찾을 수 없습니다.");
+        var result = await evaluateService.EvaluateAsync(request, sessionId, user.UserId);
+        return Ok(ApiResponse<EvaluateResponseDto>.Success(result));
     }
 }
