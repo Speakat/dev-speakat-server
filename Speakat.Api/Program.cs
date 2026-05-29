@@ -16,6 +16,8 @@ using Speakat.Application.Stages.Services;
 using Speakat.Application.Auth.Repositories;
 using Speakat.Application.Quests.Repositories;
 using Speakat.Application.Quests.Services;
+using Speakat.Application.Flashcards.Repositories;
+using Speakat.Application.Flashcards.Services;
 using Speakat.Infrastructure.Auth;
 using Speakat.Infrastructure.Evaluate;
 using Speakat.Infrastructure.Evaluate.Ai;
@@ -134,6 +136,7 @@ builder.Services.AddScoped<IEvaluateService, EvaluateService>();
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 
 builder.Services.AddScoped<IFlashcardRepository, FlashcardRepository>();
+builder.Services.AddScoped<IFlashcardService, FlashcardService>();
 
 var app = builder.Build();
 

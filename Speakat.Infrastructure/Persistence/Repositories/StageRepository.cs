@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using Speakat.Application.Auth.Repositories;
 using Speakat.Application.Stages.Repositories;
 
 namespace Speakat.Infrastructure.Persistence.Repositories;
@@ -6,15 +7,17 @@ namespace Speakat.Infrastructure.Persistence.Repositories;
 public class StageRepository : IStageRepository
 {
     private readonly AppDbContext _context;
+    private readonly IUserRepository _userRepository;
 
-    public StageRepository(AppDbContext context)
+    public StageRepository(AppDbContext context, IUserRepository userRepository)
     {
         _context = context;
+        _userRepository = userRepository;
     }
 
     public async Task<IReadOnlyList<StageProgressData>> GetStagesWithProgressAsync(string userUuid)
     {
-        var userId = await FindUserIdAsync(userUuid) ?? 0;
+        var userId = await _userRepository.FindUserIdByUuidAsync(userUuid) ?? 0;
 
         return await _context.Stages
             .OrderBy(s => s.SortOrder)
@@ -30,7 +33,7 @@ public class StageRepository : IStageRepository
 
     public async Task<StageDetailData?> GetStageDetailAsync(long stageId, string userUuid)
     {
-        var userId = await FindUserIdAsync(userUuid) ?? 0;
+        var userId = await _userRepository.FindUserIdByUuidAsync(userUuid) ?? 0;
 
         var stage = await _context.Stages.FindAsync(stageId);
         if (stage == null) return null;
@@ -49,7 +52,7 @@ public class StageRepository : IStageRepository
         else
         {
             var prevQuestCount = await _context.Quests.CountAsync(q => q.StageId == previousStage.StageId);
-            var prevCompletedCount = 0;
+            var prevCompletedCount = 0; // TODO: db에서 유저가 완료한 퀘스트 수
             previousStageCompleted = prevQuestCount > 0 && prevCompletedCount == prevQuestCount;
         }
 
@@ -67,13 +70,5 @@ public class StageRepository : IStageRepository
             .ToListAsync();
 
         return new StageDetailData(stage.StageId, stage.Title, stage.Description, previousStageCompleted, quests);
-    }
-
-    private async Task<long?> FindUserIdAsync(string userUuid)
-    {
-        return await _context.Users
-            .Where(u => u.UserUuid == userUuid)
-            .Select(u => (long?)u.UserId)
-            .FirstOrDefaultAsync();
     }
 }
