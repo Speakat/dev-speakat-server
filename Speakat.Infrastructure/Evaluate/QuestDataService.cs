@@ -24,6 +24,11 @@ public class QuestDataService(AppDbContext db) : IQuestDataService
             .OrderBy(qo => qo.SortOrder)
             .ToListAsync();
 
+        var referenceSentences = await db.QuestEmbeddings
+            .Where(e => e.QuestId == questId)
+            .Select(e => e.ReferenceSentence)
+            .ToListAsync();
+
         return new QuestPromptDto(
             Scenario:        quest.Prompt!.Scenario,
             SuccessCriteria: quest.Prompt.SuccessCriteria,
@@ -37,7 +42,8 @@ public class QuestDataService(AppDbContext db) : IQuestDataService
                 .Select(qo => new ObjectiveDto(
                     qo.Objective!.Name,
                     qo.Objective.Description ?? ""))
-                .ToList()
+                .ToList(),
+            ReferenceSentences: referenceSentences
         );
     }
 

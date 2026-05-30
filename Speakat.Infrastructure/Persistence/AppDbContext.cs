@@ -28,6 +28,7 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
     public DbSet<UserFlashcard> UserFlashcards => Set<UserFlashcard>();
     
     public DbSet<Language> Languages => Set<Language>();
+    public DbSet<QuestEmbedding> QuestEmbeddings => Set<QuestEmbedding>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -54,5 +55,6 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
         modelBuilder.ApplyConfiguration(new UserFlashcardConfiguration());
         
         modelBuilder.ApplyConfiguration(new LanguageConfiguration());
+        modelBuilder.ApplyConfiguration(new QuestEmbeddingConfiguration());
     }
 }

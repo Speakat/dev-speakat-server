@@ -8,5 +8,4 @@ SIMILARITY_THRESHOLD = 0.30
 REDIS_URL            = os.environ.get("REDIS_URL", "redis://localhost:6379")
 SESSION_TTL          = 3600  # 1시간
 EMBED_MODEL          = "sentence-transformers/all-MiniLM-L6-v2"
-REFERENCE_SENTENCE   = "I sincerely apologize for being late"
 PASS_SCORE           = 70
