@@ -1,6 +1,5 @@
 import base64
 from fastapi import FastAPI, HTTPException
-from fastapi.responses import JSONResponse
 from models.request import EvaluateRequest
 from models.response import EvaluateResponse, TurnEvaluation, QuestResult
 from core.stt import transcribe
@@ -23,7 +22,7 @@ async def evaluate_endpoint(req: EvaluateRequest):
         user_text = transcribe(audio_bytes)
 
         # 2. 유사도 필터
-        sim_score, passed = check_similarity(user_text)
+        sim_score, passed = check_similarity(user_text, req.quest_prompt.get("reference_sentences", []))
 
         if not passed:
             return EvaluateResponse(
