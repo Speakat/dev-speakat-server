@@ -1,0 +1,29 @@
+{
+  "runtime": "Net90",
+  "documentGenerator": {
+    "aspNetCoreToOpenApi": {
+      "project": "Speakat.Api.csproj",
+      "documentName": "v1",
+      "aspNetCoreEnvironment": "Development",
+      "output": "openapi.json",
+      "outputType": "OpenApi3",
+      "newLineBehavior": "Auto"
+    }
+  },
+  "codeGenerators": {
+    "openApiToCSharpClient": {
+      "generateClientClasses": true,
+      "generateClientInterfaces": true,
+      "injectHttpClient": true,
+      "className": "Speakat{controller}Client",
+      "namespace": "Speakat.Client",
+      "jsonLibrary": "NewtonsoftJson",
+      "classStyle": "Poco",
+      "generateDataAnnotations": false,
+      "generateOptionalPropertiesAsNullable": true,
+      "generateNullableReferenceTypes": false,
+      "output": "../SpeakatClient/SpeakatClient.cs",
+      "newLineBehavior": "Auto"
+    }
+  }
+}
