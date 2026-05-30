@@ -70,4 +70,6 @@ async def evaluate_endpoint(req: EvaluateRequest):
         )
 
     except Exception as e:
-        return JSONResponse(status_code=500, content={"error": "Internal server error"})
+            import traceback
+            print(traceback.format_exc())
+            return JSONResponse(status_code=500, content={"error": str(e)})
