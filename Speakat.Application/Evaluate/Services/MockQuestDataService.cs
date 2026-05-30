@@ -18,7 +18,8 @@ public class MockQuestDataService : IQuestDataService
                 new("order_drink", "Order an iced latte"),
                 new("order_food",  "Order a blueberry muffin"),
                 new("pay",         "Complete the payment")
-            ]
+            ],
+            ReferenceSentences: ["I'd like an iced latte please", "Can I get a blueberry muffin"]
         );
 
         return Task.FromResult(mock);
