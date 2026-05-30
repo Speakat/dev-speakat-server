@@ -20,8 +20,8 @@
     <PackageReference Include="Scalar.AspNetCore" Version="2.13.20" />
   </ItemGroup>
 
-  <Target Name="NSwag" AfterTargets="Build" Condition="'$(Configuration)' == 'Debug'">
-    <Exec Command="$(NSwagExe) run nswag.json /variables:Configuration=$(Configuration)" />
+  <Target Name="GenerateClient">
+    <Exec Command="$(NSwagExe_Net80) run nswag.json" WorkingDirectory="$(MSBuildProjectDirectory)" />
   </Target>
 
   <ItemGroup>

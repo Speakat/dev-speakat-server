@@ -1,13 +1,8 @@
 {
-  "runtime": "Net90",
   "documentGenerator": {
-    "aspNetCoreToOpenApi": {
-      "project": "Speakat.Api.csproj",
-      "documentName": "v1",
-      "aspNetCoreEnvironment": "Development",
-      "output": "openapi.json",
-      "outputType": "OpenApi3",
-      "newLineBehavior": "Auto"
+    "fromDocument": {
+      "url": "http://localhost:5233/openapi/v1.json",
+      "output": null
     }
   },
   "codeGenerators": {
