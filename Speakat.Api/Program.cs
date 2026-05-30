@@ -149,11 +149,17 @@ builder.Services.AddScoped<IUserService, UserService>();
 
 var app = builder.Build();
 
+// TODO 개발 완료 후 디벨롭에서만 공개로 변경 필요
+app.MapOpenApi();
+app.MapScalarApiReference(options =>
+{
+    options.Servers = app.Environment.IsDevelopment()
+        ? [new ScalarServer("http://localhost:5233")]
+        : [new ScalarServer("http://speakat.hyorim.shop")];
+});
+
 if (app.Environment.IsDevelopment())
 {
-    app.MapOpenApi();
-    app.MapScalarApiReference();
-
     // 프로젝트 실행하면 자동으로 db 마이그레이션 실행
     using var scope = app.Services.CreateScope();
     var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
