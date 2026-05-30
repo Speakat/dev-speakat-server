@@ -1,0 +1,24 @@
+{
+  "documentGenerator": {
+    "fromDocument": {
+      "url": "http://localhost:5233/openapi/v1.json",
+      "output": null
+    }
+  },
+  "codeGenerators": {
+    "openApiToCSharpClient": {
+      "generateClientClasses": true,
+      "generateClientInterfaces": true,
+      "injectHttpClient": true,
+      "className": "Speakat{controller}Client",
+      "namespace": "Speakat.Client",
+      "jsonLibrary": "NewtonsoftJson",
+      "classStyle": "Poco",
+      "generateDataAnnotations": false,
+      "generateOptionalPropertiesAsNullable": true,
+      "generateNullableReferenceTypes": false,
+      "output": "../SpeakatClient/SpeakatClient.cs",
+      "newLineBehavior": "Auto"
+    }
+  }
+}
