@@ -6,7 +6,7 @@ import numpy as np
 import onnxruntime as ort
 from tokenizers import Tokenizer
 from huggingface_hub import hf_hub_download
-from config import EMBED_MODEL, REFERENCE_SENTENCE, SIMILARITY_THRESHOLD
+from config import EMBED_MODEL, SIMILARITY_THRESHOLD
 
 print("임베딩 모델 로딩 중")
 _onnx_path  = hf_hub_download(EMBED_MODEL, "onnx/model.onnx")
@@ -36,7 +36,7 @@ def _embed(text: str) -> np.ndarray:
     return pooled / norm
 
 
-def check_similarity(user_text: str) -> tuple[float, bool]:
-    score  = float(np.sum(_embed(REFERENCE_SENTENCE) * _embed(user_text)))
-    passed = score >= SIMILARITY_THRESHOLD
-    return score, passed
+def check_similarity(user_text: str, reference_sentences: list[str]) -> tuple[float, bool]:
+    user_emb = _embed(user_text)
+    best     = max(float(np.sum(_embed(ref) * user_emb)) for ref in reference_sentences)
+    return best, best >= SIMILARITY_THRESHOLD
