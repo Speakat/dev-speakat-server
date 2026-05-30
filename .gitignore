@@ -90,3 +90,6 @@ test_evaluate.py
 
 #AWS
 *.ppk
+
+# NSwag intermediate output
+Speakat.Api/openapi.json
