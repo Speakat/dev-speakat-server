@@ -26,6 +26,7 @@ public class StubAiPipelineClient : IAiPipelineClient
                 AchievedObjectives:       ["apologize"],
                 IsQuestSuccess:           true
             )
+            // QuestResult: null
         );
         return Task.FromResult(result);
     }
