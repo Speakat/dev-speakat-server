@@ -12,6 +12,8 @@ public interface IUserService
 
     Task<UserSettingsDto> GetSettingsAsync(string userUuid);
 
+    Task<UserSettingsDto> UpdateSettingsAsync(string userUuid, bool? showNpcScript, int? streakGoal);
+
     Task<UserStatsDto> GetStatsAsync(string userUuid);
 
     Task<UserStreakDto> GetStreakAsync(string userUuid);
