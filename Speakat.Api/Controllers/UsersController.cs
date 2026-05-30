@@ -35,4 +35,49 @@ public class UsersController(IUserService userService) : ControllerBase
         await userService.DeleteAccountAsync(UserUuid);
         return NoContent();
     }
+
+    [HttpGet("me/settings")]
+    public async Task<ActionResult<ApiResponse<UserSettingsDto>>> GetSettingsAsync()
+    {
+        var result = await userService.GetSettingsAsync(UserUuid);
+        return Ok(ApiResponse<UserSettingsDto>.Success(result));
+    }
+
+    [HttpPatch("me/settings")]
+    public async Task<ActionResult<ApiResponse<UserSettingsDto>>> PatchSettingsAsync(
+        [FromBody] PatchUserSettingsRequestDto request)
+    {
+        var result = await userService.UpdateSettingsAsync(UserUuid, request.ShowNpcScript, request.StreakGoal);
+        return Ok(ApiResponse<UserSettingsDto>.Success(result));
+    }
+
+    [HttpGet("me/stats")]
+    public async Task<ActionResult<ApiResponse<UserStatsDto>>> GetStatsAsync()
+    {
+        var result = await userService.GetStatsAsync(UserUuid);
+        return Ok(ApiResponse<UserStatsDto>.Success(result));
+    }
+
+    [HttpGet("me/streak")]
+    public async Task<ActionResult<ApiResponse<UserStreakDto>>> GetStreakAsync()
+    {
+        var result = await userService.GetStreakAsync(UserUuid);
+        return Ok(ApiResponse<UserStreakDto>.Success(result));
+    }
+
+    [HttpGet("me/calendar")]
+    public async Task<ActionResult<ApiResponse<UserCalendarDto>>> GetCalendarAsync(
+        [FromQuery] int? year,
+        [FromQuery] int? month)
+    {
+        var today = DateTime.UtcNow;
+        var y = year ?? today.Year;
+        var m = month ?? today.Month;
+
+        if (m < 1 || m > 12 || y < 1)
+            return BadRequest(ApiResponse<UserCalendarDto>.Fail("INVALID_DATE", "유효하지 않은 연도/월"));
+
+        var result = await userService.GetCalendarAsync(UserUuid, y, m);
+        return Ok(ApiResponse<UserCalendarDto>.Success(result));
+    }
 }
