@@ -13,7 +13,6 @@ app = FastAPI()
 
 @app.post("/evaluate", response_model=EvaluateResponse)
 async def evaluate_endpoint(req: EvaluateRequest):
-    print(req.quest_prompt)
     try:
         audio_bytes = base64.b64decode(req.audio_base64)
     except Exception:
