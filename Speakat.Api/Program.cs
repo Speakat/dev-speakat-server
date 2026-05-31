@@ -1,6 +1,10 @@
+using System.Security.Claims;
 using System.Text;
+using System.Text.Json;
 using System.Text.Json.Serialization;
+using System.Threading.RateLimiting;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
@@ -147,13 +151,46 @@ builder.Services.AddScoped<IUserStreakRepository, UserStreakRepository>();
 builder.Services.AddScoped<IUserCalendarRepository, UserCalendarRepository>();
 builder.Services.AddScoped<IUserService, UserService>();
 
+// Rate Limiting — /speech 엔드포인트 전용, 유저별 슬라이딩 윈도우 (10회/분)
+builder.Services.AddRateLimiter(options =>
+{
+    options.AddPolicy("speech", httpContext =>
+        RateLimitPartition.GetSlidingWindowLimiter(
+            partitionKey: httpContext.User.FindFirstValue(ClaimTypes.NameIdentifier)
+                          ?? httpContext.Connection.RemoteIpAddress?.ToString()
+                          ?? "anonymous",
+            factory: _ => new SlidingWindowRateLimiterOptions
+            {
+                PermitLimit         = 10,
+                Window              = TimeSpan.FromMinutes(1),
+                SegmentsPerWindow   = 6,
+                QueueProcessingOrder = QueueProcessingOrder.OldestFirst,
+                QueueLimit          = 0,
+            }
+        )
+    );
+    options.OnRejected = async (context, cancellationToken) =>
+    {
+        context.HttpContext.Response.StatusCode  = StatusCodes.Status429TooManyRequests;
+        context.HttpContext.Response.ContentType = "application/json";
+        var error = ApiResponse<object>.Fail("TOO_MANY_REQUESTS", "요청이 너무 많습니다. 잠시 후 다시 시도해주세요.");
+        await context.HttpContext.Response.WriteAsync(JsonSerializer.Serialize(error), cancellationToken);
+    };
+});
+
 var app = builder.Build();
+
+// TODO 개발 완료 후 디벨롭에서만 공개로 변경 필요
+app.MapOpenApi();
+app.MapScalarApiReference(options =>
+{
+    options.Servers = app.Environment.IsDevelopment()
+        ? [new ScalarServer("http://localhost:5233")]
+        : [new ScalarServer("http://speakat.hyorim.shop")];
+});
 
 if (app.Environment.IsDevelopment())
 {
-    app.MapOpenApi();
-    app.MapScalarApiReference();
-
     // 프로젝트 실행하면 자동으로 db 마이그레이션 실행
     using var scope = app.Services.CreateScope();
     var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
@@ -166,6 +203,7 @@ if (app.Environment.IsDevelopment())
 app.UseExceptionHandler(o => { });
 app.UseAuthentication();
 app.UseAuthorization();
+app.UseRateLimiter();
 
 app.MapControllers();
 

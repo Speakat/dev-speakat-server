@@ -1,0 +1,14 @@
+[Unit]
+Description=Speakat API
+After=network.target docker.service
+
+[Service]
+WorkingDirectory=/home/ubuntu/dev-speakat-server/publish
+ExecStart=/usr/bin/dotnet /home/ubuntu/dev-speakat-server/publish/Speakat.Api.dll
+Environment=ASPNETCORE_ENVIRONMENT=Production
+Restart=always
+RestartSec=5
+User=ubuntu
+
+[Install]
+WantedBy=multi-user.target

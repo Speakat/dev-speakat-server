@@ -1,6 +1,7 @@
 using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 using Speakat.Api.Common.Response;
 using Speakat.Application.Auth.Repositories;
 using Speakat.Application.Common.Exceptions;
@@ -38,6 +39,7 @@ public class SessionController(
     }
 
     [HttpPost("{sessionId}/speech")]
+    [EnableRateLimiting("speech")]
     public async Task<ActionResult<ApiResponse<EvaluateResponseDto>>> EvaluateAsync(
         string sessionId,
         [FromBody] EvaluateRequestDto request)
