@@ -20,6 +20,7 @@ public record QuestResult(
 );
 
 public record AiPipelineResult(
+    [property: JsonPropertyName("user_text")]          string UserText,
     [property: JsonPropertyName("npc_dialogue")]       string NpcDialogue,
     [property: JsonPropertyName("npc_dialogue_audio")] string NpcDialogueAudio,
     [property: JsonPropertyName("similarity_score")]   float SimilarityScore,
