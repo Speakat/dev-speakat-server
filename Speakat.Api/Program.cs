@@ -182,7 +182,12 @@ var app = builder.Build();
 
 // TODO 개발 완료 후 디벨롭에서만 공개로 변경 필요
 app.MapOpenApi();
-app.MapScalarApiReference();
+app.MapScalarApiReference(options =>             
+{                                              
+    var serverUrl = app.Configuration["Scalar:ServerUrl"]?.TrimEnd('/');                       
+    if (!string.IsNullOrEmpty(serverUrl))
+        options.Servers = [new ScalarServer(serverUrl)];                      
+});
 
 if (app.Environment.IsDevelopment())
 {
