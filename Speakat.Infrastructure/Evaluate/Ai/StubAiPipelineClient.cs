@@ -5,6 +5,7 @@ public class StubAiPipelineClient : IAiPipelineClient
     public Task<AiPipelineResult> EvaluateAsync(string audioBase64, long questId, string sessionId, int turn, QuestPromptDto questPrompt)
     {
         var result = new AiPipelineResult(
+            UserText:         "I'm so sorry I'm late.",
             NpcDialogue:      "Oh hey, you're finally here! What happened?",
             NpcDialogueAudio: "",
             SimilarityScore:  0.8f,

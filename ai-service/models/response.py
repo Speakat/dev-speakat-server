@@ -18,6 +18,7 @@ class QuestResult(BaseModel):
     is_quest_success: bool
 
 class EvaluateResponse(BaseModel):
+    user_text: str
     npc_dialogue: str
     npc_dialogue_audio: str
     similarity_score: float

@@ -55,6 +55,7 @@ public class EvaluateService(IAiPipelineClient ai, IQuestDataService questData, 
         ) : null;
 
         return new EvaluateResponseDto(
+            UserText:         aiResult.UserText,
             NpcDialogue:      aiResult.NpcDialogue,
             NpcDialogueAudio: aiResult.NpcDialogueAudio,
             IsTurnPassed:     isTurnPassed,
