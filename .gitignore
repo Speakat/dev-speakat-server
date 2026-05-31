@@ -93,3 +93,4 @@ test_evaluate.py
 
 # NSwag intermediate output
 Speakat.Api/openapi.json
+Speakat.Api/appsettings.Production.json
