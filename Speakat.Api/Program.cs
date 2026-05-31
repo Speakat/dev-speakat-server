@@ -182,12 +182,7 @@ var app = builder.Build();
 
 // TODO 개발 완료 후 디벨롭에서만 공개로 변경 필요
 app.MapOpenApi();
-app.MapScalarApiReference(options =>
-{
-    options.Servers = app.Environment.IsDevelopment()
-        ? [new ScalarServer("http://localhost:5233")]
-        : [new ScalarServer("http://speakat.hyorim.shop")];
-});
+app.MapScalarApiReference();
 
 if (app.Environment.IsDevelopment())
 {
