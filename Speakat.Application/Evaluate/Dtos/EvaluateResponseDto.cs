@@ -18,6 +18,7 @@ public record QuestResultDto(
 );
 
 public record EvaluateResponseDto(
+    string UserText,
     string NpcDialogue,
     string NpcDialogueAudio,
     bool IsTurnPassed,

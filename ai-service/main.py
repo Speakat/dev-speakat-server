@@ -22,10 +22,12 @@ async def evaluate_endpoint(req: EvaluateRequest):
         user_text = transcribe(audio_bytes)
 
         # 2. 유사도 필터
-        sim_score, passed = check_similarity(user_text, req.quest_prompt.get("reference_sentences", []))
+        reference_sentences = req.quest_prompt.get("reference_sentences", [])
+        sim_score, passed = check_similarity(user_text, reference_sentences)
 
         if not passed:
             return EvaluateResponse(
+                user_text=user_text,
                 npc_dialogue="",
                 npc_dialogue_audio="",
                 similarity_score=sim_score,
@@ -60,6 +62,7 @@ async def evaluate_endpoint(req: EvaluateRequest):
             quest_result = QuestResult(**summary)
 
         return EvaluateResponse(
+            user_text=user_text,
             npc_dialogue=npc_dialogue_text,
             npc_dialogue_audio=npc_dialogue_audio,
             similarity_score=sim_score,
