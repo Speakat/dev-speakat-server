@@ -23,7 +23,7 @@ public class S3ImageStorageService : IImageStorageService
         _httpClientFactory = httpClientFactory;
     }
 
-    public async Task<string> GenerateUploadUrlAsync(string key, string contentType = "image/jpeg")
+    public async Task<string> GenerateUploadUrlAsync(string key, string contentType)
     {
         var request = new GetPreSignedUrlRequest
         {
