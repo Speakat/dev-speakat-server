@@ -18,10 +18,10 @@ public class UserService(
 {
     public async Task<UserProfileDto> GetProfileAsync(string userUuid)
     {
-        var userId = await userRepository.FindUserIdByUuidAsync(userUuid) ?? throw new UnauthorizedAccessException();
+        var userId = await userRepository.FindUserIdByUuidAsync(userUuid) ?? throw AuthException.UserNotFound();
 
         var data = await userProfileRepository.GetProfileDataAsync(userId)
-            ?? throw new UnauthorizedAccessException();
+            ?? throw AuthException.UserNotFound();
 
         return new UserProfileDto
         {
@@ -35,7 +35,7 @@ public class UserService(
 
     public async Task<PatchUserResultDto> UpdateProfileAsync(string userUuid, string? nickname, string? profileImageKey)
     {
-        var userId = await userRepository.FindUserIdByUuidAsync(userUuid) ?? throw new UnauthorizedAccessException();
+        var userId = await userRepository.FindUserIdByUuidAsync(userUuid) ?? throw AuthException.UserNotFound();
 
         if (nickname is not null && await userRepository.ExistsNicknameAsync(nickname))
             throw UserException.DuplicateNickname();
@@ -62,7 +62,7 @@ public class UserService(
         if (!AllowedContentTypes.TryGetValue(contentType, out var ext))
             throw UserException.InvalidImageFormat();
 
-        _ = await userRepository.FindUserIdByUuidAsync(userUuid) ?? throw new UnauthorizedAccessException();
+        _ = await userRepository.FindUserIdByUuidAsync(userUuid) ?? throw AuthException.UserNotFound();
 
         var key = ImageKey(userUuid, type, ext);
         var uploadUrl = await imageStorageService.GenerateUploadUrlAsync(key, contentType);
@@ -82,16 +82,16 @@ public class UserService(
 
     public async Task DeleteAccountAsync(string userUuid)
     {
-        var userId = await userRepository.FindUserIdByUuidAsync(userUuid) ?? throw new UnauthorizedAccessException();
+        var userId = await userRepository.FindUserIdByUuidAsync(userUuid) ?? throw AuthException.UserNotFound();
         await userRepository.SoftDeleteAsync(userId);
     }
 
     public async Task<UserSettingsDto> GetSettingsAsync(string userUuid)
     {
-        var userId = await userRepository.FindUserIdByUuidAsync(userUuid) ?? throw new UnauthorizedAccessException();
+        var userId = await userRepository.FindUserIdByUuidAsync(userUuid) ?? throw AuthException.UserNotFound();
 
         var settings = await userSettingsRepository.GetByUserIdAsync(userId)
-            ?? throw new UnauthorizedAccessException();
+            ?? throw AuthException.UserNotFound();
 
         return new UserSettingsDto
         {
@@ -102,7 +102,7 @@ public class UserService(
 
     public async Task<UserSettingsDto> UpdateSettingsAsync(string userUuid, bool? showNpcScript, int? streakGoal)
     {
-        var userId = await userRepository.FindUserIdByUuidAsync(userUuid) ?? throw new UnauthorizedAccessException();
+        var userId = await userRepository.FindUserIdByUuidAsync(userUuid) ?? throw AuthException.UserNotFound();
 
         var settings = await userSettingsRepository.UpdateAsync(userId, showNpcScript, streakGoal);
 
@@ -115,7 +115,7 @@ public class UserService(
 
     public async Task<UserStatsDto> GetStatsAsync(string userUuid)
     {
-        var userId = await userRepository.FindUserIdByUuidAsync(userUuid) ?? throw new UnauthorizedAccessException();
+        var userId = await userRepository.FindUserIdByUuidAsync(userUuid) ?? throw AuthException.UserNotFound();
 
         var data = await userStatsRepository.GetStatsAsync(userId);
 
@@ -132,7 +132,7 @@ public class UserService(
 
     public async Task<UserStreakDto> GetStreakAsync(string userUuid)
     {
-        var userId = await userRepository.FindUserIdByUuidAsync(userUuid) ?? throw new UnauthorizedAccessException();
+        var userId = await userRepository.FindUserIdByUuidAsync(userUuid) ?? throw AuthException.UserNotFound();
 
         var dates = await userStreakRepository.GetCompletedSessionDatesAsync(userId);
         var streakGoal = await userStreakRepository.GetStreakGoalAsync(userId);
@@ -151,7 +151,7 @@ public class UserService(
 
     public async Task<UserCalendarDto> GetCalendarAsync(string userUuid, int year, int month)
     {
-        var userId = await userRepository.FindUserIdByUuidAsync(userUuid) ?? throw new UnauthorizedAccessException();
+        var userId = await userRepository.FindUserIdByUuidAsync(userUuid) ?? throw AuthException.UserNotFound();
 
         var days = await userCalendarRepository.GetMonthlyActivityAsync(userId, year, month);
 

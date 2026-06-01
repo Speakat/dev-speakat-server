@@ -25,7 +25,7 @@ public class FlashcardService : IFlashcardService
         int size,
         long? questId)
     {
-        var userId = await _userRepository.FindUserIdByUuidAsync(userUuid) ?? throw new UnauthorizedAccessException();
+        var userId = await _userRepository.FindUserIdByUuidAsync(userUuid) ?? throw AuthException.UserNotFound();
 
         long? cursorId = DecodeCursor(cursor);
 
@@ -57,7 +57,7 @@ public class FlashcardService : IFlashcardService
 
     public async Task<FlashcardDetailDto> GetFlashcardDetailAsync(string userUuid, long flashcardId)
     {
-        var userId = await _userRepository.FindUserIdByUuidAsync(userUuid) ?? throw new UnauthorizedAccessException();
+        var userId = await _userRepository.FindUserIdByUuidAsync(userUuid) ?? throw AuthException.UserNotFound();
 
         var data = await _flashcardRepository.GetFlashcardDetailAsync(userId, flashcardId)
             ?? throw FlashcardException.NotFound();
@@ -75,7 +75,7 @@ public class FlashcardService : IFlashcardService
 
     public async Task<PatchFlashcardResultDto> UpdateIsMasteredAsync(string userUuid, long flashcardId, bool isMastered)
     {
-        var userId = await _userRepository.FindUserIdByUuidAsync(userUuid) ?? throw new UnauthorizedAccessException();
+        var userId = await _userRepository.FindUserIdByUuidAsync(userUuid) ?? throw AuthException.UserNotFound();
 
         var flashcard = await _flashcardRepository.UpdateIsMasteredAsync(userId, flashcardId, isMastered)
             ?? throw FlashcardException.NotFound();
