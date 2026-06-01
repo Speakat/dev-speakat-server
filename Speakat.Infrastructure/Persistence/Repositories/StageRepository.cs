@@ -8,6 +8,7 @@ public class StageRepository : IStageRepository
 {
     private readonly AppDbContext _context;
     private readonly IUserRepository _userRepository;
+    private const string CompletedStatus = "COMPLETED";
 
     public StageRepository(AppDbContext context, IUserRepository userRepository)
     {
@@ -19,6 +20,12 @@ public class StageRepository : IStageRepository
     {
         var userId = await _userRepository.FindUserIdByUuidAsync(userUuid) ?? 0;
 
+        var completedQuestIds = await _context.GameSessions
+            .Where(gs => gs.UserId == userId && gs.Status == CompletedStatus)
+            .Select(gs => gs.QuestId)
+            .Distinct()
+            .ToListAsync();
+
         return await _context.Stages
             .OrderBy(s => s.SortOrder)
             .Select(s => new StageProgressData(
@@ -26,7 +33,7 @@ public class StageRepository : IStageRepository
                 s.Title,
                 s.Description,
                 _context.Quests.Count(q => q.StageId == s.StageId),
-                0
+                _context.Quests.Count(q => q.StageId == s.StageId && completedQuestIds.Contains(q.QuestId))
             ))
             .ToListAsync();
     }
@@ -38,7 +45,6 @@ public class StageRepository : IStageRepository
         var stage = await _context.Stages.FindAsync(stageId);
         if (stage == null) return null;
 
-        // 이전 스테이지 완료 여부 확인
         var previousStage = await _context.Stages
             .Where(s => s.SortOrder < stage.SortOrder)
             .OrderByDescending(s => s.SortOrder)
@@ -47,12 +53,18 @@ public class StageRepository : IStageRepository
         bool previousStageCompleted;
         if (previousStage == null)
         {
-            previousStageCompleted = true; // 첫 스테이지
+            previousStageCompleted = true;
         }
         else
         {
             var prevQuestCount = await _context.Quests.CountAsync(q => q.StageId == previousStage.StageId);
-            var prevCompletedCount = 0; // TODO: db에서 유저가 완료한 퀘스트 수
+            var prevCompletedCount = await _context.GameSessions
+                .Where(gs => gs.UserId == userId && gs.Status == CompletedStatus &&
+                             _context.Quests.Any(q => q.QuestId == gs.QuestId && q.StageId == previousStage.StageId))
+                .Select(gs => gs.QuestId)
+                .Distinct()
+                .CountAsync();
+
             previousStageCompleted = prevQuestCount > 0 && prevCompletedCount == prevQuestCount;
         }
 
@@ -64,8 +76,8 @@ public class StageRepository : IStageRepository
                 q.Title,
                 q.Description,
                 q.SortOrder,
-                0,
-                false
+                _context.GameSessions.Count(gs => gs.UserId == userId && gs.QuestId == q.QuestId),
+                _context.GameSessions.Any(gs => gs.UserId == userId && gs.QuestId == q.QuestId && gs.Status == CompletedStatus)
             ))
             .ToListAsync();
 
