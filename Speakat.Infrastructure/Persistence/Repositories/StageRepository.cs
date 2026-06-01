@@ -25,18 +25,31 @@ public class StageRepository : IStageRepository
             .Where(gs => gs.UserId == userId && gs.Status == CompletedStatus)
             .Select(gs => gs.QuestId)
             .Distinct()
+            .ToHashSetAsync();
+
+        var questsByStage = await _context.Quests
+            .GroupBy(q => q.StageId)
+            .Select(g => new { StageId = g.Key, QuestIds = g.Select(q => q.QuestId).ToList() })
             .ToListAsync();
 
-        return await _context.Stages
+        var questsByStageDict = questsByStage.ToDictionary(x => x.StageId, x => x.QuestIds);
+
+        var stages = await _context.Stages
             .OrderBy(s => s.SortOrder)
-            .Select(s => new StageProgressData(
+            .Select(s => new { s.StageId, s.Title, s.Description })
+            .ToListAsync();
+
+        return stages.Select(s =>
+        {
+            var questIds = questsByStageDict.GetValueOrDefault(s.StageId, []);
+            return new StageProgressData(
                 s.StageId,
                 s.Title,
                 s.Description,
-                _context.Quests.Count(q => q.StageId == s.StageId),
-                _context.Quests.Count(q => q.StageId == s.StageId && completedQuestIds.Contains(q.QuestId))
-            ))
-            .ToListAsync();
+                questIds.Count,
+                questIds.Count(id => completedQuestIds.Contains(id))
+            );
+        }).ToList();
     }
 
     public async Task<StageDetailData?> GetStageDetailAsync(long stageId, string userUuid)
@@ -58,29 +71,49 @@ public class StageRepository : IStageRepository
         }
         else
         {
-            var prevQuestCount = await _context.Quests.CountAsync(q => q.StageId == previousStage.StageId);
+            var prevQuestIds = await _context.Quests
+                .Where(q => q.StageId == previousStage.StageId)
+                .Select(q => q.QuestId)
+                .ToListAsync();
+
             var prevCompletedCount = await _context.GameSessions
-                .Where(gs => gs.UserId == userId && gs.Status == CompletedStatus &&
-                             _context.Quests.Any(q => q.QuestId == gs.QuestId && q.StageId == previousStage.StageId))
+                .Where(gs => gs.UserId == userId && gs.Status == CompletedStatus && prevQuestIds.Contains(gs.QuestId))
                 .Select(gs => gs.QuestId)
                 .Distinct()
                 .CountAsync();
 
-            previousStageCompleted = prevQuestCount > 0 && prevCompletedCount == prevQuestCount;
+            previousStageCompleted = prevQuestIds.Count > 0 && prevCompletedCount == prevQuestIds.Count;
         }
 
-        var quests = await _context.Quests
+        var questData = await _context.Quests
             .Where(q => q.StageId == stageId)
             .OrderBy(q => q.SortOrder)
-            .Select(q => new QuestProgressData(
+            .Select(q => new { q.QuestId, q.Title, q.Description, q.SortOrder })
+            .ToListAsync();
+
+        var questIds = questData.Select(q => q.QuestId).ToList();
+
+        var sessions = await _context.GameSessions
+            .Where(gs => gs.UserId == userId && questIds.Contains(gs.QuestId))
+            .Select(gs => new { gs.QuestId, gs.Status })
+            .ToListAsync();
+
+        var sessionsByQuest = sessions
+            .GroupBy(gs => gs.QuestId)
+            .ToDictionary(g => g.Key, g => g.ToList());
+
+        var quests = questData.Select(q =>
+        {
+            var questSessions = sessionsByQuest.GetValueOrDefault(q.QuestId, []);
+            return new QuestProgressData(
                 q.QuestId,
                 q.Title,
                 q.Description,
                 q.SortOrder,
-                _context.GameSessions.Count(gs => gs.UserId == userId && gs.QuestId == q.QuestId),
-                _context.GameSessions.Any(gs => gs.UserId == userId && gs.QuestId == q.QuestId && gs.Status == CompletedStatus)
-            ))
-            .ToListAsync();
+                questSessions.Count,
+                questSessions.Any(s => s.Status == CompletedStatus)
+            );
+        }).ToList();
 
         return new StageDetailData(stage.StageId, stage.Title, stage.Description, previousStageCompleted, quests);
     }
