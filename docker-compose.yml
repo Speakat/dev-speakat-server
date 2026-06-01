@@ -20,7 +20,7 @@ services:
       - redis_data:/data
 
   ai-service:
-    build: ./ai-service
+    image: ${ECR_URI}:latest
     ports:
       - "8000:8000"
     environment:
