@@ -19,4 +19,6 @@ public interface IUserRepository
     Task<bool> ExistsNicknameAsync(string nickname);
 
     Task SoftDeleteAsync(long userId);
+    
+    Task UpdateProfileImageKeyAsync(long userId, string key);
 }

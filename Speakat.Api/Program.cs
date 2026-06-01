@@ -32,6 +32,7 @@ using Speakat.Infrastructure.Persistence;
 using Speakat.Infrastructure.Persistence.Repositories;
 using Speakat.Application.Evaluate.Services;
 using Speakat.Infrastructure.QuestSessions;
+using Speakat.Infrastructure.Storage;
 using StackExchange.Redis;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -122,6 +123,7 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 // Services
 builder.Services.AddSingleton<IJwtTokenService, JwtTokenService>();
 builder.Services.AddSingleton<IRefreshTokenStore, RedisRefreshTokenStore>();
+builder.Services.AddSingleton<IImageStorageService, S3ImageStorageService>();
 
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IAuthService, AuthService>();
