@@ -1,3 +1,4 @@
+using Microsoft.Extensions.Logging;
 using Speakat.Application.Auth.Dtos;
 using Speakat.Application.Auth.Providers;
 using Speakat.Application.Auth.Repositories;
@@ -11,22 +12,29 @@ namespace Speakat.Application.Auth.Services;
 public class AuthService : IAuthService
 {
     private static readonly TimeSpan RefreshTokenTtl = TimeSpan.FromDays(14);
+    private const string DefaultProfileImageKey = "profile-images/default.jpg";
 
     private readonly IEnumerable<IOAuthProvider> _oauthProviders;
     private readonly IUserRepository _userRepository;
     private readonly IJwtTokenService _jwtTokenService;
     private readonly IRefreshTokenStore _refreshTokenStore;
+    private readonly IImageStorageService _imageStorageService;
+    private readonly ILogger<AuthService> _logger;
 
     public AuthService(
         IEnumerable<IOAuthProvider> oauthProviders,
         IUserRepository userRepository,
         IJwtTokenService jwtTokenService,
-        IRefreshTokenStore refreshTokenStore)
+        IRefreshTokenStore refreshTokenStore,
+        IImageStorageService imageStorageService,
+        ILogger<AuthService> logger)
     {
         _oauthProviders = oauthProviders;
         _userRepository = userRepository;
         _jwtTokenService = jwtTokenService;
         _refreshTokenStore = refreshTokenStore;
+        _imageStorageService = imageStorageService;
+        _logger = logger;
     }
 
     public async Task<OAuthLoginResponseDto> OAuthLoginAsync(SocialType provider, string authorizationCode)
@@ -57,6 +65,22 @@ public class AuthService : IAuthService
             };
 
             user = await _userRepository.SaveAsync(user);
+            if (!string.IsNullOrEmpty(userInfo.ProfileImageUrl))
+            {
+                try
+                {
+                    var key = ProfileImgKey(user.UserUuid);
+                    await _imageStorageService.UploadFromUrlAsync(userInfo.ProfileImageUrl, key);
+                    await _userRepository.UpdateProfileImageKeyAsync(user.UserId, key);
+                    user.ProfileImageKey = key;
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogWarning(ex, "{Provider} 프로필 이미지 S3 업로드 실패, 기본 이미지 적용 (userUuid: {UserUuid})", provider, user.UserUuid);
+                    await _userRepository.UpdateProfileImageKeyAsync(user.UserId, DefaultProfileImageKey);
+                    user.ProfileImageKey = DefaultProfileImageKey;
+                }
+            }
         }
 
         // JWT 발급
@@ -71,8 +95,8 @@ public class AuthService : IAuthService
             UserUuid = user.UserUuid,
             Email = user.Email,
             Nickname = user.Nickname,
-            // TODO: 이미지 업로드 구현 후 ProfileImageKey 변환
-            ProfileImageUrl = null,
+            ProfileImageUrl = user!.ProfileImageKey is not null 
+                ? _imageStorageService.GetPublicUrl(user.ProfileImageKey) : null,
             Provider = user.SocialType,
             AccessToken = accessToken,
             RefreshToken = refreshToken,
@@ -109,6 +133,8 @@ public class AuthService : IAuthService
         await _refreshTokenStore.BlacklistAsync(refreshToken);
         await _refreshTokenStore.DeleteAsync(refreshToken);
     }
+
+    private static string ProfileImgKey(string userUuid) => $"profile-images/{userUuid}.jpg";
 
     public async Task<CheckNicknameResponseDto> CheckNicknameAsync(string nickname)
     {

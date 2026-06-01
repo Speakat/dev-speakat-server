@@ -66,4 +66,14 @@ public class UserRepository : IUserRepository
         user.DeletedAt = DateTime.UtcNow;
         await _context.SaveChangesAsync();
     }
+    
+    public async Task UpdateProfileImageKeyAsync(long 
+        userId, string key)
+    {
+        var user = await _context.Users.FindAsync(userId) 
+                   ?? throw new InvalidOperationException($"User {userId} 없음");
+        user.ProfileImageKey = key;
+        user.UpdatedAt = DateTime.UtcNow;
+        await _context.SaveChangesAsync();
+    }
 }
