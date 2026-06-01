@@ -28,4 +28,7 @@ public class AuthException : BusinessException
 
     public static AuthException UnsupportedProvider() =>
         new("UNSUPPORTED_OAUTH_PROVIDER", "지원하지 않는 OAuth Provider", 400);
+
+    public static AuthException UserNotFound() =>
+        new("USER_NOT_FOUND", "존재하지 않는 사용자", 401);
 }

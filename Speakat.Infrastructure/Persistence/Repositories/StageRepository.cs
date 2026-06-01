@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using Speakat.Application.Auth.Repositories;
+using Speakat.Application.Common.Exceptions;
 using Speakat.Application.Stages.Repositories;
 
 namespace Speakat.Infrastructure.Persistence.Repositories;
@@ -18,7 +19,7 @@ public class StageRepository : IStageRepository
 
     public async Task<IReadOnlyList<StageProgressData>> GetStagesWithProgressAsync(string userUuid)
     {
-        var userId = await _userRepository.FindUserIdByUuidAsync(userUuid) ?? 0;
+        var userId = await _userRepository.FindUserIdByUuidAsync(userUuid) ?? throw AuthException.UserNotFound();
 
         var completedQuestIds = await _context.GameSessions
             .Where(gs => gs.UserId == userId && gs.Status == CompletedStatus)
@@ -40,7 +41,7 @@ public class StageRepository : IStageRepository
 
     public async Task<StageDetailData?> GetStageDetailAsync(long stageId, string userUuid)
     {
-        var userId = await _userRepository.FindUserIdByUuidAsync(userUuid) ?? 0;
+        var userId = await _userRepository.FindUserIdByUuidAsync(userUuid) ?? throw AuthException.UserNotFound();
 
         var stage = await _context.Stages.FindAsync(stageId);
         if (stage == null) return null;

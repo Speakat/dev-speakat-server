@@ -13,7 +13,7 @@ public class QuestRepository : IQuestRepository
 
     public async Task<QuestDetailData?> GetQuestDetailAsync(long questId, string userUuid)
     {
-        var userId = await FindUserIdAsync(userUuid) ?? 0;
+        var userId = await FindUserIdAsync(userUuid) ?? throw AuthException.UserNotFound();
         
         var quest = await _context.Quests.FindAsync(questId);
         if (quest == null) return null;
