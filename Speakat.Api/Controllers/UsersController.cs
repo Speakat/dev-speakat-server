@@ -39,9 +39,10 @@ public class UsersController(IUserService userService) : ControllerBase
     
     [HttpGet("me/images/upload-url")]
     public async Task<ActionResult<ApiResponse<UploadUrlDto>>> GetImageUploadUrlAsync(
-        [FromQuery] ImageType type = ImageType.Profile)
+        [FromQuery] ImageType type = ImageType.Profile,
+        [FromQuery] string contentType = "image/jpeg")
     {
-        var result = await userService.GetImageUploadUrlAsync(UserUuid, type);
+        var result = await userService.GetImageUploadUrlAsync(UserUuid, type, contentType);
         return Ok(ApiResponse<UploadUrlDto>.Success(result));
     }
 
