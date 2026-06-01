@@ -11,6 +11,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using Scalar.AspNetCore;
+using Serilog;
 using Speakat.Api.Common.Exceptions;
 using Speakat.Api.Common.Response;
 using Speakat.Application.Common.Exceptions;
@@ -38,6 +39,8 @@ using Speakat.Infrastructure.Storage;
 using StackExchange.Redis;
 
 var builder = WebApplication.CreateBuilder(args);
+builder.Host.UseSerilog((context, config) =>
+    config.ReadFrom.Configuration(context.Configuration));
 
 builder.Services.AddOpenApi(options =>
 {
