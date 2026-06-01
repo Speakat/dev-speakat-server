@@ -15,13 +15,11 @@ public class S3ImageStorageService : IImageStorageService
 
     public S3ImageStorageService(IConfiguration configuration, IHttpClientFactory httpClientFactory)
     {
-        _region = configuration["AWS:Region"]!;
-        _bucketName = configuration["AWS:BucketName"]!;
-        _s3Client = new AmazonS3Client(
-            configuration["AWS:AccessKeyId"],
-            configuration["AWS:SecretAccessKey"],
-            RegionEndpoint.GetBySystemName(_region)
-        );
+        _region = configuration["AWS:Region"] ?? throw new InvalidOperationException("AWS:Region이 설정되지 않았습니다.");
+        _bucketName = configuration["AWS:BucketName"] ?? throw new InvalidOperationException("AWS:BucketName이 설정되지 않았습니다.");
+        var accessKeyId = configuration["AWS:AccessKeyId"] ?? throw new InvalidOperationException("AWS:AccessKeyId가 설정되지 않았습니다.");
+        var secretAccessKey = configuration["AWS:SecretAccessKey"] ?? throw new InvalidOperationException("AWS:SecretAccessKey가 설정되지 않았습니다.");
+        _s3Client = new AmazonS3Client(accessKeyId, secretAccessKey, RegionEndpoint.GetBySystemName(_region));
         _httpClientFactory = httpClientFactory;
     }
 
