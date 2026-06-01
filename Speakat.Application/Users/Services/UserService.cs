@@ -51,12 +51,21 @@ public class UserService(
         };
     }
 
-    public async Task<UploadUrlDto> GetImageUploadUrlAsync(string userUuid, ImageType type)
+    private static readonly Dictionary<string, string> AllowedContentTypes = new()
     {
+        ["image/jpeg"] = "jpg",
+        ["image/png"]  = "png",
+    };
+
+    public async Task<UploadUrlDto> GetImageUploadUrlAsync(string userUuid, ImageType type, string contentType)
+    {
+        if (!AllowedContentTypes.TryGetValue(contentType, out var ext))
+            throw UserException.InvalidImageFormat();
+
         _ = await userRepository.FindUserIdByUuidAsync(userUuid) ?? throw new UnauthorizedAccessException();
 
-        var key = ImageKey(userUuid, type);
-        var uploadUrl = await imageStorageService.GenerateUploadUrlAsync(key);
+        var key = ImageKey(userUuid, type, ext);
+        var uploadUrl = await imageStorageService.GenerateUploadUrlAsync(key, contentType);
 
         return new UploadUrlDto
         {
@@ -65,9 +74,9 @@ public class UserService(
         };
     }
 
-    private static string ImageKey(string userUuid, ImageType type) => type switch
+    private static string ImageKey(string userUuid, ImageType type, string ext) => type switch
     {
-        ImageType.Profile => $"profile-images/{userUuid}.jpg",
+        ImageType.Profile => $"profile-images/{userUuid}.{ext}",
         _ => throw new ArgumentOutOfRangeException(nameof(type))
     };
 

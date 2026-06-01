@@ -9,4 +9,7 @@ public class UserException : BusinessException
 
     public static UserException InvalidRequest() =>
         new("INVALID_REQUEST", "닉네임 형식 오류", 400);
+
+    public static UserException InvalidImageFormat() =>
+        new("INVALID_IMAGE_FORMAT", "지원하지 않는 이미지 형식입니다. (jpg, png만 허용)", 400);
 }

@@ -65,22 +65,22 @@ public class AuthService : IAuthService
             };
 
             user = await _userRepository.SaveAsync(user);
+            var profileKey = DefaultProfileImageKey;
             if (!string.IsNullOrEmpty(userInfo.ProfileImageUrl))
             {
                 try
                 {
                     var key = ProfileImgKey(user.UserUuid);
                     await _imageStorageService.UploadFromUrlAsync(userInfo.ProfileImageUrl, key);
-                    await _userRepository.UpdateProfileImageKeyAsync(user.UserId, key);
-                    user.ProfileImageKey = key;
+                    profileKey = key;
                 }
                 catch (Exception ex)
                 {
                     _logger.LogWarning(ex, "{Provider} 프로필 이미지 S3 업로드 실패, 기본 이미지 적용 (userUuid: {UserUuid})", provider, user.UserUuid);
-                    await _userRepository.UpdateProfileImageKeyAsync(user.UserId, DefaultProfileImageKey);
-                    user.ProfileImageKey = DefaultProfileImageKey;
                 }
             }
+            await _userRepository.UpdateProfileImageKeyAsync(user.UserId, profileKey);
+            user.ProfileImageKey = profileKey;
         }
 
         // JWT 발급
