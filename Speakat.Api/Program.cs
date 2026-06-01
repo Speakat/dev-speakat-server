@@ -65,24 +65,32 @@ builder.Services.AddHttpClient<KakaoOAuthProvider>();
 builder.Services.AddTransient<IOAuthProvider>(sp => sp.GetRequiredService<KakaoOAuthProvider>());
 
 //HttpClient로 Python AI 서비스 연결 (개발 환경에서는 스터빙 적용)
-// if (builder.Environment.IsDevelopment()) //개발 환경인 경우
-//     builder.Services.AddSingleton<IAiPipelineClient, StubAiPipelineClient>();
-// else
-builder.Services.AddHttpClient<IAiPipelineClient, AiPipelineClient>(client =>
+if (builder.Environment.IsDevelopment())
 {
-    client.BaseAddress = new Uri(builder.Configuration["AiService:BaseUrl"]!);
-    client.Timeout     = TimeSpan.FromSeconds(60);
-})
-.AddResilienceHandler("ai-pipeline", pipeline =>
+    builder.Services.AddSingleton<IAiPipelineClient, StubAiPipelineClient>();
+}
+else
 {
-    pipeline.AddCircuitBreaker(new HttpCircuitBreakerStrategyOptions
+    var aiBaseUrl = builder.Configuration["AiService:BaseUrl"];
+    if (string.IsNullOrWhiteSpace(aiBaseUrl) || !Uri.TryCreate(aiBaseUrl, UriKind.Absolute, out var aiBaseUri))
+        throw new InvalidOperationException("AiService:BaseUrl is not configured or invalid.");
+
+    builder.Services.AddHttpClient<IAiPipelineClient, AiPipelineClient>(client =>
     {
-        FailureRatio       = 0.5,
-        MinimumThroughput  = 5,
-        SamplingDuration   = TimeSpan.FromSeconds(30),
-        BreakDuration      = TimeSpan.FromSeconds(30),
+        client.BaseAddress = aiBaseUri;
+        client.Timeout     = TimeSpan.FromSeconds(60);
+    })
+    .AddResilienceHandler("ai-pipeline", pipeline =>
+    {
+        pipeline.AddCircuitBreaker(new HttpCircuitBreakerStrategyOptions
+        {
+            FailureRatio       = 0.5,
+            MinimumThroughput  = 5,
+            SamplingDuration   = TimeSpan.FromSeconds(30),
+            BreakDuration      = TimeSpan.FromSeconds(30),
+        });
     });
-});
+}
 
 // JWT 인증
 var secretKey = builder.Configuration["Jwt:SecretKey"]
@@ -107,7 +115,7 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
                 context.Response.ContentType = "application/json";
                 var isExpired = context.AuthenticateFailure is SecurityTokenExpiredException;
                 var ex = isExpired ? AuthException.AccessTokenExpired() : AuthException.InvalidToken();
-                var error = ApiResponse<object>.Fail(ex.Code, ex.Message!);
+                var error = ApiResponse<object>.Fail(ex.Code, ex.Message);
                 await context.Response.WriteAsJsonAsync(error);
             }
         };
