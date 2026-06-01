@@ -174,6 +174,11 @@ builder.Services.AddScoped<IUserStreakRepository, UserStreakRepository>();
 builder.Services.AddScoped<IUserCalendarRepository, UserCalendarRepository>();
 builder.Services.AddScoped<IUserService, UserService>();
 
+// Health Check
+builder.Services.AddHealthChecks()
+    .AddMySql(mysqlConnectionString, name: "mysql")
+    .AddRedis(redisConnectionString, name: "redis");
+
 // Rate Limiting — /speech 엔드포인트 전용, 유저별 슬라이딩 윈도우 (10회/분)
 builder.Services.AddRateLimiter(options =>
 {
@@ -227,6 +232,8 @@ app.UseExceptionHandler(o => { });
 app.UseAuthentication();
 app.UseAuthorization();
 app.UseRateLimiter();
+
+app.MapHealthChecks("/health");
 
 app.MapControllers();
 
