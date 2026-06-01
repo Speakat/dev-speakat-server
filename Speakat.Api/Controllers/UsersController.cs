@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using Speakat.Api.Common.Response;
 using Speakat.Application.Users.Dtos;
 using Speakat.Application.Users.Services;
+using Speakat.Domain.Enums;
 
 namespace Speakat.Api.Controllers;
 
@@ -34,6 +35,14 @@ public class UsersController(IUserService userService) : ControllerBase
     {
         await userService.DeleteAccountAsync(UserUuid);
         return NoContent();
+    }
+    
+    [HttpGet("me/images/upload-url")]
+    public async Task<ActionResult<ApiResponse<UploadUrlDto>>> GetImageUploadUrlAsync(
+        [FromQuery] ImageType type = ImageType.Profile)
+    {
+        var result = await userService.GetImageUploadUrlAsync(UserUuid, type);
+        return Ok(ApiResponse<UploadUrlDto>.Success(result));
     }
 
     [HttpGet("me/settings")]

@@ -1,5 +1,6 @@
 using Speakat.Application.Auth.Repositories;
 using Speakat.Application.Common.Exceptions;
+using Speakat.Application.Common.Interfaces;
 using Speakat.Application.Users.Dtos;
 using Speakat.Application.Users.Repositories;
 using Speakat.Domain.Enums;
@@ -9,6 +10,7 @@ namespace Speakat.Application.Users.Services;
 public class UserService(
     IUserRepository userRepository,
     IUserProfileRepository userProfileRepository,
+    IImageStorageService imageStorageService,
     IUserSettingsRepository userSettingsRepository,
     IUserStatsRepository userStatsRepository,
     IUserStreakRepository userStreakRepository,
@@ -25,7 +27,8 @@ public class UserService(
         {
             UserId = data.UserUuid,
             Nickname = data.Nickname,
-            ProfileImageUrl = null, // TODO: S3 이미지 업로드 구현 후 ProfileImageKey → URL 변환
+            ProfileImageUrl = data.ProfileImageKey is not null ? 
+                imageStorageService.GetPublicUrl(data.ProfileImageKey) : null,
             EnglishLevel = CalculateEnglishLevel(data.AvgSemanticScore, data.AvgGrammarScore, data.AvgNaturalnessScore)
         };
     }
@@ -37,15 +40,36 @@ public class UserService(
         if (nickname is not null && await userRepository.ExistsNicknameAsync(nickname))
             throw UserException.DuplicateNickname();
 
-        var (uuid, updatedNickname, _) = await userProfileRepository.UpdateProfileAsync(userId, nickname, profileImageKey);
+        var (uuid, updatedNickname, updatedImageKey) = await userProfileRepository.UpdateProfileAsync(userId, nickname, profileImageKey);
 
         return new PatchUserResultDto
         {
             UserId = uuid,
             Nickname = updatedNickname,
-            ProfileImageUrl = null // TODO: S3 이미지 업로드 구현 후 ProfileImageKey → URL 변환
+            ProfileImageUrl = updatedImageKey is not null ? 
+                imageStorageService.GetPublicUrl(updatedImageKey) : null,
         };
     }
+
+    public async Task<UploadUrlDto> GetImageUploadUrlAsync(string userUuid, ImageType type)
+    {
+        _ = await userRepository.FindUserIdByUuidAsync(userUuid) ?? throw new UnauthorizedAccessException();
+
+        var key = ImageKey(userUuid, type);
+        var uploadUrl = await imageStorageService.GenerateUploadUrlAsync(key);
+
+        return new UploadUrlDto
+        {
+            UploadUrl = uploadUrl,
+            Key = key
+        };
+    }
+
+    private static string ImageKey(string userUuid, ImageType type) => type switch
+    {
+        ImageType.Profile => $"profile-images/{userUuid}.jpg",
+        _ => throw new ArgumentOutOfRangeException(nameof(type))
+    };
 
     public async Task DeleteAccountAsync(string userUuid)
     {
