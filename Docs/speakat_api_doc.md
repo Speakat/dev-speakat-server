@@ -2,7 +2,7 @@
 
 > **Version:** v1.0  
 > **Base URL:** `/api/v1`  
-> **Last Updated:** 2026-04-29
+> **Last Updated:** 2026-06-02
 
 ---
 
@@ -566,8 +566,8 @@ Speakat은 자체 이메일 회원가입 없이 **Google / Kakao OAuth 소셜 �
 | turnEvaluation.objectiveProgress | array\<string\> | 이번 턴에서 달성된 목표 목록 |
 | turnEvaluation.isQuestComplete | boolean | 퀘스트 완료 여부 |
 | turnEvaluation.reason | string | AI 채점 근거 |
-| turnEvaluation.betterSuggestions | array\<string\> | 더 나은 표현 제안 - 플래시카드 저장 대상 |
-| turnEvaluation.recommendationReason | string | 제안 이유 - `user_flashcards.recommendation_reason`으로 저장 |
+| turnEvaluation.betterSuggestions | array\<string\> | 더 나은 표현 제안 - 클라이언트에서 사용자가 선택해 `POST /flashcards`로 수동 저장 |
+| turnEvaluation.recommendationReason | string | 제안 이유 - 수동 저장 시 `POST /flashcards` 요청의 `recommendationReason` 필드로 전달 |
 | questResult | object\|null | 퀘스트 완료 시 결과. `isQuestComplete: false`이면 `null` |
 | questResult.averageContextRelevance | float (0~1) | 세션 전체 의미 관련성 평균 |
 | questResult.averageGrammarAccuracy | float (0~1) | 세션 전체 문법 정확성 평균 |
@@ -614,6 +614,50 @@ Speakat은 자체 이메일 회원가입 없이 **Google / Kakao OAuth 소셜 �
 ---
 
 ### 5.5 Flashcards (플래시카드 / 단어 학습)
+
+#### `POST /flashcards` 🔒- 플래시카드 수동 저장
+
+`POST /sessions/{sessionId}/speech` 응답의 `betterSuggestions`에서 원하는 단어를 선택해 저장합니다. 단어 정보(뜻, 발음 등)는 서버에서 외부 사전 API를 통해 자동으로 조회합니다.
+
+**Request Body:**
+
+```json
+{
+  "questId": 2,
+  "word": "espresso",
+  "recommendationReason": "주문 상황에서 더 자연스러운 표현입니다."
+}
+```
+
+| 필드 | 타입 | 필수 | 설명 |
+|------|------|------|------|
+| questId | long | ✅ | 단어가 등장한 퀘스트 ID (`turnEvaluation`이 속한 세션의 questId) |
+| word | string | ✅ | 저장할 단어 (`betterSuggestions` 배열의 항목 중 하나) |
+| recommendationReason | string | ✅ | 저장 이유 (`turnEvaluation.recommendationReason` 그대로 전달) |
+
+**Response (200 OK):**
+
+```json
+{
+  "isSuccess": true,
+  "data": {
+    "flashcardId": 101,
+    "word": "espresso",
+    "meaning": "a strong coffee made by forcing hot water through finely ground coffee beans",
+    "phonetic": "/eˈspresəʊ/",
+    "audioUrl": "https://api.dictionaryapi.dev/media/pronunciations/en/espresso-us.mp3",
+    "isMastered": false
+  }
+}
+```
+
+| 필드 | 타입 | 설명 |
+|------|------|------|
+| flashcardId | long | 저장된 플래시카드 ID (`GET /flashcards/{flashcardId}` 조회에 사용) |
+| meaning | string | 사전 API에서 조회한 영문 정의. 조회 실패 시 `recommendationReason`으로 대체 |
+| audioUrl | string\|null | 발음 오디오 URL. 사전에 없으면 `null` |
+
+---
 
 #### `GET /flashcards` 🔒- 내 플래시카드 목록 조회
 
