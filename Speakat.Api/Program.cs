@@ -6,7 +6,6 @@ using System.Threading.RateLimiting;
 using AWS.Logger;
 using AWS.Logger.SeriLog;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.Extensions.Http.Resilience;
 using Polly;
 using Microsoft.EntityFrameworkCore;
@@ -74,6 +73,16 @@ builder.Services.AddTransient<IOAuthProvider>(sp => sp.GetRequiredService<Google
 
 builder.Services.AddHttpClient<KakaoOAuthProvider>();
 builder.Services.AddTransient<IOAuthProvider>(sp => sp.GetRequiredService<KakaoOAuthProvider>());
+
+// cors 설정
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowWebClient", policy =>
+        policy.WithOrigins(
+                "https://speakatweb.hyorim.shop")
+            .AllowAnyHeader()
+            .AllowAnyMethod());
+});
 
 //HttpClient로 Python AI 서비스 연결 (개발 환경에서는 스터빙 적용)
 if (builder.Environment.IsDevelopment())
@@ -239,6 +248,7 @@ if (app.Environment.IsDevelopment())
 // app.UseHttpsRedirection();
 
 app.UseExceptionHandler(o => { });
+app.UseCors("AllowWebClient");
 app.UseAuthentication();
 app.UseAuthorization();
 app.UseRateLimiter();
