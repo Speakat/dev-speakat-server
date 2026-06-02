@@ -3,6 +3,7 @@ using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Threading.RateLimiting;
+using AWS.Logger.SeriLog;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.Extensions.Http.Resilience;
@@ -41,7 +42,11 @@ using StackExchange.Redis;
 var builder = WebApplication.CreateBuilder(args);
 Serilog.Debugging.SelfLog.Enable(Console.Error);
 builder.Host.UseSerilog((context, config) =>
-    config.ReadFrom.Configuration(context.Configuration));
+{
+    config.ReadFrom.Configuration(context.Configuration);
+    if (!context.HostingEnvironment.IsDevelopment())
+        config.WriteTo.AWSSeriLog(context.Configuration);
+});
 
 builder.Services.AddOpenApi(options =>
 {
