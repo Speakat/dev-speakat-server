@@ -69,6 +69,35 @@ async def append_turn_eval(
     await client.set(key, json.dumps(data, ensure_ascii=False), ex=SESSION_TTL)
 
 
+async def get_eval_data(session_id: str, quest_id: int) -> dict:
+    #현재 eval 누적 데이터 반환
+    client = _get_client()
+    raw = await client.get(_eval_key(session_id, quest_id))
+    return json.loads(raw) if raw else {"scores": [], "achieved_objectives": [], "closing_turns_remaining": None}
+
+
+async def start_closing_phase(session_id: str, quest_id: int) -> None:
+    #모든 목표 달성 직후 마무리 단계(최대 3턴)를 시작
+    client = _get_client()
+    key = _eval_key(session_id, quest_id)
+    raw = await client.get(key)
+    data = json.loads(raw) if raw else {"scores": [], "achieved_objectives": []}
+    data["closing_turns_remaining"] = 3
+    await client.set(key, json.dumps(data, ensure_ascii=False), ex=SESSION_TTL)
+
+
+async def tick_closing_phase(session_id: str, quest_id: int) -> int:
+    #마무리 턴 카운트를 1 감소하고 남은 횟수를 반환
+    client = _get_client()
+    key = _eval_key(session_id, quest_id)
+    raw = await client.get(key)
+    data = json.loads(raw) if raw else {}
+    remaining = max(0, (data.get("closing_turns_remaining") or 1) - 1)
+    data["closing_turns_remaining"] = remaining
+    await client.set(key, json.dumps(data, ensure_ascii=False), ex=SESSION_TTL)
+    return remaining
+
+
 async def get_quest_summary(
     session_id: str,
     quest_id: int,
