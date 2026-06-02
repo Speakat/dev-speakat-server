@@ -39,6 +39,7 @@ using Speakat.Infrastructure.Storage;
 using StackExchange.Redis;
 
 var builder = WebApplication.CreateBuilder(args);
+Serilog.Debugging.SelfLog.Enable(Console.Error);
 builder.Host.UseSerilog((context, config) =>
     config.ReadFrom.Configuration(context.Configuration));
 
