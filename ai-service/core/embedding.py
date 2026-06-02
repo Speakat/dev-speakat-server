@@ -36,7 +36,7 @@ def _embed(text: str) -> np.ndarray:
     return pooled / norm
 
 
-def check_similarity(user_text: str, reference_sentences: list[str]) -> tuple[float, bool]:
+def check_similarity(user_text: str, reference_sentences: list[str], threshold: float = SIMILARITY_THRESHOLD) -> tuple[float, bool]:
     user_emb = _embed(user_text)
     best     = max(float(np.sum(_embed(ref) * user_emb)) for ref in reference_sentences)
-    return best, best >= SIMILARITY_THRESHOLD
+    return best, best >= threshold

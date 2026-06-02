@@ -22,9 +22,10 @@ async def evaluate_endpoint(req: EvaluateRequest):
         # STT
         user_text = transcribe(audio_bytes)
 
-        #유사도 필터
+        #유사도 필터 (첫 번째 턴 0.3, 이후 0.1)
         reference_sentences = req.quest_prompt.get("reference_sentences", [])
-        sim_score, passed = check_similarity(user_text, reference_sentences)
+        sim_threshold = 0.3 if req.turn == 1 else 0.1
+        sim_score, passed = check_similarity(user_text, reference_sentences, sim_threshold)
 
         if not passed:
             return EvaluateResponse(
