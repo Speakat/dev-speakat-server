@@ -21,6 +21,8 @@ public class UserFlashcardConfiguration : IEntityTypeConfiguration<UserFlashcard
             .HasColumnName("recommendation_reason")
             .HasColumnType("text");
 
+        builder.Property(uf => uf.IsMastered).HasColumnName("is_mastered");
+
         builder.Property(uf => uf.SavedAt)
             .HasColumnName("saved_at")
             .HasDefaultValueSql("CURRENT_TIMESTAMP(6)");

@@ -14,9 +14,13 @@ public class FlashcardConfiguration : IEntityTypeConfiguration<Flashcard>
         builder.Property(f => f.FlashcardId).HasColumnName("flashcard_id");
         
         builder.Property(f => f.WordId).HasColumnName("word_id");
-        
-        builder.Property(f => f.IsMastered).HasColumnName("is_mastered");
-        
+
+        builder.Property(f => f.LanguageId).HasColumnName("language_id");
+
+        builder.Property(f => f.Definition)
+            .HasColumnName("definition")
+            .HasColumnType("text");
+
         builder.Property(f => f.CreatedAt)
             .HasColumnName("created_at")
             .HasDefaultValueSql("CURRENT_TIMESTAMP(6)");
@@ -24,5 +28,9 @@ public class FlashcardConfiguration : IEntityTypeConfiguration<Flashcard>
         builder.HasOne(f => f.Word)
             .WithMany()
             .HasForeignKey(f => f.WordId);
+
+        builder.HasOne(f => f.Language)
+            .WithMany()
+            .HasForeignKey(f => f.LanguageId);
     }
 }
