@@ -18,6 +18,14 @@ public class FlashcardsController : ControllerBase
 
     private string UserUuid => User.FindFirstValue(ClaimTypes.NameIdentifier)!;
 
+    [HttpPost]
+    public async Task<ActionResult<ApiResponse<FlashcardDetailDto>>> SaveFlashcardAsync(
+        [FromBody] SaveFlashcardRequestDto request)
+    {
+        var result = await _flashcardService.SaveFlashcardAsync(UserUuid, request);
+        return Ok(ApiResponse<FlashcardDetailDto>.Success(result));
+    }
+
     [HttpGet]
     public async Task<ActionResult<ApiResponse<FlashcardListDto>>> GetFlashcardsAsync(
         [FromQuery] string? cursor,
