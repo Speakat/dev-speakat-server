@@ -43,12 +43,16 @@ jobs:
           host: ${{ secrets.EC2_HOST }}
           username: ${{ secrets.EC2_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
+          envs: ECR_URI,AWS_ACCESS_KEY_ID,AWS_SECRET_ACCESS_KEY
           script: |
-            export ECR_URI=${{ secrets.ECR_URI }}
             aws ecr get-login-password --region ap-northeast-2 | \
-              docker login --username AWS --password-stdin ${{ secrets.ECR_URI }}
+              docker login --username AWS --password-stdin $ECR_URI
             cd ~/dev-speakat-server
             git pull origin develop
-            docker compose down
-            docker compose pull
-            docker compose up -d
+            ECR_URI=$ECR_URI docker compose down
+            ECR_URI=$ECR_URI docker compose pull
+            ECR_URI=$ECR_URI docker compose up -d
+        env:
+          ECR_URI: ${{ secrets.ECR_URI }}
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
