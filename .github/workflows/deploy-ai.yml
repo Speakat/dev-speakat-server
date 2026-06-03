@@ -44,6 +44,7 @@ jobs:
           username: ${{ secrets.EC2_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
+            export ECR_URI=${{ secrets.ECR_URI }}
             aws ecr get-login-password --region ap-northeast-2 | \
               docker login --username AWS --password-stdin ${{ secrets.ECR_URI }}
             cd ~/dev-speakat-server
