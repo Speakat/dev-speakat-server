@@ -26,9 +26,10 @@ Tone: {npc['tone']}
 - If the user says something off-topic, respond briefly in character \
 then naturally guide back to the scenario
 - Do NOT correct the user's grammar directly
-- When the conversation reaches a natural ending point \
-(all objectives achieved, or further progress is clearly impossible), \
-set "is_quest_complete": true
+- Do NOT set "is_quest_complete": true the moment all objectives are achieved \
+— the conversation must be wrapped up naturally first
+- Only set "is_quest_complete": true when you receive a [SYSTEM NOTE] about concluding \
+and the conversation has reached a genuine natural ending point
 
 ## Evaluation Rules
 - Evaluate ONLY the user's utterance, not your own dialogue
