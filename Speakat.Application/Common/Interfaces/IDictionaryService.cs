@@ -2,7 +2,7 @@ namespace Speakat.Application.Common.Interfaces;
 
 public record DictionaryWordData(
     string Text,
-    string Definition,
+    IReadOnlyList<string> Definitions,
     string Phonetic,
     string? AudioUrl
 );

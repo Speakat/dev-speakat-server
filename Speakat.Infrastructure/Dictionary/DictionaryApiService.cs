@@ -21,23 +21,29 @@ public class DictionaryApiService(IHttpClientFactory httpClientFactory, ILogger<
 
             var json = await response.Content.ReadAsStringAsync();
             var entries = JsonSerializer.Deserialize<List<DictionaryEntry>>(json);
-            var entry = entries?.FirstOrDefault();
-            if (entry is null) return null;
+            if (entries is null || entries.Count == 0) return null;
 
-            var definition = entry.Meanings
+            var definitions = entries
+                .SelectMany(e => e.Meanings)
                 .SelectMany(m => m.Definitions)
                 .Select(d => d.Text)
-                .FirstOrDefault() ?? string.Empty;
+                .Where(d => !string.IsNullOrWhiteSpace(d))
+                .ToList();
 
-            var phonetic = entry.Phonetics
+            if (definitions.Count == 0) return null;
+
+            var first = entries[0];
+            var phonetic = entries
+                .SelectMany(e => e.Phonetics)
                 .Select(p => p.Text)
                 .FirstOrDefault(t => !string.IsNullOrEmpty(t)) ?? string.Empty;
 
-            var audioUrl = entry.Phonetics
+            var audioUrl = entries
+                .SelectMany(e => e.Phonetics)
                 .Select(p => p.Audio)
                 .FirstOrDefault(a => !string.IsNullOrEmpty(a));
 
-            return new DictionaryWordData(entry.Word, definition, phonetic, audioUrl);
+            return new DictionaryWordData(first.Word, definitions, phonetic, audioUrl);
         }
         catch (Exception ex)
         {
