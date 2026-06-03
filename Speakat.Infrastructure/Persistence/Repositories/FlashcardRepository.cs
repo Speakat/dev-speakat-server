@@ -13,6 +13,7 @@ public class FlashcardRepository : IFlashcardRepository
     private readonly AppDbContext _context;
     private readonly IDictionaryService _dictionaryService;
     private readonly ITranslationService _translationService;
+    private readonly IAiPipelineClient _aiPipelineClient;
     private readonly string _targetLanguage;
     private readonly long _targetLanguageId;
     private const long EnglishLanguageId = 1;
@@ -21,11 +22,13 @@ public class FlashcardRepository : IFlashcardRepository
         AppDbContext context,
         IDictionaryService dictionaryService,
         ITranslationService translationService,
+        IAiPipelineClient aiPipelineClient,
         IConfiguration configuration)
     {
         _context = context;
         _dictionaryService = dictionaryService;
         _translationService = translationService;
+        _aiPipelineClient = aiPipelineClient;
         _targetLanguage = configuration["Translation:TargetLanguage"] ?? "ko";
         _targetLanguageId = configuration.GetValue<long>("Translation:TargetLanguageId", 2);
     }
@@ -65,11 +68,17 @@ public class FlashcardRepository : IFlashcardRepository
     {
         var data = await _dictionaryService.LookupAsync(text);
 
+        var definition = string.Empty;
+        if (data is not null && data.Definitions.Count > 0)
+            definition = data.Definitions.Count == 1
+                ? data.Definitions[0]
+                : await SelectDefinitionAsync(recommendationReason, data.Definitions);
+
         var word = new Word
         {
             LanguageId = EnglishLanguageId,
             Text       = data?.Text ?? text,
-            Definition = data?.Definition ?? string.Empty,
+            Definition = definition,
             Phonetic   = data?.Phonetic ?? string.Empty,
             AudioUrl   = data?.AudioUrl
         };
@@ -78,17 +87,23 @@ public class FlashcardRepository : IFlashcardRepository
         return word;
     }
 
-    private async Task<Flashcard> CreateFlashcardAsync(long wordId, string englishDefinition, string recommendationReason)
+    private async Task<string> SelectDefinitionAsync(string query, IReadOnlyList<string> definitions)
     {
-        var definition = !string.IsNullOrEmpty(englishDefinition)
-            ? await _translationService.TranslateAsync(englishDefinition, _targetLanguage)
+        var (selected, _) = await _aiPipelineClient.FindBestDefinitionAsync(query, definitions);
+        return selected;
+    }
+
+    private async Task<Flashcard> CreateFlashcardAsync(long wordId, string definition, string recommendationReason)
+    {
+        var translatedDefinition = !string.IsNullOrEmpty(definition)
+            ? await _translationService.TranslateAsync(definition, _targetLanguage)
             : recommendationReason;
 
         var flashcard = new Flashcard
         {
             WordId     = wordId,
             LanguageId = _targetLanguageId,
-            Definition = definition,
+            Definition = translatedDefinition,
         };
         _context.Flashcards.Add(flashcard);
         await _context.SaveChangesAsync();

@@ -25,3 +25,7 @@ class EvaluateResponse(BaseModel):
     similarity_passed: bool
     turn_evaluation: TurnEvaluation
     quest_result: QuestResult | None = None
+
+class BestDefinitionResponse(BaseModel):
+    best_definition: str
+    scores: list[float]

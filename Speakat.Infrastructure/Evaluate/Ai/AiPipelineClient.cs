@@ -30,4 +30,31 @@ public class AiPipelineClient : IAiPipelineClient
             throw AiServiceException.Unavailable();
         }
     }
+
+    public async Task<(string BestDefinition, IReadOnlyList<float> Scores)> FindBestDefinitionAsync(string query, IReadOnlyList<string> definitions)
+    {
+        try
+        {
+            var res = await _http.PostAsJsonAsync("/best-definition", new
+            {
+                query,
+                definitions,
+            });
+            res.EnsureSuccessStatusCode();
+
+            var result = await res.Content.ReadFromJsonAsync<BestDefinitionResponse>()
+                ?? throw new InvalidOperationException("AI 서비스 응답 파싱 실패");
+            return (result.BestDefinition, result.Scores);
+        }
+        catch (Exception ex) when (ex is not AiServiceException)
+        {
+            throw AiServiceException.Unavailable();
+        }
+    }
+
+    private sealed record BestDefinitionResponse(
+        [property: System.Text.Json.Serialization.JsonPropertyName("best_definition")]
+        string BestDefinition,
+        [property: System.Text.Json.Serialization.JsonPropertyName("scores")]
+        List<float> Scores);
 }

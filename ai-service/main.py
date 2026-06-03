@@ -1,14 +1,20 @@
 import base64
 from fastapi import FastAPI, HTTPException
-from models.request import EvaluateRequest
-from models.response import EvaluateResponse, TurnEvaluation, QuestResult
+from models.request import EvaluateRequest, BestDefinitionRequest
+from models.response import EvaluateResponse, TurnEvaluation, QuestResult, BestDefinitionResponse
 from core.stt import transcribe
-from core.embedding import check_similarity
+from core.embedding import check_similarity, find_best_definition
 from core.evaluator import evaluate
 from core.tts import speak_roleplay
 from core.session import get_quest_summary
 
 app = FastAPI()
+
+@app.post("/best-definition", response_model=BestDefinitionResponse)
+async def best_definition_endpoint(req: BestDefinitionRequest):
+    best, scores = find_best_definition(req.query, req.definitions)
+    return BestDefinitionResponse(best_definition=best, scores=scores)
+
 
 @app.post("/evaluate", response_model=EvaluateResponse)
 async def evaluate_endpoint(req: EvaluateRequest):
