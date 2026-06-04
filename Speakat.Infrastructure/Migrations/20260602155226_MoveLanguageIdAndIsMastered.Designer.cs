@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Speakat.Infrastructure.Persistence;
 
@@ -11,9 +12,11 @@ using Speakat.Infrastructure.Persistence;
 namespace Speakat.Infrastructure.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260602155226_MoveLanguageIdAndIsMastered")]
+    partial class MoveLanguageIdAndIsMastered
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -36,11 +39,6 @@ namespace Speakat.Infrastructure.Migrations
                         .HasColumnType("datetime(6)")
                         .HasColumnName("created_at")
                         .HasDefaultValueSql("CURRENT_TIMESTAMP(6)");
-
-                    b.Property<string>("Definition")
-                        .IsRequired()
-                        .HasColumnType("text")
-                        .HasColumnName("definition");
 
                     b.Property<long>("LanguageId")
                         .HasColumnType("bigint")
@@ -673,10 +671,6 @@ namespace Speakat.Infrastructure.Migrations
                         .HasColumnType("text")
                         .HasColumnName("definition");
 
-                    b.Property<long>("LanguageId")
-                        .HasColumnType("bigint")
-                        .HasColumnName("language_id");
-
                     b.Property<string>("Phonetic")
                         .IsRequired()
                         .HasMaxLength(255)
@@ -690,8 +684,6 @@ namespace Speakat.Infrastructure.Migrations
                         .HasColumnName("word");
 
                     b.HasKey("WordId");
-
-                    b.HasIndex("LanguageId");
 
                     b.ToTable("words", (string)null);
                 });
@@ -887,17 +879,6 @@ namespace Speakat.Infrastructure.Migrations
                     b.Navigation("Stage");
 
                     b.Navigation("User");
-                });
-
-            modelBuilder.Entity("Speakat.Domain.Entities.Word", b =>
-                {
-                    b.HasOne("Speakat.Domain.Entities.Language", "Language")
-                        .WithMany()
-                        .HasForeignKey("LanguageId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Language");
                 });
 
             modelBuilder.Entity("Speakat.Domain.Entities.User", b =>

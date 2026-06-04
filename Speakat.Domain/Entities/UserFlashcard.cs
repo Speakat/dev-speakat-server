@@ -7,6 +7,7 @@ public class UserFlashcard
     public long FlashcardId { get; set; }
     public long QuestId { get; set; }
     public string? RecommendationReason { get; set; }
+    public bool IsMastered { get; set; }
     public DateTime SavedAt { get; set; }
 
     public User? User { get; set; }

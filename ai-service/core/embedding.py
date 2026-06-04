@@ -42,3 +42,9 @@ def check_similarity(user_text: str, reference_sentences: list[str], threshold: 
     user_emb = _embed(user_text)
     best     = max(float(np.sum(_embed(ref) * user_emb)) for ref in reference_sentences)
     return best, best >= threshold
+
+
+def find_best_definition(query: str, definitions: list[str]) -> tuple[str, list[float]]:
+    query_emb = _embed(query)
+    scores    = [float(np.sum(_embed(d) * query_emb)) for d in definitions]
+    return definitions[int(np.argmax(scores))], scores

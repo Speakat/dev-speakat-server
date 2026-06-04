@@ -6,3 +6,7 @@ class EvaluateRequest(BaseModel):
     session_id: str
     turn: int
     quest_prompt: dict
+
+class BestDefinitionRequest(BaseModel):
+    query: str
+    definitions: list[str]

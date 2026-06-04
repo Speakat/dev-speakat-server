@@ -1,10 +1,9 @@
 using Speakat.Application.Common.Exceptions;
 using Speakat.Application.Common.Interfaces;
-using Speakat.Application.Flashcards.Repositories;
 
 namespace Speakat.Application.Evaluate.Services;
 
-public class EvaluateService(IAiPipelineClient ai, IQuestDataService questData, ISessionStore sessionStore, IGameSessionRepository gameSessionRepo, IFlashcardRepository flashcardRepo, IUserStageRepository userStageRepo) : IEvaluateService
+public class EvaluateService(IAiPipelineClient ai, IQuestDataService questData, ISessionStore sessionStore, IGameSessionRepository gameSessionRepo, IUserStageRepository userStageRepo) : IEvaluateService
 {
     private const float PassThreshold = 0.7f;
 
@@ -23,8 +22,6 @@ public class EvaluateService(IAiPipelineClient ai, IQuestDataService questData, 
             && aiResult.TurnEvaluation.ContextRelevance >= PassThreshold
             && aiResult.TurnEvaluation.GrammarAccuracy >= PassThreshold
             && aiResult.TurnEvaluation.ExpressionQuality >= PassThreshold;
-
-        await flashcardRepo.SaveAsync(userId, request.QuestId, aiResult.TurnEvaluation);
 
         if (aiResult.QuestResult is not null)
             if(aiResult.QuestResult.IsQuestSuccess)

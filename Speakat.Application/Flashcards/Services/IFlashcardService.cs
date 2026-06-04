@@ -4,6 +4,8 @@ namespace Speakat.Application.Flashcards.Services;
 
 public interface IFlashcardService
 {
+    Task<FlashcardDetailDto> SaveFlashcardAsync(string userUuid, SaveFlashcardRequestDto request);
+
     Task<FlashcardListDto> GetFlashcardsAsync(
         string userUuid,
         string? cursor,

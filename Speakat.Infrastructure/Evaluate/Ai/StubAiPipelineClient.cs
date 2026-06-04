@@ -2,6 +2,9 @@ namespace Speakat.Infrastructure.Evaluate.Ai;
 
 public class StubAiPipelineClient : IAiPipelineClient
 {
+    public Task<(string BestDefinition, IReadOnlyList<float> Scores)> FindBestDefinitionAsync(string query, IReadOnlyList<string> definitions)
+        => Task.FromResult((definitions.FirstOrDefault() ?? string.Empty, (IReadOnlyList<float>)definitions.Select(_ => 0f).ToList()));
+
     public Task<AiPipelineResult> EvaluateAsync(string audioBase64, long questId, string sessionId, int turn, QuestPromptDto questPrompt)
     {
         var result = new AiPipelineResult(

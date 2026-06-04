@@ -25,7 +25,7 @@ public record FlashcardDetailData(
 
 public interface IFlashcardRepository
 {
-    Task SaveAsync(long userId, long questId, TurnEvaluationResult evaluationResult);
+    Task<FlashcardDetailData> SaveWordAsync(long userId, long questId, string word, string recommendationReason);
 
     Task<IReadOnlyList<FlashcardData>> GetFlashcardsAsync(
         long userId,
@@ -35,5 +35,5 @@ public interface IFlashcardRepository
 
     Task<FlashcardDetailData?> GetFlashcardDetailAsync(long userId, long flashcardId);
 
-    Task<Flashcard?> UpdateIsMasteredAsync(long userId, long flashcardId, bool isMastered);
+    Task<UserFlashcard?> UpdateIsMasteredAsync(long userId, long flashcardId, bool isMastered);
 }

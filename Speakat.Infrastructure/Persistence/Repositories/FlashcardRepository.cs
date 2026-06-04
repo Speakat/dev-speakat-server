@@ -1,4 +1,7 @@
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
+using Speakat.Application.Common.Exceptions;
+using Speakat.Application.Common.Interfaces;
 using Speakat.Application.Flashcards.Repositories;
 using Speakat.Domain.Entities;
 using Speakat.Infrastructure.Persistence;
@@ -8,34 +11,100 @@ namespace Speakat.Infrastructure.Persistence.Repositories;
 public class FlashcardRepository : IFlashcardRepository
 {
     private readonly AppDbContext _context;
+    private readonly IDictionaryService _dictionaryService;
+    private readonly ITranslationService _translationService;
+    private readonly IAiPipelineClient _aiPipelineClient;
+    private readonly string _targetLanguage;
+    private readonly long _targetLanguageId;
+    private const long EnglishLanguageId = 1;
 
-    public FlashcardRepository(AppDbContext context) => _context = context;
-    
-    public async Task SaveAsync(long userId, long questId, TurnEvaluationResult evaluationResult)
+    public FlashcardRepository(
+        AppDbContext context,
+        IDictionaryService dictionaryService,
+        ITranslationService translationService,
+        IAiPipelineClient aiPipelineClient,
+        IConfiguration configuration)
     {
-        foreach (var suggestion in evaluationResult.BetterSuggestions)
-        {
-            var word = await _context.Words.FirstOrDefaultAsync(w => w.Text == suggestion);
-            if (word is null) continue;
-
-            var flashcard = await _context.Flashcards.FirstOrDefaultAsync(f => f.WordId == word.WordId)
-                ?? await CreateFlashcardAsync(word.WordId);
-
-            _context.UserFlashcards.Add(new UserFlashcard
-            {
-                UserId = userId,
-                FlashcardId = flashcard.FlashcardId,
-                QuestId = questId,
-                RecommendationReason = evaluationResult.RecommendationReason,
-            });
-        }
-
-        await _context.SaveChangesAsync();
+        _context = context;
+        _dictionaryService = dictionaryService;
+        _translationService = translationService;
+        _aiPipelineClient = aiPipelineClient;
+        _targetLanguage = configuration["Translation:TargetLanguage"] ?? "ko";
+        _targetLanguageId = configuration.GetValue<long>("Translation:TargetLanguageId", 2);
     }
 
-    private async Task<Flashcard> CreateFlashcardAsync(long wordId)
+    public async Task<FlashcardDetailData> SaveWordAsync(long userId, long questId, string word, string recommendationReason)
     {
-        var flashcard = new Flashcard { WordId = wordId };
+        var questExists = await _context.Quests.AnyAsync(q => q.QuestId == questId);
+        if (!questExists) throw QuestException.NotFound();
+
+        var wordEntity = await _context.Words.FirstOrDefaultAsync(w => w.Text == word)
+                         ?? await CreateWordAsync(word, recommendationReason);
+
+        var flashcard = await _context.Flashcards.FirstOrDefaultAsync(f => f.WordId == wordEntity.WordId)
+                        ?? await CreateFlashcardAsync(wordEntity.WordId, wordEntity.Definition, recommendationReason);
+
+        var userFlashcard = new UserFlashcard
+        {
+            UserId = userId,
+            FlashcardId = flashcard.FlashcardId,
+            QuestId = questId,
+            RecommendationReason = recommendationReason,
+        };
+        _context.UserFlashcards.Add(userFlashcard);
+        await _context.SaveChangesAsync();
+
+        return new FlashcardDetailData(
+            flashcard.FlashcardId,
+            wordEntity.Text,
+            flashcard.Definition,
+            wordEntity.Phonetic,
+            wordEntity.AudioUrl,
+            userFlashcard.IsMastered
+        );
+    }
+
+    private async Task<Word> CreateWordAsync(string text, string recommendationReason)
+    {
+        var data = await _dictionaryService.LookupAsync(text);
+
+        var definition = string.Empty;
+        if (data is not null && data.Definitions.Count > 0)
+            definition = data.Definitions.Count == 1
+                ? data.Definitions[0]
+                : await SelectDefinitionAsync(recommendationReason, data.Definitions);
+
+        var word = new Word
+        {
+            LanguageId = EnglishLanguageId,
+            Text       = data?.Text ?? text,
+            Definition = definition,
+            Phonetic   = data?.Phonetic ?? string.Empty,
+            AudioUrl   = data?.AudioUrl
+        };
+        _context.Words.Add(word);
+        await _context.SaveChangesAsync();
+        return word;
+    }
+
+    private async Task<string> SelectDefinitionAsync(string query, IReadOnlyList<string> definitions)
+    {
+        var (selected, _) = await _aiPipelineClient.FindBestDefinitionAsync(query, definitions);
+        return selected;
+    }
+
+    private async Task<Flashcard> CreateFlashcardAsync(long wordId, string definition, string recommendationReason)
+    {
+        var translatedDefinition = !string.IsNullOrEmpty(definition)
+            ? await _translationService.TranslateAsync(definition, _targetLanguage)
+            : recommendationReason;
+
+        var flashcard = new Flashcard
+        {
+            WordId     = wordId,
+            LanguageId = _targetLanguageId,
+            Definition = translatedDefinition,
+        };
         _context.Flashcards.Add(flashcard);
         await _context.SaveChangesAsync();
         return flashcard;
@@ -48,34 +117,34 @@ public class FlashcardRepository : IFlashcardRepository
             .Join(_context.Flashcards,
                 uf => uf.FlashcardId,
                 f => f.FlashcardId,
-                (uf, f) => new { f })
+                (uf, f) => new { uf, f })
             .Join(_context.Words,
                 x => x.f.WordId,
                 w => w.WordId,
                 (x, w) => new FlashcardDetailData(
                     x.f.FlashcardId,
                     w.Text,
-                    w.Definition,
+                    x.f.Definition,
                     w.Phonetic,
                     w.AudioUrl,
-                    x.f.IsMastered
+                    x.uf.IsMastered
                 ))
             .FirstOrDefaultAsync();
     }
 
-    public async Task<Flashcard?> UpdateIsMasteredAsync(long userId, long flashcardId, bool isMastered)
+    public async Task<UserFlashcard?> UpdateIsMasteredAsync(long userId, long flashcardId, bool isMastered)
     {
-        var hasFlashcard = await _context.UserFlashcards
-            .AnyAsync(uf => uf.UserId == userId && uf.FlashcardId == flashcardId);
+        var userFlashcards = await _context.UserFlashcards
+            .Where(uf => uf.UserId == userId && uf.FlashcardId == flashcardId)
+            .ToListAsync();
 
-        if (!hasFlashcard) return null;
+        if (userFlashcards.Count == 0) return null;
 
-        var flashcard = await _context.Flashcards.FindAsync(flashcardId);
-        if (flashcard is null) return null;
+        foreach (var uf in userFlashcards)
+            uf.IsMastered = isMastered;
 
-        flashcard.IsMastered = isMastered;
         await _context.SaveChangesAsync();
-        return flashcard;
+        return userFlashcards[0];
     }
 
     public async Task<IReadOnlyList<FlashcardData>> GetFlashcardsAsync(
@@ -110,9 +179,9 @@ public class FlashcardRepository : IFlashcardRepository
                 x.uf.UserFlashcardId,
                 x.f.FlashcardId,
                 x.w.Text,
-                x.w.Definition,
+                x.f.Definition,
                 x.w.Phonetic,
-                x.f.IsMastered,
+                x.uf.IsMastered,
                 x.uf.SavedAt,
                 x.uf.QuestId,
                 x.q.Title

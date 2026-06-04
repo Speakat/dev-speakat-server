@@ -19,6 +19,23 @@ public class FlashcardService : IFlashcardService
         _userRepository = userRepository;
     }
 
+    public async Task<FlashcardDetailDto> SaveFlashcardAsync(string userUuid, SaveFlashcardRequestDto request)
+    {
+        var userId = await _userRepository.FindUserIdByUuidAsync(userUuid) ?? throw AuthException.UserNotFound();
+
+        var data = await _flashcardRepository.SaveWordAsync(userId, request.QuestId, request.Word, request.RecommendationReason);
+
+        return new FlashcardDetailDto
+        {
+            FlashcardId = data.FlashcardId,
+            Word        = data.Word,
+            Meaning     = data.Meaning,
+            Phonetic    = data.Phonetic,
+            AudioUrl    = data.AudioUrl,
+            IsMastered  = data.IsMastered
+        };
+    }
+
     public async Task<FlashcardListDto> GetFlashcardsAsync(
         string userUuid,
         string? cursor,
@@ -77,13 +94,13 @@ public class FlashcardService : IFlashcardService
     {
         var userId = await _userRepository.FindUserIdByUuidAsync(userUuid) ?? throw AuthException.UserNotFound();
 
-        var flashcard = await _flashcardRepository.UpdateIsMasteredAsync(userId, flashcardId, isMastered)
+        var userFlashcard = await _flashcardRepository.UpdateIsMasteredAsync(userId, flashcardId, isMastered)
             ?? throw FlashcardException.NotFound();
 
         return new PatchFlashcardResultDto
         {
-            FlashcardId = flashcard.FlashcardId,
-            IsMastered = flashcard.IsMastered
+            FlashcardId = userFlashcard.FlashcardId,
+            IsMastered = userFlashcard.IsMastered
         };
     }
 
