@@ -517,7 +517,10 @@ Speakat은 자체 이메일 회원가입 없이 **Google / Kakao OAuth 소셜 �
       "objectiveProgress": [],
       "isQuestComplete": false,
       "reason": "사용자의 말이 맥락과 관련이 없는 사과뿐이지만, 문법적으로 정확하다.",
-      "betterSuggestions": ["hello", "hi"],
+      "betterSuggestions": [
+        { "word": "hello", "meaning": "안녕하다" },
+        { "word": "hi", "meaning": "안녕" }
+      ],
       "recommendationReason": "대화를 자연스럽게 시작할 수 있는 인사말이 더 적절하다."
     },
     "questResult": null
@@ -541,7 +544,9 @@ Speakat은 자체 이메일 회원가입 없이 **Google / Kakao OAuth 소셜 �
       "objectiveProgress": ["최종 주문을 확인하세요"],
       "isQuestComplete": true,
       "reason": "모든 주문 목표를 달성하고 자연스럽게 대화를 마무리했다.",
-      "betterSuggestions": ["bye"],
+      "betterSuggestions": [
+        { "word": "bye", "meaning": "안녕히 가세요" }
+      ],
       "recommendationReason": "대화를 자연스럽게 끝낼 수 있는 인사말이 더 적절하다."
     },
     "questResult": {
@@ -566,7 +571,9 @@ Speakat은 자체 이메일 회원가입 없이 **Google / Kakao OAuth 소셜 �
 | turnEvaluation.objectiveProgress | array\<string\> | 이번 턴에서 달성된 목표 목록 |
 | turnEvaluation.isQuestComplete | boolean | 퀘스트 완료 여부 |
 | turnEvaluation.reason | string | AI 채점 근거 |
-| turnEvaluation.betterSuggestions | array\<string\> | 더 나은 표현 제안 - 클라이언트에서 사용자가 선택해 `POST /flashcards`로 수동 저장 |
+| turnEvaluation.betterSuggestions | array\<object\> | 더 나은 표현 제안 목록. 클라이언트에서 사용자가 선택해 `POST /flashcards`로 수동 저장 |
+| turnEvaluation.betterSuggestions[].word | string | 추천 단어 |
+| turnEvaluation.betterSuggestions[].meaning | string | AI가 제공하는 한국어 의미 - 수동 저장 시 `POST /flashcards` 요청의 `meaning` 필드로 전달 |
 | turnEvaluation.recommendationReason | string | 제안 이유 - 수동 저장 시 `POST /flashcards` 요청의 `recommendationReason` 필드로 전달 |
 | questResult | object\|null | 퀘스트 완료 시 결과. `isQuestComplete: false`이면 `null` |
 | questResult.averageContextRelevance | float (0~1) | 세션 전체 의미 관련성 평균 |
@@ -625,6 +632,7 @@ Speakat은 자체 이메일 회원가입 없이 **Google / Kakao OAuth 소셜 �
 {
   "questId": 2,
   "word": "espresso",
+  "meaning": "에스프레소",
   "recommendationReason": "주문 상황에서 더 자연스러운 표현입니다."
 }
 ```
@@ -632,7 +640,8 @@ Speakat은 자체 이메일 회원가입 없이 **Google / Kakao OAuth 소셜 �
 | 필드 | 타입 | 필수 | 설명 |
 |------|------|------|------|
 | questId | long | ✅ | 단어가 등장한 퀘스트 ID (`turnEvaluation`이 속한 세션의 questId) |
-| word | string | ✅ | 저장할 단어 (`betterSuggestions` 배열의 항목 중 하나) |
+| word | string | ✅ | 저장할 단어 (`betterSuggestions[].word`) |
+| meaning | string | ✅ | AI가 제공한 한국어 의미 (`betterSuggestions[].meaning`) - 서버에서 사전 정의 선택 시 임베딩 유사도 기준으로 사용 |
 | recommendationReason | string | ✅ | 저장 이유 (`turnEvaluation.recommendationReason` 그대로 전달) |
 
 **Response (200 OK):**
@@ -654,7 +663,7 @@ Speakat은 자체 이메일 회원가입 없이 **Google / Kakao OAuth 소셜 �
 | 필드 | 타입 | 설명 |
 |------|------|------|
 | flashcardId | long | 저장된 플래시카드 ID (`GET /flashcards/{flashcardId}` 조회에 사용) |
-| meaning | string | 사전 API에서 조회한 영문 정의. 조회 실패 시 `recommendationReason`으로 대체 |
+| meaning | string | 번역된 한국어 정의. 사전 조회 실패 시 요청의 `meaning`(AI 제공 의미)으로 대체 |
 | audioUrl | string\|null | 발음 오디오 URL. 사전에 없으면 `null` |
 
 ---

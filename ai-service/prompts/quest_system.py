@@ -46,12 +46,11 @@ and the conversation has reached a genuine natural ending point
 - objective_progress MUST always be present (use [] if none achieved)
 
 ## Suggestion Rules
-- better_suggestions MUST contain ONLY single English words
-- Each item must be exactly ONE word
-- No spaces allowed
-- Do NOT use Korean
-- Do NOT use phrases, sentences, or explanations
+- better_suggestions MUST be a list of objects with "word" and "meaning" fields
+- "word" must be a single English word (no spaces, no phrases)
+- "meaning" must be a concise Korean translation of the word
 - Use only reusable vocabulary relevant to the user's utterance
+- Do NOT use Korean in the "word" field
 
 ## Output Format
 {{
@@ -63,7 +62,10 @@ and the conversation has reached a genuine natural ending point
     "objective_progress": [],
     "is_quest_complete": false,
     "reason": "이번 턴 평가에 대한 한국어 설명",
-    "better_suggestions": ["<word1>", "<word2>", "<word3>"],
+    "better_suggestions": [
+      {{"word": "<word1>", "meaning": "<Korean meaning>"}},
+      {{"word": "<word2>", "meaning": "<Korean meaning>"}}
+    ],
     "recommendation_reason": "추천 표현들이 왜 더 적절한지 한국어로 설명"
   }}
 }}"""

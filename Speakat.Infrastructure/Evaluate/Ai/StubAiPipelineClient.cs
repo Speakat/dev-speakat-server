@@ -20,7 +20,11 @@ public class StubAiPipelineClient : IAiPipelineClient
                 ObjectiveProgress:    ["apologize"],
                 IsQuestComplete:      false,
                 Reason:               "스터빙 고정 응답입니다.",
-                BetterSuggestions:    ["apologize", "sorry", "regret"],
+                BetterSuggestions:    [
+                    new BetterSuggestionResult("apologize", "사과하다"),
+                    new BetterSuggestionResult("sorry",     "미안한"),
+                    new BetterSuggestionResult("regret",    "후회하다"),
+                ],
                 RecommendationReason: "스터빙 고정 추천 이유입니다."
             ),
             QuestResult: new QuestResult(

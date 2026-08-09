@@ -1,5 +1,9 @@
 from pydantic import BaseModel
 
+class BetterSuggestion(BaseModel):
+    word: str
+    meaning: str
+
 class TurnEvaluation(BaseModel):
     context_relevance: float
     grammar_accuracy: float
@@ -7,7 +11,7 @@ class TurnEvaluation(BaseModel):
     objective_progress: list[str]
     is_quest_complete: bool
     reason: str
-    better_suggestions: list[str]
+    better_suggestions: list[BetterSuggestion]
     recommendation_reason: str
 
 class QuestResult(BaseModel):

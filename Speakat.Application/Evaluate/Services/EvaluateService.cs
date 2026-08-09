@@ -39,7 +39,7 @@ public class EvaluateService(IAiPipelineClient ai, IQuestDataService questData, 
             ObjectiveProgress:    aiResult.TurnEvaluation.ObjectiveProgress,
             IsQuestComplete:      aiResult.TurnEvaluation.IsQuestComplete,
             Reason:               aiResult.TurnEvaluation.Reason,
-            BetterSuggestions:    aiResult.TurnEvaluation.BetterSuggestions,
+            BetterSuggestions:    [..aiResult.TurnEvaluation.BetterSuggestions.Select(s => new BetterSuggestionDto(s.Word, s.Meaning))],
             RecommendationReason: aiResult.TurnEvaluation.RecommendationReason
         );
 

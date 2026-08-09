@@ -33,16 +33,16 @@ public class FlashcardRepository : IFlashcardRepository
         _targetLanguageId = configuration.GetValue<long>("Translation:TargetLanguageId", 2);
     }
 
-    public async Task<FlashcardDetailData> SaveWordAsync(long userId, long questId, string word, string recommendationReason)
+    public async Task<FlashcardDetailData> SaveWordAsync(long userId, long questId, string word, string meaning, string recommendationReason)
     {
         var questExists = await _context.Quests.AnyAsync(q => q.QuestId == questId);
         if (!questExists) throw QuestException.NotFound();
 
         var wordEntity = await _context.Words.FirstOrDefaultAsync(w => w.Text == word)
-                         ?? await CreateWordAsync(word, recommendationReason);
+                         ?? await CreateWordAsync(word, meaning);
 
         var flashcard = await _context.Flashcards.FirstOrDefaultAsync(f => f.WordId == wordEntity.WordId)
-                        ?? await CreateFlashcardAsync(wordEntity.WordId, wordEntity.Definition, recommendationReason);
+                        ?? await CreateFlashcardAsync(wordEntity.WordId, wordEntity.Definition, meaning);
 
         var userFlashcard = new UserFlashcard
         {
@@ -64,7 +64,7 @@ public class FlashcardRepository : IFlashcardRepository
         );
     }
 
-    private async Task<Word> CreateWordAsync(string text, string recommendationReason)
+    private async Task<Word> CreateWordAsync(string text, string meaning)
     {
         var data = await _dictionaryService.LookupAsync(text);
 
@@ -72,7 +72,7 @@ public class FlashcardRepository : IFlashcardRepository
         if (data is not null && data.Definitions.Count > 0)
             definition = data.Definitions.Count == 1
                 ? data.Definitions[0]
-                : await SelectDefinitionAsync(recommendationReason, data.Definitions);
+                : await SelectDefinitionAsync(meaning, data.Definitions);
 
         var word = new Word
         {
@@ -93,11 +93,11 @@ public class FlashcardRepository : IFlashcardRepository
         return selected;
     }
 
-    private async Task<Flashcard> CreateFlashcardAsync(long wordId, string definition, string recommendationReason)
+    private async Task<Flashcard> CreateFlashcardAsync(long wordId, string definition, string meaning)
     {
         var translatedDefinition = !string.IsNullOrEmpty(definition)
             ? await _translationService.TranslateAsync(definition, _targetLanguage)
-            : recommendationReason;
+            : meaning;
 
         var flashcard = new Flashcard
         {

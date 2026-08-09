@@ -1,3 +1,8 @@
+public record BetterSuggestionDto(
+    string Word,
+    string Meaning
+);
+
 public record TurnEvaluationDto(
     float ContextRelevance,
     float GrammarAccuracy,
@@ -5,7 +10,7 @@ public record TurnEvaluationDto(
     List<string> ObjectiveProgress,
     bool IsQuestComplete,
     string Reason,
-    List<string> BetterSuggestions,
+    List<BetterSuggestionDto> BetterSuggestions,
     string RecommendationReason
 );
 
