@@ -15,6 +15,7 @@ using Scalar.AspNetCore;
 using Serilog;
 using Speakat.Api.Common.Exceptions;
 using Speakat.Api.Common.Response;
+using Speakat.Api.WebSockets;
 using Speakat.Application.Common.Exceptions;
 using Speakat.Application.Auth.Providers;
 using Speakat.Application.Auth.Services;
@@ -131,6 +132,17 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
         };
         options.Events = new JwtBearerEvents
         {
+            // WebSocket 핸드셰이크는 클라이언트가 커스텀 헤더를 못 붙이는 경우가 많아 쿼리 파라미터로 넘어온 토큰도 허용 (PoC 범위: /speech/ws)
+            OnMessageReceived = context =>
+            {
+                if (context.Request.Path.Value?.EndsWith("/speech/ws", StringComparison.Ordinal) == true)
+                {
+                    var accessToken = context.Request.Query["access_token"];
+                    if (!string.IsNullOrEmpty(accessToken))
+                        context.Token = accessToken;
+                }
+                return Task.CompletedTask;
+            },
             OnChallenge = async context =>
             {
                 context.HandleResponse();
@@ -186,6 +198,8 @@ builder.Services.AddHostedService<SessionCleanupService>();
 
 builder.Services.AddScoped<IEvaluateService, EvaluateService>();
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
+
+builder.Services.AddScoped<SpeechWebSocketHandler>();
 
 builder.Services.AddScoped<IFlashcardRepository, FlashcardRepository>();
 builder.Services.AddScoped<IFlashcardService, FlashcardService>();
@@ -253,6 +267,10 @@ if (app.Environment.IsDevelopment())
 
 app.UseExceptionHandler(o => { });
 app.UseCors("AllowWebClient");
+app.UseWebSockets(new WebSocketOptions
+{
+    KeepAliveInterval = TimeSpan.FromSeconds(30),
+});
 app.UseAuthentication();
 app.UseAuthorization();
 app.UseRateLimiter();
