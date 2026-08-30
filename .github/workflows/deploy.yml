@@ -1,24 +1,192 @@
-name: Deploy to EC2
+name: Deploy
 
 on:
   push:
     branches: [develop]
+  workflow_dispatch:
 
 permissions:
   contents: read
 
+env:
+  AWS_REGION: ap-northeast-2
+  API_REPO: speakat-api
+  AI_REPO: speakat-ai
+
 jobs:
+  build:
+    runs-on: ubuntu-latest
+    outputs:
+      api_image: ${{ steps.images.outputs.api }}
+      ai_image: ${{ steps.images.outputs.ai }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+          fetch-depth: 0 
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Login to ECR
+        id: ecr
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Ensure ECR repositories exist
+        run: |
+          for repo in "$API_REPO" "$AI_REPO"; do
+            aws ecr describe-repositories --repository-names "$repo" --region "$AWS_REGION" >/dev/null 2>&1 \
+              || aws ecr create-repository \
+                   --repository-name "$repo" \
+                   --region "$AWS_REGION" \
+                   --image-scanning-configuration scanOnPush=true
+          done
+
+      # 이미지 태그 = 해당 컴포넌트를 마지막으로 수정한 커밋.
+      - name: Resolve image tags
+        id: images
+        run: |
+          registry="${{ steps.ecr.outputs.registry }}"
+          api_sha=$(git log -1 --format=%H -- \
+            Speakat.Api Speakat.Application Speakat.Domain Speakat.Infrastructure .dockerignore)
+          ai_sha=$(git log -1 --format=%H -- ai-service)
+
+          echo "api_tag=$api_sha" >> "$GITHUB_OUTPUT"
+          echo "ai_tag=$ai_sha"   >> "$GITHUB_OUTPUT"
+          echo "api=${registry}/${API_REPO}:${api_sha}" >> "$GITHUB_OUTPUT"
+          echo "ai=${registry}/${AI_REPO}:${ai_sha}"    >> "$GITHUB_OUTPUT"
+
+          for pair in "api:$API_REPO:$api_sha" "ai:$AI_REPO:$ai_sha"; do
+            key=${pair%%:*}; rest=${pair#*:}; repo=${rest%%:*}; tag=${rest#*:}
+            if aws ecr describe-images --repository-name "$repo" \
+                 --image-ids imageTag="$tag" --region "$AWS_REGION" >/dev/null 2>&1; then
+              echo "${key}_exists=true" >> "$GITHUB_OUTPUT"
+              echo "$repo:$tag 이미 존재 — 빌드 생략"
+            else
+              echo "${key}_exists=false" >> "$GITHUB_OUTPUT"
+            fi
+          done
+
+      - uses: docker/setup-buildx-action@v3
+
+      - name: Build & push API
+        if: steps.images.outputs.api_exists != 'true'
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: Speakat.Api/Dockerfile
+          push: true
+          tags: |
+            ${{ steps.images.outputs.api }}
+            ${{ steps.ecr.outputs.registry }}/${{ env.API_REPO }}:latest
+          cache-from: type=gha,scope=api
+          cache-to: type=gha,scope=api,mode=max
+
+      - name: Build & push AI service
+        if: steps.images.outputs.ai_exists != 'true'
+        uses: docker/build-push-action@v6
+        with:
+          context: ./ai-service
+          push: true
+          tags: |
+            ${{ steps.images.outputs.ai }}
+            ${{ steps.ecr.outputs.registry }}/${{ env.AI_REPO }}:latest
+          cache-from: type=gha,scope=ai
+          cache-to: type=gha,scope=ai,mode=max
+
   deploy:
+    needs: build
     runs-on: ubuntu-latest
     steps:
-      - name: Deploy via SSH
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Issue short-lived ECR token
+        id: token
+        run: |
+          password=$(aws ecr get-login-password --region "$AWS_REGION")
+          echo "::add-mask::$password"
+          account=$(aws sts get-caller-identity --query Account --output text)
+          {
+            echo "password<<TOKEN_EOF"
+            echo "$password"
+            echo "TOKEN_EOF"
+            echo "registry=${account}.dkr.ecr.${AWS_REGION}.amazonaws.com"
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Render .env
+        env:
+          API_IMAGE: ${{ needs.build.outputs.api_image }}
+          AI_IMAGE: ${{ needs.build.outputs.ai_image }}
+          API_DOMAIN: ${{ vars.API_DOMAIN }}
+          ACME_EMAIL: ${{ vars.ACME_EMAIL }}
+          MYSQL_ROOT_PASSWORD: ${{ secrets.MYSQL_ROOT_PASSWORD }}
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          JWT_SECRET_KEY: ${{ secrets.JWT_SECRET_KEY }}
+          GOOGLE_CLIENT_ID: ${{ secrets.GOOGLE_CLIENT_ID }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+          GOOGLE_REDIRECT_URI: ${{ secrets.GOOGLE_REDIRECT_URI }}
+          KAKAO_CLIENT_ID: ${{ secrets.KAKAO_CLIENT_ID }}
+          KAKAO_CLIENT_SECRET: ${{ secrets.KAKAO_CLIENT_SECRET }}
+          KAKAO_REDIRECT_URI: ${{ secrets.KAKAO_REDIRECT_URI }}
+        run: |
+          umask 077
+          {
+            printf 'API_IMAGE=%s\n'           "$API_IMAGE"
+            printf 'AI_IMAGE=%s\n'            "$AI_IMAGE"
+            printf 'API_DOMAIN=%s\n'          "$API_DOMAIN"
+            printf 'ACME_EMAIL=%s\n'          "$ACME_EMAIL"
+            printf 'MYSQL_ROOT_PASSWORD=%s\n' "$MYSQL_ROOT_PASSWORD"
+            printf 'OPENAI_API_KEY=%s\n'      "$OPENAI_API_KEY"
+            printf 'ConnectionStrings__MySQL=Server=mysql;Port=3306;Database=speakat;User=root;Password=%s;\n' "$MYSQL_ROOT_PASSWORD"
+            printf 'Jwt__SecretKey=%s\n'              "$JWT_SECRET_KEY"
+            printf 'OAuth__Google__ClientId=%s\n'     "$GOOGLE_CLIENT_ID"
+            printf 'OAuth__Google__ClientSecret=%s\n' "$GOOGLE_CLIENT_SECRET"
+            printf 'OAuth__Google__RedirectUri=%s\n'  "$GOOGLE_REDIRECT_URI"
+            printf 'OAuth__Kakao__ClientId=%s\n'      "$KAKAO_CLIENT_ID"
+            printf 'OAuth__Kakao__ClientSecret=%s\n'  "$KAKAO_CLIENT_SECRET"
+            printf 'OAuth__Kakao__RedirectUri=%s\n'   "$KAKAO_REDIRECT_URI"
+          } > deploy/.env
+
+      - name: Copy stack files to EC2
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          source: "deploy/docker-compose.prod.yml,deploy/Caddyfile,deploy/.env"
+          target: "~/speakat"
+          strip_components: 1
+          overwrite: true
+
+      - name: Pull & restart
         uses: appleboy/ssh-action@v1
         with:
           host: ${{ secrets.EC2_HOST }}
           username: ${{ secrets.EC2_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
+          envs: ECR_REGISTRY,ECR_PASSWORD
           script: |
-            cd ~/dev-speakat-server
-            git pull origin develop
-            dotnet publish Speakat.Api/Speakat.Api.csproj -c Release -o ./publish
-            sudo systemctl restart speakat
+            set -euo pipefail
+            cd ~/speakat
+            chmod 600 .env
+            echo "$ECR_PASSWORD" | docker login --username AWS --password-stdin "$ECR_REGISTRY"
+            docker compose -f docker-compose.prod.yml pull
+            docker compose -f docker-compose.prod.yml up -d --remove-orphans
+            docker logout "$ECR_REGISTRY"
+            docker image prune -af --filter "until=168h"
+        env:
+          ECR_REGISTRY: ${{ steps.token.outputs.registry }}
+          ECR_PASSWORD: ${{ steps.token.outputs.password }}

@@ -240,9 +240,9 @@ app.MapScalarApiReference(options =>
         options.Servers = [new ScalarServer(serverUrl)];                      
 });
 
-if (app.Environment.IsDevelopment())
+// 개발 환경은 항상, 그 외 환경은 Database:AutoMigrate 가 켜져 있을 때만 마이그레이션을 적용한다.
+if (app.Environment.IsDevelopment() || app.Configuration.GetValue<bool>("Database:AutoMigrate"))
 {
-    // 프로젝트 실행하면 자동으로 db 마이그레이션 실행
     using var scope = app.Services.CreateScope();
     var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
     db.Database.Migrate();

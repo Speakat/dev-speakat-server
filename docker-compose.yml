@@ -1,4 +1,4 @@
-﻿services:
+services:
   mysql:
     image: mysql:8.0
     container_name: speakat-mysql
@@ -17,16 +17,6 @@
       - "6379:6379"
     volumes:
       - redis_data:/data
-
-  ai-service:
-    image: ${ECR_URI}:latest
-    ports:
-      - "8000:8000"
-    environment:
-      OPENAI_API_KEY: ${OPENAI_API_KEY}
-      REDIS_URL: redis://redis:6379
-    depends_on:
-      - redis
 
 volumes:
   mysql_data:
