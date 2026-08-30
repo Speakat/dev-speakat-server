@@ -6,6 +6,7 @@ public class Word
     public long LanguageId { get; set; }
     public string Text { get; set; } = null!;
     public string Definition { get; set; } = null!;
+    public string PartOfSpeech { get; set; } = null!;
     public string Phonetic { get; set; } = null!;
     public string? AudioUrl { get; set; }
 
