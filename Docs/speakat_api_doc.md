@@ -518,8 +518,8 @@ Speakat은 자체 이메일 회원가입 없이 **Google / Kakao OAuth 소셜 �
       "isQuestComplete": false,
       "reason": "사용자의 말이 맥락과 관련이 없는 사과뿐이지만, 문법적으로 정확하다.",
       "betterSuggestions": [
-        { "word": "hello", "meaning": "안녕하다" },
-        { "word": "hi", "meaning": "안녕" }
+        { "word": "hello", "meaning": "안녕하다", "partOfSpeech": "verb" },
+        { "word": "hi", "meaning": "안녕", "partOfSpeech": "interjection" }
       ],
       "recommendationReason": "대화를 자연스럽게 시작할 수 있는 인사말이 더 적절하다."
     },
@@ -545,7 +545,7 @@ Speakat은 자체 이메일 회원가입 없이 **Google / Kakao OAuth 소셜 �
       "isQuestComplete": true,
       "reason": "모든 주문 목표를 달성하고 자연스럽게 대화를 마무리했다.",
       "betterSuggestions": [
-        { "word": "bye", "meaning": "안녕히 가세요" }
+        { "word": "bye", "meaning": "안녕히 가세요", "partOfSpeech": "interjection" }
       ],
       "recommendationReason": "대화를 자연스럽게 끝낼 수 있는 인사말이 더 적절하다."
     },
@@ -574,6 +574,7 @@ Speakat은 자체 이메일 회원가입 없이 **Google / Kakao OAuth 소셜 �
 | turnEvaluation.betterSuggestions | array\<object\> | 더 나은 표현 제안 목록. 클라이언트에서 사용자가 선택해 `POST /flashcards`로 수동 저장 |
 | turnEvaluation.betterSuggestions[].word | string | 추천 단어 |
 | turnEvaluation.betterSuggestions[].meaning | string | AI가 제공하는 한국어 의미 - 수동 저장 시 `POST /flashcards` 요청의 `meaning` 필드로 전달 |
+| turnEvaluation.betterSuggestions[].partOfSpeech | string | 품사 (`noun`, `verb`, `adjective`, `adverb` 등) - 수동 저장 시 `POST /flashcards` 요청의 `partOfSpeech` 필드로 전달 |
 | turnEvaluation.recommendationReason | string | 제안 이유 - 수동 저장 시 `POST /flashcards` 요청의 `recommendationReason` 필드로 전달 |
 | questResult | object\|null | 퀘스트 완료 시 결과. `isQuestComplete: false`이면 `null` |
 | questResult.averageContextRelevance | float (0~1) | 세션 전체 의미 관련성 평균 |
@@ -633,6 +634,7 @@ Speakat은 자체 이메일 회원가입 없이 **Google / Kakao OAuth 소셜 �
   "questId": 2,
   "word": "espresso",
   "meaning": "에스프레소",
+  "partOfSpeech": "noun",
   "recommendationReason": "주문 상황에서 더 자연스러운 표현입니다."
 }
 ```
@@ -641,7 +643,8 @@ Speakat은 자체 이메일 회원가입 없이 **Google / Kakao OAuth 소셜 �
 |------|------|------|------|
 | questId | long | ✅ | 단어가 등장한 퀘스트 ID (`turnEvaluation`이 속한 세션의 questId) |
 | word | string | ✅ | 저장할 단어 (`betterSuggestions[].word`) |
-| meaning | string | ✅ | AI가 제공한 한국어 의미 (`betterSuggestions[].meaning`) - 서버에서 사전 정의 선택 시 임베딩 유사도 기준으로 사용 |
+| meaning | string | ✅ | AI가 제공한 한국어 의미 (`betterSuggestions[].meaning`) |
+| partOfSpeech | string | ✅ | 품사 (`betterSuggestions[].partOfSpeech`) - 동일 단어+품사 조합에서 중복 판별 기준으로 사용 |
 | recommendationReason | string | ✅ | 저장 이유 (`turnEvaluation.recommendationReason` 그대로 전달) |
 
 **Response (200 OK):**
