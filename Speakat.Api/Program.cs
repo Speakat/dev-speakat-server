@@ -81,7 +81,7 @@ builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowWebClient", policy =>
         policy.WithOrigins(
-                "https://speakatweb.hyorim.shop")
+                "https://web.speakat.chokoring.com")
             .AllowAnyHeader()
             .AllowAnyMethod());
 });
