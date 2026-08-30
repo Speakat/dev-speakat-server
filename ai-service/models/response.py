@@ -3,6 +3,7 @@ from pydantic import BaseModel
 class BetterSuggestion(BaseModel):
     word: str
     meaning: str
+    part_of_speech: str
 
 class TurnEvaluation(BaseModel):
     context_relevance: float

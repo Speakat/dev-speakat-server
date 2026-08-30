@@ -1,8 +1,9 @@
 using System.Text.Json.Serialization;
 
 public record BetterSuggestionResult(
-    [property: JsonPropertyName("word")]    string Word,
-    [property: JsonPropertyName("meaning")] string Meaning
+    [property: JsonPropertyName("word")]           string Word,
+    [property: JsonPropertyName("meaning")]        string Meaning,
+    [property: JsonPropertyName("part_of_speech")] string PartOfSpeech
 );
 
 public record TurnEvaluationResult(

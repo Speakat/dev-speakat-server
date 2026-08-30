@@ -1,6 +1,7 @@
 public record BetterSuggestionDto(
     string Word,
-    string Meaning
+    string Meaning,
+    string PartOfSpeech
 );
 
 public record TurnEvaluationDto(
