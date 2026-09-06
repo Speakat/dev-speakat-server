@@ -23,7 +23,7 @@ public class FlashcardService : IFlashcardService
     {
         var userId = await _userRepository.FindUserIdByUuidAsync(userUuid) ?? throw AuthException.UserNotFound();
 
-        var data = await _flashcardRepository.SaveWordAsync(userId, request.QuestId, request.Word, request.RecommendationReason);
+        var data = await _flashcardRepository.SaveWordAsync(userId, request.QuestId, request.Word, request.Meaning, request.PartOfSpeech, request.RecommendationReason);
 
         return new FlashcardDetailDto
         {

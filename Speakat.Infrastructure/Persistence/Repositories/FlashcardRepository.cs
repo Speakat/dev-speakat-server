@@ -1,5 +1,4 @@
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
 using Speakat.Application.Common.Exceptions;
 using Speakat.Application.Common.Interfaces;
 using Speakat.Application.Flashcards.Repositories;
@@ -11,44 +10,37 @@ namespace Speakat.Infrastructure.Persistence.Repositories;
 public class FlashcardRepository : IFlashcardRepository
 {
     private readonly AppDbContext _context;
-    private readonly IDictionaryService _dictionaryService;
-    private readonly ITranslationService _translationService;
     private readonly IAiPipelineClient _aiPipelineClient;
-    private readonly string _targetLanguage;
-    private readonly long _targetLanguageId;
+    private readonly ITranslationService _translationService;
+    private const float DuplicateThreshold = 0.85f;
     private const long EnglishLanguageId = 1;
+    private const long KoreanLanguageId = 2;
 
     public FlashcardRepository(
         AppDbContext context,
-        IDictionaryService dictionaryService,
-        ITranslationService translationService,
         IAiPipelineClient aiPipelineClient,
-        IConfiguration configuration)
+        ITranslationService translationService)
     {
         _context = context;
-        _dictionaryService = dictionaryService;
-        _translationService = translationService;
         _aiPipelineClient = aiPipelineClient;
-        _targetLanguage = configuration["Translation:TargetLanguage"] ?? "ko";
-        _targetLanguageId = configuration.GetValue<long>("Translation:TargetLanguageId", 2);
+        _translationService = translationService;
     }
 
-    public async Task<FlashcardDetailData> SaveWordAsync(long userId, long questId, string word, string recommendationReason)
+    public async Task<FlashcardDetailData> SaveWordAsync(long userId, long questId, string word, string meaning, string partOfSpeech, string recommendationReason)
     {
         var questExists = await _context.Quests.AnyAsync(q => q.QuestId == questId);
         if (!questExists) throw QuestException.NotFound();
 
-        var wordEntity = await _context.Words.FirstOrDefaultAsync(w => w.Text == word)
-                         ?? await CreateWordAsync(word, recommendationReason);
+        var wordEntity = await FindOrCreateWordAsync(word, meaning, partOfSpeech);
 
         var flashcard = await _context.Flashcards.FirstOrDefaultAsync(f => f.WordId == wordEntity.WordId)
-                        ?? await CreateFlashcardAsync(wordEntity.WordId, wordEntity.Definition, recommendationReason);
+                        ?? await CreateFlashcardAsync(wordEntity.WordId, meaning);
 
         var userFlashcard = new UserFlashcard
         {
-            UserId = userId,
-            FlashcardId = flashcard.FlashcardId,
-            QuestId = questId,
+            UserId               = userId,
+            FlashcardId          = flashcard.FlashcardId,
+            QuestId              = questId,
             RecommendationReason = recommendationReason,
         };
         _context.UserFlashcards.Add(userFlashcard);
@@ -64,46 +56,43 @@ public class FlashcardRepository : IFlashcardRepository
         );
     }
 
-    private async Task<Word> CreateWordAsync(string text, string recommendationReason)
+    private async Task<Word> FindOrCreateWordAsync(string text, string meaning, string partOfSpeech)
     {
-        var data = await _dictionaryService.LookupAsync(text);
+        var candidates = await _context.Words
+            .Where(w => w.Text == text && w.PartOfSpeech == partOfSpeech)
+            .ToListAsync();
 
-        var definition = string.Empty;
-        if (data is not null && data.Definitions.Count > 0)
-            definition = data.Definitions.Count == 1
-                ? data.Definitions[0]
-                : await SelectDefinitionAsync(recommendationReason, data.Definitions);
-
-        var word = new Word
+        if (candidates.Count > 0)
         {
-            LanguageId = EnglishLanguageId,
-            Text       = data?.Text ?? text,
-            Definition = definition,
-            Phonetic   = data?.Phonetic ?? string.Empty,
-            AudioUrl   = data?.AudioUrl
+            var existingMeanings = candidates.Select(w => w.Definition).ToList();
+            var (_, scores) = await _aiPipelineClient.FindBestDefinitionAsync(meaning, existingMeanings);
+            var maxScore = scores.Max();
+
+            if (maxScore >= DuplicateThreshold)
+                return candidates[scores.ToList().IndexOf(maxScore)];
+        }
+
+        var newWord = new Word
+        {
+            LanguageId   = EnglishLanguageId,
+            Text         = text,
+            Definition   = meaning,
+            PartOfSpeech = partOfSpeech,
+            Phonetic     = string.Empty,
+            AudioUrl     = null,
         };
-        _context.Words.Add(word);
+        _context.Words.Add(newWord);
         await _context.SaveChangesAsync();
-        return word;
+        return newWord;
     }
 
-    private async Task<string> SelectDefinitionAsync(string query, IReadOnlyList<string> definitions)
+    private async Task<Flashcard> CreateFlashcardAsync(long wordId, string meaning)
     {
-        var (selected, _) = await _aiPipelineClient.FindBestDefinitionAsync(query, definitions);
-        return selected;
-    }
-
-    private async Task<Flashcard> CreateFlashcardAsync(long wordId, string definition, string recommendationReason)
-    {
-        var translatedDefinition = !string.IsNullOrEmpty(definition)
-            ? await _translationService.TranslateAsync(definition, _targetLanguage)
-            : recommendationReason;
-
         var flashcard = new Flashcard
         {
             WordId     = wordId,
-            LanguageId = _targetLanguageId,
-            Definition = translatedDefinition,
+            LanguageId = KoreanLanguageId,
+            Definition = meaning,
         };
         _context.Flashcards.Add(flashcard);
         await _context.SaveChangesAsync();
