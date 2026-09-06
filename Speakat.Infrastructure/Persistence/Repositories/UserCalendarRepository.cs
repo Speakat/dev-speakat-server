@@ -3,14 +3,14 @@ using Speakat.Application.Users.Repositories;
 
 namespace Speakat.Infrastructure.Persistence.Repositories;
 
-public class UserCalendarRepository(AppDbContext db) : IUserCalendarRepository
+public class UserCalendarRepository(AppDbContext context) : IUserCalendarRepository
 {
     public async Task<IReadOnlyList<CalendarDayData>> GetMonthlyActivityAsync(long userId, int year, int month)
     {
         var from = new DateTime(year, month, 1, 0, 0, 0, DateTimeKind.Utc);
         var to = from.AddMonths(1);
 
-        var rows = await db.GameSessions
+        var rows = await context.GameSessions
             .Where(gs => gs.UserId == userId
                       && gs.Status == "COMPLETED"
                       && gs.StartedAt >= from

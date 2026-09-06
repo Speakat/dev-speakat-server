@@ -3,18 +3,18 @@ using Speakat.Application.Users.Repositories;
 
 namespace Speakat.Infrastructure.Persistence.Repositories;
 
-public class UserProfileRepository(AppDbContext db) : IUserProfileRepository
+public class UserProfileRepository(AppDbContext context) : IUserProfileRepository
 {
     public async Task<UserProfileData?> GetProfileDataAsync(long userId)
     {
-        var user = await db.Users
+        var user = await context.Users
             .Where(u => u.UserId == userId)
             .Select(u => new { u.UserUuid, u.Nickname, u.ProfileImageKey })
             .FirstOrDefaultAsync();
 
         if (user is null) return null;
 
-        var scores = await db.GameSessions
+        var scores = await context.GameSessions
             .Where(gs => gs.UserId == userId && gs.Status == "COMPLETED")
             .GroupBy(_ => 0)
             .Select(g => new
@@ -38,7 +38,7 @@ public class UserProfileRepository(AppDbContext db) : IUserProfileRepository
     public async Task<(string UserUuid, string Nickname, string? ProfileImageKey)> UpdateProfileAsync(
         long userId, string? nickname, string? profileImageKey)
     {
-        var user = await db.Users.FindAsync(userId)
+        var user = await context.Users.FindAsync(userId)
             ?? throw new InvalidOperationException($"User {userId} 없음");
 
         if (nickname is not null)
@@ -47,7 +47,7 @@ public class UserProfileRepository(AppDbContext db) : IUserProfileRepository
         if (profileImageKey is not null)
             user.ProfileImageKey = profileImageKey;
 
-        await db.SaveChangesAsync();
+        await context.SaveChangesAsync();
 
         return (user.UserUuid, user.Nickname, user.ProfileImageKey);
     }

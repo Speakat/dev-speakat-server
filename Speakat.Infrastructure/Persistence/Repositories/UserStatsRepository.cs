@@ -3,11 +3,11 @@ using Speakat.Application.Users.Repositories;
 
 namespace Speakat.Infrastructure.Persistence.Repositories;
 
-public class UserStatsRepository(AppDbContext db) : IUserStatsRepository
+public class UserStatsRepository(AppDbContext context) : IUserStatsRepository
 {
     public async Task<UserStatsData> GetStatsAsync(long userId)
     {
-        var sessionStats = await db.GameSessions
+        var sessionStats = await context.GameSessions
             .Where(gs => gs.UserId == userId)
             .GroupBy(_ => 0)
             .Select(g => new
@@ -26,7 +26,7 @@ public class UserStatsRepository(AppDbContext db) : IUserStatsRepository
             })
             .FirstOrDefaultAsync();
 
-        var totalStagesCompleted = await db.UserStages
+        var totalStagesCompleted = await context.UserStages
             .CountAsync(us => us.UserId == userId && us.CompletedAt != null);
 
         return new UserStatsData(
