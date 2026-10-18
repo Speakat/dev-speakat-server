@@ -5,11 +5,11 @@ using Speakat.Infrastructure.Persistence;
 
 namespace Speakat.Infrastructure.Persistence.Repositories;
 
-public class GameSessionRepository(AppDbContext db) : IGameSessionRepository
+public class GameSessionRepository(AppDbContext context) : IGameSessionRepository
 {
     public async Task<IReadOnlyList<string>> CreateAsync(string sessionId, long userId, long questId)
     {
-        var existingSessions = await db.GameSessions
+        var existingSessions = await context.GameSessions
             .Where(gs => gs.UserId == userId && gs.QuestId == questId && gs.Status == "IN_PROGRESS")
             .ToListAsync();
 
@@ -19,21 +19,21 @@ public class GameSessionRepository(AppDbContext db) : IGameSessionRepository
             existing.EndedAt = DateTime.UtcNow;
         }
 
-        db.GameSessions.Add(new GameSession
+        context.GameSessions.Add(new GameSession
         {
             SessionId = sessionId,
             UserId    = userId,
             QuestId   = questId,
             Status    = "IN_PROGRESS",
         });
-        await db.SaveChangesAsync();
+        await context.SaveChangesAsync();
 
         return [.. existingSessions.Select(s => s.SessionId)];
     }
 
     public async Task<EndSessionResponseDto> AbandonAsync(string sessionId, long userId)
     {
-        var session = await db.GameSessions.FindAsync(sessionId)
+        var session = await context.GameSessions.FindAsync(sessionId)
             ?? throw SessionException.NotFound();
 
         if (session.UserId != userId)
@@ -44,7 +44,7 @@ public class GameSessionRepository(AppDbContext db) : IGameSessionRepository
 
         session.Status  = "FAILED";
         session.EndedAt = DateTime.UtcNow;
-        await db.SaveChangesAsync();
+        await context.SaveChangesAsync();
 
         return new EndSessionResponseDto(session.SessionId, session.Status, session.EndedAt.Value);
     }
@@ -57,7 +57,7 @@ public class GameSessionRepository(AppDbContext db) : IGameSessionRepository
 
     private async Task FinalizeAsync(string sessionId, long questId, QuestResult questResult, string status)
     {
-        var session = await db.GameSessions.FindAsync(sessionId)
+        var session = await context.GameSessions.FindAsync(sessionId)
             ?? throw SessionException.NotFound();
 
         if (session.Status != "IN_PROGRESS")
@@ -69,18 +69,18 @@ public class GameSessionRepository(AppDbContext db) : IGameSessionRepository
         session.GrammarScore     = (int)Math.Round(questResult.AverageGrammarAccuracy   * 100);
         session.NaturalnessScore = (int)Math.Round(questResult.AverageExpressionQuality * 100);
 
-        var questObjectives = await db.QuestObjectives
+        var questObjectives = await context.QuestObjectives
             .Include(qo => qo.Objective)
             .Where(qo => qo.QuestId == questId)
             .ToListAsync();
 
-        db.SessionObjectives.AddRange(questObjectives.Select(qo => new SessionObjective
+        context.SessionObjectives.AddRange(questObjectives.Select(qo => new SessionObjective
         {
             SessionId        = sessionId,
             QuestObjectiveId = qo.QuestObjectiveId,
             IsAchieved       = questResult.AchievedObjectives.Contains(qo.Objective!.Name)
         }));
 
-        await db.SaveChangesAsync();
+        await context.SaveChangesAsync();
     }
 }
