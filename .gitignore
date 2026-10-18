@@ -97,3 +97,10 @@ test_evaluate.py
 Speakat.Api/openapi.json
 Speakat.Api/appsettings.Production.json
 Speakat.Api/appsettings.json
+
+# Terraform
+terraform/**/.terraform/
+terraform/**/*.tfstate
+terraform/**/*.tfstate.*
+terraform/**/*.tfvars
+crash.log

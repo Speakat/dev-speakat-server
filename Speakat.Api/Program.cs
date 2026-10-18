@@ -3,8 +3,6 @@ using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Threading.RateLimiting;
-using AWS.Logger;
-using AWS.Logger.SeriLog;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.Extensions.Http.Resilience;
 using Polly;
@@ -43,12 +41,10 @@ using StackExchange.Redis;
 
 var builder = WebApplication.CreateBuilder(args);
 Serilog.Debugging.SelfLog.Enable(Console.Error);
+// 싱크는 설정(Serilog 섹션 / 환경변수)에서 읽는다.
+// 운영에서는 콘솔로 내보내고 도커 로그로 수집한다.
 builder.Host.UseSerilog((context, config) =>
-{
-    config.ReadFrom.Configuration(context.Configuration);
-    if (!context.HostingEnvironment.IsDevelopment())
-        config.WriteTo.AWSSeriLog(new AWSLoggerConfig("/speakat/api") { Region = "ap-northeast-2" });
-});
+    config.ReadFrom.Configuration(context.Configuration));
 
 builder.Services.AddOpenApi(options =>
 {
