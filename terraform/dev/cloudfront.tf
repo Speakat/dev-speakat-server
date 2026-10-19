@@ -17,11 +17,12 @@ resource "aws_cloudfront_origin_access_control" "storage" {
 }
 
 resource "aws_cloudfront_distribution" "web" {
-  enabled         = true
-  aliases         = ["web.speakat.chokoring.com"]
-  http_version    = "http2"
-  is_ipv6_enabled = true
-  price_class     = "PriceClass_All"
+  enabled             = true
+  aliases             = ["web.speakat.chokoring.com"]
+  default_root_object = "index.html" # 없으면 / 가 빈 web/ 폴더 객체를 돌려준다
+  http_version        = "http2"
+  is_ipv6_enabled     = true
+  price_class         = "PriceClass_All"
 
   # 콘솔에서 배포를 만들 때 자동으로 생긴 WAF
   web_acl_id = "arn:aws:wafv2:us-east-1:092205142257:global/webacl/CreatedByCloudFront-5224fd38/bd05db2c-4043-4549-a9ea-e36358c45388"

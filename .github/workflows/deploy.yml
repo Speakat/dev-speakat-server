@@ -142,7 +142,7 @@ jobs:
           umask 077
           put() {
             case "$2" in
-              *"'"*|*$'\n'*) echo "::error::$1 에 작은따옴표나 줄바꿈이 있어 .env 에 쓸 수 없다"; exit 1 ;;
+              *"'"*|*$'\n'*|*\\) echo "::error::$1 에 작은따옴표/줄바꿈이 있거나 \\ 로 끝나 .env 에 쓸 수 없다"; exit 1 ;;
             esac
             printf "%s='%s'\n" "$1" "$2"
           }
