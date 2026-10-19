@@ -3,8 +3,6 @@ using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Threading.RateLimiting;
-using AWS.Logger;
-using AWS.Logger.SeriLog;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.Extensions.Http.Resilience;
 using Polly;
@@ -43,12 +41,10 @@ using StackExchange.Redis;
 
 var builder = WebApplication.CreateBuilder(args);
 Serilog.Debugging.SelfLog.Enable(Console.Error);
+// 싱크는 설정(Serilog 섹션 / 환경변수)에서 읽는다.
+// 운영에서는 콘솔로 내보내고 도커 로그로 수집한다.
 builder.Host.UseSerilog((context, config) =>
-{
-    config.ReadFrom.Configuration(context.Configuration);
-    if (!context.HostingEnvironment.IsDevelopment())
-        config.WriteTo.AWSSeriLog(new AWSLoggerConfig("/speakat/api") { Region = "ap-northeast-2" });
-});
+    config.ReadFrom.Configuration(context.Configuration));
 
 builder.Services.AddOpenApi(options =>
 {
@@ -81,7 +77,7 @@ builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowWebClient", policy =>
         policy.WithOrigins(
-                "https://speakatweb.hyorim.shop")
+                "https://web.speakat.chokoring.com")
             .AllowAnyHeader()
             .AllowAnyMethod());
 });
@@ -240,9 +236,9 @@ app.MapScalarApiReference(options =>
         options.Servers = [new ScalarServer(serverUrl)];                      
 });
 
-if (app.Environment.IsDevelopment())
+// 개발 환경은 항상, 그 외 환경은 Database:AutoMigrate 가 켜져 있을 때만 마이그레이션을 적용한다.
+if (app.Environment.IsDevelopment() || app.Configuration.GetValue<bool>("Database:AutoMigrate"))
 {
-    // 프로젝트 실행하면 자동으로 db 마이그레이션 실행
     using var scope = app.Services.CreateScope();
     var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
     db.Database.Migrate();

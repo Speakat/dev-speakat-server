@@ -1,0 +1,17 @@
+# Caddy 가 Let's Encrypt 인증서를 자동으로 발급/갱신
+
+{
+	email {$ACME_EMAIL}
+}
+
+{$API_DOMAIN} {
+	encode zstd gzip
+	reverse_proxy api:8080 {
+		flush_interval -1
+	}
+
+	log {
+		output stdout
+		format console
+	}
+}
