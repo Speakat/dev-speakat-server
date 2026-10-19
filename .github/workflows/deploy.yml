@@ -9,6 +9,11 @@ permissions:
   contents: read
   id-token: write   # OIDC 로 AWS 역할을 받는다
 
+# 같은 EC2 에 배포하는 실행은 진행 중인 배포는 끊지 않고, 대기 중인 건 최신 커밋만 남는다.
+concurrency:
+  group: deploy-dev-ec2
+  cancel-in-progress: false
+
 env:
   AWS_REGION: ap-northeast-2
   # terraform/shared 의 output github_actions_role_arn. develop 브랜치에서만 assume 가능
