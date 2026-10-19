@@ -140,21 +140,27 @@ jobs:
           KAKAO_REDIRECT_URI: ${{ secrets.KAKAO_REDIRECT_URI }}
         run: |
           umask 077
+          put() {
+            case "$2" in
+              *"'"*|*$'\n'*) echo "::error::$1 에 작은따옴표나 줄바꿈이 있어 .env 에 쓸 수 없다"; exit 1 ;;
+            esac
+            printf "%s='%s'\n" "$1" "$2"
+          }
           {
-            printf 'API_IMAGE=%s\n'           "$API_IMAGE"
-            printf 'AI_IMAGE=%s\n'            "$AI_IMAGE"
-            printf 'API_DOMAIN=%s\n'          "$API_DOMAIN"
-            printf 'ACME_EMAIL=%s\n'          "$ACME_EMAIL"
-            printf 'MYSQL_ROOT_PASSWORD=%s\n' "$MYSQL_ROOT_PASSWORD"
-            printf 'OPENAI_API_KEY=%s\n'      "$OPENAI_API_KEY"
-            printf 'ConnectionStrings__MySQL=Server=mysql;Port=3306;Database=speakat;User=root;Password=%s;\n' "$MYSQL_ROOT_PASSWORD"
-            printf 'Jwt__SecretKey=%s\n'              "$JWT_SECRET_KEY"
-            printf 'OAuth__Google__ClientId=%s\n'     "$GOOGLE_CLIENT_ID"
-            printf 'OAuth__Google__ClientSecret=%s\n' "$GOOGLE_CLIENT_SECRET"
-            printf 'OAuth__Google__RedirectUri=%s\n'  "$GOOGLE_REDIRECT_URI"
-            printf 'OAuth__Kakao__ClientId=%s\n'      "$KAKAO_CLIENT_ID"
-            printf 'OAuth__Kakao__ClientSecret=%s\n'  "$KAKAO_CLIENT_SECRET"
-            printf 'OAuth__Kakao__RedirectUri=%s\n'   "$KAKAO_REDIRECT_URI"
+            put API_IMAGE           "$API_IMAGE"
+            put AI_IMAGE            "$AI_IMAGE"
+            put API_DOMAIN          "$API_DOMAIN"
+            put ACME_EMAIL          "$ACME_EMAIL"
+            put MYSQL_ROOT_PASSWORD "$MYSQL_ROOT_PASSWORD"
+            put OPENAI_API_KEY      "$OPENAI_API_KEY"
+            put ConnectionStrings__MySQL "Server=mysql;Port=3306;Database=speakat;User=root;Password=$MYSQL_ROOT_PASSWORD;"
+            put Jwt__SecretKey              "$JWT_SECRET_KEY"
+            put OAuth__Google__ClientId     "$GOOGLE_CLIENT_ID"
+            put OAuth__Google__ClientSecret "$GOOGLE_CLIENT_SECRET"
+            put OAuth__Google__RedirectUri  "$GOOGLE_REDIRECT_URI"
+            put OAuth__Kakao__ClientId      "$KAKAO_CLIENT_ID"
+            put OAuth__Kakao__ClientSecret  "$KAKAO_CLIENT_SECRET"
+            put OAuth__Kakao__RedirectUri   "$KAKAO_REDIRECT_URI"
           } > deploy/.env
 
       - name: Copy stack files to EC2
