@@ -677,6 +677,10 @@ namespace Speakat.Infrastructure.Migrations
                         .HasColumnType("bigint")
                         .HasColumnName("language_id");
 
+                    b.Property<string>("PartOfSpeech")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
                     b.Property<string>("Phonetic")
                         .IsRequired()
                         .HasMaxLength(255)

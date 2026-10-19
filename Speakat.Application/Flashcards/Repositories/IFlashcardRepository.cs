@@ -25,7 +25,7 @@ public record FlashcardDetailData(
 
 public interface IFlashcardRepository
 {
-    Task<FlashcardDetailData> SaveWordAsync(long userId, long questId, string word, string recommendationReason);
+    Task<FlashcardDetailData> SaveWordAsync(long userId, long questId, string word, string meaning, string partOfSpeech, string recommendationReason);
 
     Task<IReadOnlyList<FlashcardData>> GetFlashcardsAsync(
         long userId,
