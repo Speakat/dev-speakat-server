@@ -1,0 +1,76 @@
+#!/bin/bash
+set -euo pipefail
+
+export DEBIAN_FRONTEND=noninteractive
+# 첫 부팅 직후 unattended-upgrades 의 apt 잠금 대기
+APT="apt-get -y -o DPkg::Lock::Timeout=600"
+
+# --- 데이터 EBS -> /data ---
+# Nitro 에서 /dev/sdf 가 nvme 로 보여 볼륨 ID 로 탐색, 인스턴스 생성 후 연결이라 대기
+DEVICE="/dev/disk/by-id/nvme-Amazon_Elastic_Block_Store_${replace(data_volume_id, "-", "")}"
+for _ in $(seq 1 60); do
+  [ -e "$DEVICE" ] && break
+  sleep 5
+done
+[ -e "$DEVICE" ] || { echo "data volume not attached: $DEVICE"; exit 1; }
+
+# 시그니처 없음(2)일 때만 포맷, 그 외 오류는 기존 데이터 보호를 위해 중단
+rc=0
+blkid -p "$DEVICE" >/dev/null 2>&1 || rc=$?
+if [ "$rc" -eq 2 ]; then
+  mkfs.ext4 -L monitoring-data "$DEVICE"
+elif [ "$rc" -ne 0 ]; then
+  echo "blkid failed ($rc): $DEVICE"
+  exit 1
+fi
+
+mkdir -p /data
+UUID=$(blkid -s UUID -o value "$DEVICE")
+grep -q "$UUID" /etc/fstab || echo "UUID=$UUID /data ext4 defaults,nofail 0 2" >> /etc/fstab
+systemctl daemon-reload
+mount /data
+mountpoint -q /data
+
+# compose 의 user 값과 일치
+mkdir -p /data/prometheus /data/loki /data/grafana
+chown -R 65534:65534 /data/prometheus
+chown -R 10001:10001 /data/loki
+chown -R 472:0 /data/grafana
+
+# --- 스왑 1GB ---
+if [ ! -f /swapfile ]; then
+  fallocate -l 1G /swapfile
+  chmod 600 /swapfile
+  mkswap /swapfile
+  swapon /swapfile
+  echo '/swapfile none swap sw 0 0' >> /etc/fstab
+fi
+
+# --- Docker ---
+$APT update
+$APT install ca-certificates curl
+install -m 0755 -d /etc/apt/keyrings
+curl -fsSL https://download.docker.com/linux/ubuntu/gpg -o /etc/apt/keyrings/docker.asc
+chmod a+r /etc/apt/keyrings/docker.asc
+echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/ubuntu $(. /etc/os-release && echo "$VERSION_CODENAME") stable" \
+  > /etc/apt/sources.list.d/docker.list
+$APT update
+$APT install docker-ce docker-ce-cli containerd.io docker-compose-plugin
+
+# /data 미마운트(nofail 부팅) 시 루트 디스크 기록 방지
+mkdir -p /etc/systemd/system/docker.service.d
+cat > /etc/systemd/system/docker.service.d/require-data.conf <<'EOF'
+[Unit]
+RequiresMountsFor=/data
+EOF
+
+cat > /etc/docker/daemon.json <<'EOF'
+{
+  "log-driver": "json-file",
+  "log-opts": { "max-size": "10m", "max-file": "3" }
+}
+EOF
+systemctl daemon-reload
+systemctl enable docker
+systemctl restart docker
+usermod -aG docker ubuntu

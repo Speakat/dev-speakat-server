@@ -1,0 +1,64 @@
+name: speakat-monitoring
+
+services:
+  prometheus:
+    image: prom/prometheus:v3.15.1
+    restart: unless-stopped
+    # /data 디렉터리 소유자와 일치 (monitoring-init.sh.tftpl)
+    user: "65534:65534"
+    command:
+      - --config.file=/etc/prometheus/prometheus.yml
+      - --storage.tsdb.path=/prometheus
+      - --storage.tsdb.retention.time=15d
+      # EBS 20GB 중 Loki 몫 확보
+      - --storage.tsdb.retention.size=8GB
+      - --web.enable-remote-write-receiver
+    ports:
+      # 접근 제어는 SG 담당
+      - "9090:9090"
+    volumes:
+      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - /data/prometheus:/prometheus
+    mem_limit: 512m
+
+  loki:
+    image: grafana/loki:3.7.9
+    restart: unless-stopped
+    user: "10001:10001"
+    command:
+      - -config.file=/etc/loki/loki.yml
+    ports:
+      # 접근 제어는 SG 담당
+      - "3100:3100"
+    volumes:
+      - ./loki/loki.yml:/etc/loki/loki.yml:ro
+      - /data/loki:/loki
+    mem_limit: 512m
+
+  grafana:
+    image: grafana/grafana:13.2.4
+    restart: unless-stopped
+    user: "472:0"
+    environment:
+      GF_SECURITY_ADMIN_USER: ${GRAFANA_ADMIN_USER:-admin}
+      # 최초 기동 시에만 적용, 미설정 시 기본값 admin 방지를 위해 기동 차단
+      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_ADMIN_PASSWORD:?GRAFANA_ADMIN_PASSWORD 를 .env 에 설정하세요}
+      GF_SERVER_ROOT_URL: http://localhost:3000
+      GF_USERS_ALLOW_SIGN_UP: "false"
+      GF_AUTH_ANONYMOUS_ENABLED: "false"
+      GF_ANALYTICS_REPORTING_ENABLED: "false"
+      GF_ANALYTICS_CHECK_FOR_UPDATES: "false"
+      GF_ANALYTICS_CHECK_FOR_PLUGIN_UPDATES: "false"
+      # 기동마다 앱 플러그인 약 300MB 다운로드 방지 (Prometheus, Loki 데이터 소스는 내장)
+      GF_PLUGINS_PREINSTALL_DISABLED: "true"
+    ports:
+      # SSH 터널 전용
+      - "127.0.0.1:3000:3000"
+    volumes:
+      - ./grafana/provisioning:/etc/grafana/provisioning:ro
+      - /data/grafana:/var/lib/grafana
+    # 유휴 상태 약 250MB
+    mem_limit: 512m
+    depends_on:
+      - prometheus
+      - loki
