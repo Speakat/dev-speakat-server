@@ -1,22 +1,6 @@
 name: speakat
 
 services:
-  caddy:
-    image: caddy:2-alpine
-    restart: unless-stopped
-    ports:
-      - "80:80"
-      - "443:443"
-    environment:
-      API_DOMAIN: ${API_DOMAIN}
-      ACME_EMAIL: ${ACME_EMAIL}
-    volumes:
-      - ./Caddyfile:/etc/caddy/Caddyfile:ro
-      - caddy_data:/data
-      - caddy_config:/config
-    depends_on:
-      - api
-
   api:
     image: ${API_IMAGE}
     restart: unless-stopped
@@ -33,8 +17,6 @@ services:
       Serilog__MinimumLevel__Override__Microsoft: "Warning"
       Serilog__WriteTo__0__Name: "Console"
     depends_on:
-      mysql:
-        condition: service_healthy
       redis:
         condition: service_started
     healthcheck:
@@ -43,6 +25,12 @@ services:
       timeout: 5s
       retries: 5
       start_period: 60s
+    networks: [ default, edge, db ]
+    labels:
+      caddy: ${API_DOMAIN}
+      caddy.reverse_proxy: "{{upstreams 8080}}"
+      caddy.reverse_proxy.flush_interval: "-1"
+      caddy.encode: zstd gzip
 
   ai-service:
     image: ${AI_IMAGE}
@@ -53,28 +41,6 @@ services:
     depends_on:
       - redis
 
-  mysql:
-    image: mysql:8.0
-    container_name: speakat-mysql
-    restart: unless-stopped
-    ports:
-      - "127.0.0.1:3306:3306"
-    environment:
-      MYSQL_DATABASE: speakat
-      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
-    command: >
-      --innodb-buffer-pool-size=96M
-      --performance-schema=OFF
-      --max-connections=50
-    volumes:
-      - mysql_data:/var/lib/mysql
-    healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "127.0.0.1", "-uroot", "-p${MYSQL_ROOT_PASSWORD}"]
-      interval: 10s
-      timeout: 5s
-      retries: 12
-      start_period: 40s
-
   redis:
     image: redis:7-alpine
     container_name: speakat-redis
@@ -84,9 +50,12 @@ services:
     command: ["redis-server", "--maxmemory", "96mb", "--maxmemory-policy", "allkeys-lru"]
     volumes:
       - redis_data:/data
+        
+networks:
+  edge:
+    external: true
+  db:
+    external: true
 
 volumes:
-  mysql_data:
   redis_data:
-  caddy_data:
-  caddy_config:

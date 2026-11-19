@@ -171,7 +171,7 @@ jobs:
           host: ${{ secrets.EC2_HOST }}
           username: ${{ secrets.EC2_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
-          source: "deploy/docker-compose.prod.yml,deploy/Caddyfile,deploy/.env"
+          source: "deploy/docker-compose.prod.yml,deploy/.env"
           target: "~/speakat"
           strip_components: 1
           overwrite: true
