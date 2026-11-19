@@ -128,7 +128,6 @@ jobs:
           API_IMAGE: ${{ needs.build.outputs.api_image }}
           AI_IMAGE: ${{ needs.build.outputs.ai_image }}
           API_DOMAIN: ${{ vars.API_DOMAIN }}
-          ACME_EMAIL: ${{ vars.ACME_EMAIL }}
           MYSQL_ROOT_PASSWORD: ${{ secrets.MYSQL_ROOT_PASSWORD }}
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
           JWT_SECRET_KEY: ${{ secrets.JWT_SECRET_KEY }}
@@ -150,7 +149,6 @@ jobs:
             put API_IMAGE           "$API_IMAGE"
             put AI_IMAGE            "$AI_IMAGE"
             put API_DOMAIN          "$API_DOMAIN"
-            put ACME_EMAIL          "$ACME_EMAIL"
             put MYSQL_ROOT_PASSWORD "$MYSQL_ROOT_PASSWORD"
             put OPENAI_API_KEY      "$OPENAI_API_KEY"
             put ConnectionStrings__MySQL "Server=mysql;Port=3306;Database=speakat;User=root;Password=$MYSQL_ROOT_PASSWORD;"
@@ -171,7 +169,7 @@ jobs:
           host: ${{ secrets.EC2_HOST }}
           username: ${{ secrets.EC2_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
-          source: "deploy/docker-compose.prod.yml,deploy/Caddyfile,deploy/.env"
+          source: "deploy/docker-compose.prod.yml,deploy/.env"
           target: "~/speakat"
           strip_components: 1
           overwrite: true

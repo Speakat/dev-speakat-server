@@ -81,6 +81,11 @@ dotnet ef database update --project src/Infrastructure
 dotnet run --project src/Api
 ```
 
+## 배포
+
+`develop`에 머지되면 GitHub Actions가 EC2에 자동 배포합니다. 서버에서 직접 배포하지 마세요.
+결과는 Actions 탭의 Deploy 워크플로에서 확인합니다. 필요한 Secrets 목록은 `.github/workflows/deploy.yml`을 참고하세요.
+
 ## 브랜치 및 커밋 컨벤션
 
 **브랜치 네이밍:** `feature/#[issue번호]-설명` (예: `feature/#12-quest-api`)

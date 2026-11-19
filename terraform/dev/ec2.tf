@@ -61,14 +61,6 @@ resource "aws_security_group" "api" {
     cidr_blocks = ["0.0.0.0/0"]
   }
 
-  # TODO: sg-066da295db2e06173 확인
-  ingress {
-    from_port       = 5000
-    to_port         = 5000
-    protocol        = "tcp"
-    security_groups = ["sg-066da295db2e06173"]
-  }
-
   egress {
     from_port   = 0
     to_port     = 0
