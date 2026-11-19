@@ -128,7 +128,7 @@ jobs:
           API_IMAGE: ${{ needs.build.outputs.api_image }}
           AI_IMAGE: ${{ needs.build.outputs.ai_image }}
           API_DOMAIN: ${{ vars.API_DOMAIN }}
-          MYSQL_ROOT_PASSWORD: ${{ secrets.MYSQL_ROOT_PASSWORD }}
+          DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
           JWT_SECRET_KEY: ${{ secrets.JWT_SECRET_KEY }}
           GOOGLE_CLIENT_ID: ${{ secrets.GOOGLE_CLIENT_ID }}
@@ -139,6 +139,7 @@ jobs:
           KAKAO_REDIRECT_URI: ${{ secrets.KAKAO_REDIRECT_URI }}
         run: |
           umask 077
+          : "${DB_PASSWORD:?DB_PASSWORD secret 이 비어 있다}"
           put() {
             case "$2" in
               *"'"*|*$'\n'*|*\\) echo "::error::$1 에 작은따옴표/줄바꿈이 있거나 \\ 로 끝나 .env 에 쓸 수 없다"; exit 1 ;;
@@ -149,9 +150,8 @@ jobs:
             put API_IMAGE           "$API_IMAGE"
             put AI_IMAGE            "$AI_IMAGE"
             put API_DOMAIN          "$API_DOMAIN"
-            put MYSQL_ROOT_PASSWORD "$MYSQL_ROOT_PASSWORD"
             put OPENAI_API_KEY      "$OPENAI_API_KEY"
-            put ConnectionStrings__MySQL "Server=mysql;Port=3306;Database=speakat;User=root;Password=$MYSQL_ROOT_PASSWORD;"
+            put ConnectionStrings__MySQL "Server=mysql;Port=3306;Database=speakat;User=speakat;Password=$DB_PASSWORD;"
             put Jwt__SecretKey              "$JWT_SECRET_KEY"
             put OAuth__Google__ClientId     "$GOOGLE_CLIENT_ID"
             put OAuth__Google__ClientSecret "$GOOGLE_CLIENT_SECRET"
